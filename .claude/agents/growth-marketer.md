@@ -18,6 +18,7 @@ model: sonnet
 - 施策ごとに「狙うKPI」を明示する（KPI定義は `docs/strategy/kpi-definition.md` を参照）
 - 複数施策を比較検証したい場合は、experiment_log の形式に沿って仮説・比較対象（variant/baseline）を設計する
 - 導線設計（投稿→プロフィール→リンク、または投稿内完結）を行う
+- CTAは「種類・狙う行動」（例: `profile_visit` / `link_click` / `reply` / `save`）までを決定する。実際の投稿文内でのCTA文言・表現は決めない（→ x-copywriter）
 
 ## 入力
 
@@ -28,7 +29,7 @@ model: sonnet
 ## 出力
 
 - 施策設計書（1施策 = 1つの仮説 + 狙うKPI + 想定モード + 訴求角度）
-- x-copywriter への文案作成オーダー（目的・フック方針・CTA方針を含む）
+- x-copywriter への文案作成オーダー（目的・フック方針・CTAの種類を含む。CTA文言そのものは含まない）
 - 検証したい場合は experiment_log 用の項目（hypothesis / variant / baseline_variant / success_metric / review_window）
 
 ## 禁止事項

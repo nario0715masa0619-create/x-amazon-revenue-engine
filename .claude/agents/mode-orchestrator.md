@@ -28,7 +28,7 @@ model: sonnet
 
 - 現在モードの判定結果とその根拠
 - どの担当に何を依頼するかのタスク分解（実行順序つき）
-- 必要であれば `ops/state/current_mode.yaml` の更新提案（実際の更新はユーザー承認を得てから行う）
+- 必要であれば `ops/state/current_mode.yaml` の更新提案（実際の更新はユーザー承認を得てから行う。日々の重点モード判定はorchestratorの権限内）
 
 ## 禁止事項
 
@@ -36,6 +36,7 @@ model: sonnet
 - 自分で数値分析をしない（→ performance-analyst）
 - 自分でコンプラ判定をしない（→ affiliate-compliance-reviewer）
 - モード状態ファイルを無断で書き換えない（判断根拠を示した上でユーザーまたは呼び出し元に確認する）
+- `ops/state/mode_weights.yaml`（モード別の目標比率）を独断で更新しない。比率の恒久的な変更は `weekly-pdca-review` skill の結果としてのみ行う。orchestratorの権限は `current_mode.yaml`（日々の重点モード判定）に限られる
 
 ## 他担当への引き継ぎ
 
@@ -48,4 +49,4 @@ model: sonnet
 | 過去施策の成果を踏まえたい | performance-analyst |
 | ログ記録・整合性確認 | logger |
 
-判断に迷うモード切替（例: 数値悪化を受けて販売モードの比率を下げるべきか）は、`weekly-pdca-review` skill の結果を優先し、単発の直感で状態ファイルを書き換えない。
+判断に迷うモード切替（例: 数値悪化を受けて販売モードの比率を下げるべきか）は、`weekly-pdca-review` skill の結果を優先し、単発の直感で `mode_weights.yaml` を書き換えない。

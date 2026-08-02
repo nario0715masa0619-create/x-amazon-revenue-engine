@@ -6,6 +6,7 @@
 
 - growth-marketerの施策設計をもとにX投稿文案を作成する
 - 目的・フック・本文・CTA・開示欄を投稿案ごとに明示する
+- CTAは、growth-marketerが決めた種類（profile_visit / link_click 等）をもとに、投稿文内の具体的な文言・表現を書く。種類自体の変更はしない
 - モードに応じて文体・導線を切り替える（[docs/playbooks/](../playbooks/)参照）
 
 ## 入力

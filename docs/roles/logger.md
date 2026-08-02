@@ -14,6 +14,10 @@
 - `experiment_id`: `e-YYYYMMDD-連番`（例: `e-20260802-001`）
 - `snapshot_id`: `s-{post_id}-YYYYMMDDHHmm`（例: `s-p-20260802-001-202608091200`）
 
+## 再提出ルール（needs_revision後）
+
+`needs_revision` となった投稿案が修正・再提出される場合、新しい `post_id` は発行しない。同一 `post_id` のまま、修正後の内容を新しい行として追記する（既存行は上書きしない）。同一 `post_id` に複数行がある場合、最新の `created_at` を持つ行が現在のステータスを表し、過去の行は修正履歴として残る。詳細は [.claude/agents/logger.md](../../.claude/agents/logger.md) を参照。
+
 ## 入力
 
 - affiliate-compliance-reviewerが承認した投稿案
@@ -29,7 +33,7 @@
 
 - すべてのログエントリが `schemas/*.schema.json` に準拠している
 - `approved_by` が空、または未承認のまま `status: approved` になっているエントリがない
-- `post_id` の重複発行がない
+- 同一投稿案に対する `post_id` の重複発行がない（再提出時は同一IDを維持している）
 
 ## 禁止事項
 

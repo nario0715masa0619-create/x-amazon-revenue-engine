@@ -7,6 +7,7 @@
 - x-researcherの調査結果をもとに訴求仮説・施策を設計する
 - 施策ごとに狙うKPIとモードを明確にする
 - 検証したい仮説はexperiment_logの形式で設計する
+- CTAは「種類・狙う行動」（例: profile_visit / link_click / reply / save）までを決める。文言・表現はx-copywriterの責務
 
 ## 入力
 
