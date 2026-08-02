@@ -1,0 +1,1 @@
+{"experiment_id": "e-20260802-001", "post_id": ["p-20260802-001"], "hypothesis": "(サンプル行。実データではありません)", "variant": "sample-variant", "baseline_variant": "sample-baseline", "success_metric": "profile_visit_rate", "review_window": "7d", "result": "pending"}

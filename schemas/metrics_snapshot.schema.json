@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://x-amazon-revenue-engine/schemas/metrics_snapshot.schema.json",
+  "title": "metrics_snapshot",
+  "description": "post_id単位の数値実績を、ある時点で記録するスナップショットのスキーマ。ops/logs/metrics_snapshots.csv の1行に対応する。",
+  "type": "object",
+  "required": [
+    "snapshot_id",
+    "post_id",
+    "captured_at",
+    "window",
+    "impressions",
+    "engagements",
+    "likes",
+    "replies",
+    "reposts",
+    "bookmarks",
+    "profile_visits",
+    "link_clicks",
+    "conversions",
+    "revenue",
+    "epc"
+  ],
+  "properties": {
+    "snapshot_id": {
+      "type": "string",
+      "description": "一意なスナップショットID。命名規則: s-{post_id}-YYYYMMDDHHmm",
+      "pattern": "^s-p-[0-9]{8}-[0-9]{3,}-[0-9]{12}$"
+    },
+    "post_id": {
+      "type": "string",
+      "description": "対応する投稿ID",
+      "pattern": "^p-[0-9]{8}-[0-9]{3,}$"
+    },
+    "captured_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "計測日時 (ISO 8601)"
+    },
+    "window": {
+      "type": "string",
+      "description": "計測対象期間の区分 (例: t0, 24h, 7d)"
+    },
+    "impressions": { "type": "integer", "minimum": 0 },
+    "engagements": { "type": "integer", "minimum": 0 },
+    "likes": { "type": "integer", "minimum": 0 },
+    "replies": { "type": "integer", "minimum": 0 },
+    "reposts": { "type": "integer", "minimum": 0 },
+    "bookmarks": { "type": "integer", "minimum": 0 },
+    "profile_visits": { "type": "integer", "minimum": 0 },
+    "link_clicks": { "type": "integer", "minimum": 0 },
+    "conversions": { "type": "integer", "minimum": 0 },
+    "revenue": { "type": "number", "minimum": 0, "description": "この投稿に紐づく紹介料収益 (通貨単位は運用側で統一する)" },
+    "epc": { "type": "number", "minimum": 0, "description": "Earnings Per Click = revenue / link_clicks" }
+  },
+  "additionalProperties": false
+}

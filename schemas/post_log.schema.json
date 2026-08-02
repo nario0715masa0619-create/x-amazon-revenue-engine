@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://x-amazon-revenue-engine/schemas/post_log.schema.json",
+  "title": "post_log",
+  "description": "Xへの投稿1件を記録するログエントリのスキーマ。ops/logs/post_log.jsonl に1行1JSONで追記する。",
+  "type": "object",
+  "required": [
+    "post_id",
+    "created_at",
+    "mode",
+    "campaign",
+    "product",
+    "angle",
+    "format",
+    "cta_type",
+    "disclosure_included",
+    "draft_text",
+    "final_text",
+    "asset_ids",
+    "link_id",
+    "status",
+    "approved_by"
+  ],
+  "properties": {
+    "post_id": {
+      "type": "string",
+      "description": "一意な投稿ID。命名規則: p-YYYYMMDD-連番 (例: p-20260802-001)",
+      "pattern": "^p-[0-9]{8}-[0-9]{3,}$"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ログエントリ作成日時 (ISO 8601)"
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["acquisition", "education", "sales"],
+      "description": "この投稿が属する運用モード"
+    },
+    "campaign": {
+      "type": ["string", "null"],
+      "description": "紐づくキャンペーン名。単発施策の場合はnull"
+    },
+    "product": {
+      "type": ["string", "null"],
+      "description": "紹介対象商品名またはASIN。商品を伴わない投稿の場合はnull"
+    },
+    "angle": {
+      "type": "string",
+      "description": "訴求角度 (例: コスパ, 時短, 失敗回避, 比較)"
+    },
+    "format": {
+      "type": "string",
+      "description": "投稿フォーマット (例: single, thread, image, poll)"
+    },
+    "cta_type": {
+      "type": ["string", "null"],
+      "description": "CTAの種類 (例: profile_visit, link_click, reply_prompt, none)"
+    },
+    "disclosure_included": {
+      "type": "boolean",
+      "description": "アフィリエイト開示を含むかどうか"
+    },
+    "draft_text": {
+      "type": "string",
+      "description": "レビュー前の投稿案本文"
+    },
+    "final_text": {
+      "type": ["string", "null"],
+      "description": "承認・確定後の最終本文。未確定の場合はnull"
+    },
+    "asset_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "添付画像・動画等のアセットID一覧"
+    },
+    "link_id": {
+      "type": ["string", "null"],
+      "description": "使用したアフィリエイトリンクの識別子。リンクなしの場合はnull"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "needs_revision", "rejected", "approved", "posted", "archived"],
+      "description": "投稿案のステータス"
+    },
+    "approved_by": {
+      "type": ["string", "null"],
+      "description": "承認した担当名 (例: affiliate-compliance-reviewer)。未承認の場合はnull"
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://x-amazon-revenue-engine/schemas/experiment_log.schema.json",
+  "title": "experiment_log",
+  "description": "施策・検証（A/B比較等）を記録するログエントリのスキーマ。ops/logs/experiment_log.jsonl に1行1JSONで追記する。",
+  "type": "object",
+  "required": [
+    "experiment_id",
+    "post_id",
+    "hypothesis",
+    "variant",
+    "baseline_variant",
+    "success_metric",
+    "review_window",
+    "result"
+  ],
+  "properties": {
+    "experiment_id": {
+      "type": "string",
+      "description": "一意な施策ID。命名規則: e-YYYYMMDD-連番 (例: e-20260802-001)",
+      "pattern": "^e-[0-9]{8}-[0-9]{3,}$"
+    },
+    "post_id": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "この施策に紐づく投稿IDの一覧 (variant/baseline両方を含む)"
+    },
+    "hypothesis": {
+      "type": "string",
+      "description": "検証したい仮説 (例: フックを疑問形にするとprofile_visit_rateが上がる)"
+    },
+    "variant": {
+      "type": "string",
+      "description": "比較対象となる施策側の名称・内容の要約"
+    },
+    "baseline_variant": {
+      "type": "string",
+      "description": "比較の基準となる施策側の名称・内容の要約"
+    },
+    "success_metric": {
+      "type": "string",
+      "description": "成功判定に使う指標 (kpi-definition.mdのKPI名を使用)"
+    },
+    "review_window": {
+      "type": "string",
+      "description": "結果を評価する期間 (例: 7d, 24h)"
+    },
+    "result": {
+      "type": "string",
+      "enum": ["pending", "supported", "not_supported", "inconclusive"],
+      "description": "検証結果。データ収集中はpending"
+    }
+  },
+  "additionalProperties": false
+}

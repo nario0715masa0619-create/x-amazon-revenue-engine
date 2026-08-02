@@ -1,0 +1,14 @@
+# モード別の目標投稿比率 (実績比率との乖離を weekly-pdca-review で確認する)
+# 変更する場合は、必ず理由と ops/reports/weekly_review.md への記載をセットで行う (CLAUDE.md参照)。
+
+weights:
+  acquisition: 0.5
+  education: 0.3
+  sales: 0.2
+
+rationale: >
+  初期値。集客がファネルの入口であり最も投稿頻度を要するという前提に基づく。
+  ログ実績が蓄積した段階で weekly-pdca-review により見直す。
+
+updated_at: "2026-08-02T00:00:00+09:00"
+updated_by: mode-orchestrator

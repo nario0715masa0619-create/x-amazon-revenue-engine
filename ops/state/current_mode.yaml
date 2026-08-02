@@ -1,0 +1,11 @@
+# 現在の重点運用モード
+# mode-orchestrator が判断根拠に基づき更新する。感覚での書き換えは禁止 (CLAUDE.md参照)。
+
+current_mode: acquisition
+
+rationale: >
+  初期セットアップ直後のため、ログ実績がまだ存在しない。
+  funnel-definition.md の設計に従い、ファネルの入口である集客モードから開始する。
+
+updated_at: "2026-08-02T00:00:00+09:00"
+updated_by: mode-orchestrator
