@@ -49,3 +49,4 @@ model: sonnet
 - 販売モードの投稿案は必ず affiliate-compliance-reviewer に提出し、承認を得てから確定させる
 - 集客・教育モードでも、開示や表現に不安がある場合は compliance-reviewer に相談する
 - 確定した投稿案は logger に渡し、post_id を発行してもらった上でログ化する
+- `needs_revision` の修正版を再提出する場合も、必ず affiliate-compliance-reviewer の再レビューを経る。logger に直接引き継いで `approved` 済みとして記録させない

@@ -51,7 +51,8 @@
     },
     "format": {
       "type": "string",
-      "description": "投稿フォーマット (例: single, thread, image, poll)"
+      "enum": ["single_post", "thread", "reply", "quote", "image_post", "poll"],
+      "description": "投稿フォーマット"
     },
     "cta_type": {
       "type": ["string", "null"],

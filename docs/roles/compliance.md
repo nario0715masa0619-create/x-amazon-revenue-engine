@@ -7,6 +7,7 @@
 - 投稿案を開示・表現・運用ルールの観点でレビューする
 - `docs/policies/` の各ポリシーに基づき判定する
 - 販売モードは特に厳格な基準でレビューする
+- x-copywriterからの再提出版（同一post_id）も新規案と同様に必ずレビューする。未レビューのまま放置しない
 
 ## 入力
 
@@ -35,6 +36,6 @@
 
 ## 連携先
 
-- x-copywriter（`needs_revision` / `rejected` の差し戻し先）
+- x-copywriter（`needs_revision` / `rejected` の差し戻し先。再提出版の受け取り元でもある）
 - logger（`approved` 案件のログ記録依頼）
-- mode-orchestrator（ポリシー自体の不備・不足の提案）
+- mode-orchestrator（ポリシー自体の不備・不足の提案。再レビュー依頼の受け取り元でもある）

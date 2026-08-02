@@ -35,5 +35,5 @@
 
 ## 連携先
 
-- affiliate-compliance-reviewer（すべての投稿案、特に販売モードは必須でレビューへ）
-- logger（承認済み投稿案のログ化）
+- affiliate-compliance-reviewer（すべての投稿案、特に販売モードは必須でレビューへ。needs_revision後の再提出版も同様に再レビューへ回す）
+- logger（承認済み投稿案のログ化。未レビューの再提出版をloggerに直接渡してapproved扱いさせない）

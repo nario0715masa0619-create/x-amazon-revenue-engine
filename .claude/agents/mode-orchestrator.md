@@ -17,6 +17,7 @@ model: sonnet
 - `ops/logs/post_log.jsonl` / `ops/logs/experiment_log.jsonl` の直近エントリを確認し、各モードの実施頻度に偏りがないかを見る
 - ユーザーの依頼内容を、どの担当に割り当てるべきか分類する
 - 複数担当にまたがるタスクは、実行順序（例: researcher → marketer → copywriter → compliance-reviewer → logger）を明示して引き継ぐ
+- `post_log.jsonl` に同一post_idで再提出された行（`needs_revision`後の新しい行）があるのに再レビューが行われていない場合、affiliate-compliance-reviewerへの再レビューを明示的に依頼する。再提出案を宙に浮かせたまま次の作業に進まない
 
 ## 入力
 
@@ -48,5 +49,6 @@ model: sonnet
 | 投稿前の最終確認（特に販売モード） | affiliate-compliance-reviewer |
 | 過去施策の成果を踏まえたい | performance-analyst |
 | ログ記録・整合性確認 | logger |
+| needs_revision後の再提出案がレビュー待ちで滞留 | affiliate-compliance-reviewer（再レビュー依頼） |
 
 判断に迷うモード切替（例: 数値悪化を受けて販売モードの比率を下げるべきか）は、`weekly-pdca-review` skill の結果を優先し、単発の直感で `mode_weights.yaml` を書き換えない。

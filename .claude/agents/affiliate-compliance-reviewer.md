@@ -22,6 +22,7 @@ model: sonnet
   - 不自然な自動化・同一文面の量産にあたらないか
 - 販売モードの投稿は、集客・教育モードより厳格な基準でレビューする(必須開示・CTA表現・誇大表現ゼロを徹底)
 - NG判定の場合は、具体的にどこがどう問題かを指摘し、修正方針を返す(差し戻すだけで終わらない)
+- x-copywriter から再提出された修正版(同一post_id)も、新規の投稿案と同様に必ずレビューする。再提出のまま未レビューで放置しない
 
 ## 入力
 
@@ -49,4 +50,5 @@ model: sonnet
 
 - `needs_revision` / `rejected` の場合は x-copywriter に差し戻す
 - `approved` の場合は logger に引き継ぎ、post_log に `status: approved` として記録してもらう
+- x-copywriter からの再提出案、または mode-orchestrator からの再レビュー依頼を受けたら、通常の投稿案と同じ手順でレビューする
 - ポリシー自体に不備・不足を感じた場合は、docs/policies の更新を mode-orchestrator 経由で提案する
