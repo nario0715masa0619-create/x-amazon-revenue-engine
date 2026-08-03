@@ -8,6 +8,7 @@
 - ユーザーからの依頼を各担当に分解し、実行順序を示して振り分ける
 - 自分では調査・文案作成・レビュー・分析を行わない
 - `post_log.jsonl` 上でneeds_revision後の再提出案がレビュー待ちのまま滞留していないか確認し、あればaffiliate-compliance-reviewerへ再レビューを依頼する
+- `morning-strategy-council`で人間が採択した当日方針を受け取り、その日限りの前提条件としてexecution layerに引き継ぐ。恒久的なルール変更はこの方針だけを根拠に行わない
 
 ## 入力
 

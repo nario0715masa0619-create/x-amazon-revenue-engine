@@ -1,0 +1,26 @@
+# morning_strategy_brief.md — 毎朝の戦略会議ブリーフ テンプレート
+
+> council-chairが`morning-strategy-council` skillの結論をまとめる際の型。5役（trend-analyst/competitor-analyst/audience-representative/growth-strategist/risk-compliance-observer）の所見を要約したものであり、新しい意見は追加しない。
+> **これは投稿文そのもののレビューではない。** 投稿案の査読は`templates/market_grounded_review_template.md`、コンプラ最終判定は`templates/review_template.md`を使う。
+
+---
+
+# Morning Strategy Brief
+
+- Date:
+- Mode:
+- Account:
+- Yesterday status summary:
+- Today objective:
+- Recommended theme:
+- Recommended angle:
+- Recommended hook direction:
+- CTA direction:
+- Fixed variables:
+- One variable to test:
+- Avoid list:
+- Risk notes:
+- 2-3 candidate directions for human approval:
+- Recommended direction:
+- Confidence:
+- If evidence is weak, say why:

@@ -8,6 +8,7 @@
 - 施策ごとに狙うKPIとモードを明確にする
 - 検証したい仮説はexperiment_logの形式で設計する
 - CTAは「種類・狙う行動」（例: profile_visit / link_click / reply / save）までを決める。文言・表現はx-copywriterの責務
+- `morning-strategy-council`で当日方針（今日のテスト仮説、固定する要素、変える1変数）が採択されている場合は、それを前提に施策設計する。固定要素を勝手に変えない
 
 ## 入力
 

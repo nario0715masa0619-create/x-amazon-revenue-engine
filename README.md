@@ -34,6 +34,8 @@ X（旧Twitter）× Amazonアフィリエイト運用を、Claude Code上で複�
 
 x-copywriterとcompliance-reviewerの間には、`pre-post-self-check` skillとmarket-grounded review layer（`trend-reality-reviewer`/`competitor-reality-reviewer`/`audience-market-fit-reviewer`）という2つの前段品質改善レイヤーがあります。いずれもcompliance-reviewerの最終判断を代替しません（詳細は`.claude/agents/`参照）。
 
+さらにその手前、mode-orchestratorが動き出す前には、毎朝「今日何を狙うか」を決める`morning-strategy-council` skillがあります。**朝会＝戦略決定、execution layer（researcher以降）＝実務**という二層構造で、朝会は投稿文そのものを議論せず、人間が方針を1つ採択してからexecution layerに引き継ぎます（詳細は`.claude/skills/morning-strategy-council/SKILL.md`参照）。
+
 ## 3. 「担当」と「モード」の違い
 
 | | 担当（Roles） | モード（Modes） |

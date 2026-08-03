@@ -35,6 +35,7 @@
 | Amazonアフィリ注意点 | `docs/policies/amazon-affiliate-policy.md` |
 | 開示ルール | `docs/policies/disclosure-policy.md` |
 | モード別の実務手順 | `.claude/skills/*/SKILL.md`、`docs/playbooks/*.md` |
+| 毎朝の戦略決定（朝会＝戦略、execution layer＝実務） | `.claude/skills/morning-strategy-council/SKILL.md` |
 | ログの構造 | `schemas/*.schema.json` |
 | 現在の運用状態 | `ops/state/*.yaml` |
 

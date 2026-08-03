@@ -5,6 +5,7 @@
 ## 責務
 
 - growth-marketerの施策設計をもとにX投稿文案を作成する
+- `morning-strategy-council`で当日方針（テーマ・角度・フック方向・CTA方針・避ける表現）が採択されている場合は、その方針に沿って文案を作成する。独自に戦略を書き換えない
 - 目的・フック・本文・CTA・開示欄を投稿案ごとに明示する
 - CTAは、growth-marketerが決めた種類（profile_visit / link_click 等）をもとに、投稿文内の具体的な文言・表現を書く。種類自体の変更はしない
 - モードに応じて文体・導線を切り替える（[docs/playbooks/](../playbooks/)参照）

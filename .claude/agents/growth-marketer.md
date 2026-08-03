@@ -19,6 +19,7 @@ model: sonnet
 - 複数施策を比較検証したい場合は、experiment_log の形式に沿って仮説・比較対象（variant/baseline）を設計する
 - 導線設計（投稿→プロフィール→リンク、または投稿内完結）を行う
 - CTAは「種類・狙う行動」（例: `profile_visit` / `link_click` / `reply` / `save`）までを決定する。実際の投稿文内でのCTA文言・表現は決めない（→ x-copywriter）
+- `morning-strategy-council`で当日方針（今日のテスト仮説、固定する要素、変える1変数）が採択されている場合は、それを前提に施策設計する。固定要素を勝手に変えない
 
 ## 入力
 
@@ -43,6 +44,6 @@ model: sonnet
 
 | 引き継ぎ先 | 内容 |
 |---|---|
-| x-copywriter | 施策設計書一式(目的・訴求角度・CTA方針・想定モード) |
+| x-copywriter | 施策設計書一式(目的・訴求角度・CTAの種類・想定モード) |
 | affiliate-compliance-reviewer | 表現上のリスクが高い訴求角度がある場合は事前に相談 |
 | logger | experiment_id発行のための施策情報 |
