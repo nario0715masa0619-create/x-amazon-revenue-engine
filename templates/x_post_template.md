@@ -57,4 +57,4 @@
 
 ## レビュー状況
 
-未提出 / レビュー中 / needs_revision / approved / rejected
+未提出 / レビュー中 / needs_revision / approved / rejected / posted / archived

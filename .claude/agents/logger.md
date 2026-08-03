@@ -16,7 +16,7 @@ model: sonnet
 - `schemas/post_log.schema.json` / `schemas/experiment_log.schema.json` / `schemas/metrics_snapshot.schema.json` に準拠した形でログを記録する
 - `post_id` / `experiment_id` / `snapshot_id` を一意な命名規則で発行する(命名規則例は下記)
 - x-copywriterが投稿案をaffiliate-compliance-reviewerのレビューに提出した時点で、レビュー結果を待たずに`post_id`を発行する
-- 投稿案の状態遷移(`draft` / `needs_revision` / `approved` 等)を、同一`post_id`のもとで一貫して`ops/logs/post_log.jsonl`に記録する。**承認済み(`approved`)のものだけを記録対象とするわけではない**。`posted`/`archived`は本番投稿自動化後に扱う状態であり、現段階(設計・雛形整備中)では`draft`/`needs_revision`/`approved`の追跡が中心となる
+- 投稿案の状態遷移(`draft` / `needs_revision` / `approved` / `posted` 等)を、同一`post_id`のもとで一貫して`ops/logs/post_log.jsonl`に記録する。**承認済み(`approved`)のものだけを記録対象とするわけではない**。`posted`への遷移はPhase 1（人間による手動投稿）から発生する。詳細は下記「`posted`状態の暫定運用(Phase 1)」を参照
 - 数値取得結果を `ops/logs/metrics_snapshots.csv` に追記する
 - 施策(A/Bなど)の情報を `ops/logs/experiment_log.jsonl` に追記する
 - ログの欠損(post_idはあるがmetricsがない、approved_byが空、等)を検知し警告する
@@ -38,9 +38,17 @@ affiliate-compliance-reviewer が `needs_revision` と判定した投稿案が�
 - 同一 `post_id` の行が複数存在する場合、`created_at` が最も新しい行をその投稿の現在のステータスとみなす。過去の行は修正履歴(監査証跡)として残す
 - 新しい `post_id` を発行するのは、別の投稿案(訴求角度や本文の起点が異なるもの)を新規に立てる場合のみ
 
+## `posted`状態の暫定運用(Phase 1)
+
+`posted` = 人間がXへの投稿完了を確認した状態(自動投稿ではない)。
+
+- 人間から投稿完了の確認を受けたら、既存行を上書きせず新しい行を追記する(`post_id`は同一、`status: posted`、`final_text`は投稿済み本文)
+- **投稿URL・投稿時刻・投稿者は`post_log.schema.json`に格納する場所がないため、`post_log.jsonl`には書かず、`ops/reports/daily_brief.md`の「実投稿記録」欄に記録する**(schemaを変更しない前提の暫定運用。将来的なschema拡張は提案に留める)
+- `approved`のまま投稿されなかった案(2案のうち選ばれなかった側)は、`status`を無理に`posted`にせず、`approved`のまま残すか、人間の判断で`archived`とする
+
 ## 入力
 
-- x-copywriter がレビューに提出した投稿案、およびaffiliate-compliance-reviewerの判定結果(承認結果によらず、`draft`/`needs_revision`/`approved`いずれも記録対象)
+- x-copywriter がレビューに提出した投稿案、およびaffiliate-compliance-reviewerの判定結果(承認結果によらず、`draft`/`needs_revision`/`approved`/`posted`いずれも記録対象)
 - growth-marketer からの施策情報(experiment_log用)
 - 数値取得結果(手動入力または将来の自動取得)
 

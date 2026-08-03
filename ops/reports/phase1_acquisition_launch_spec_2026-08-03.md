@@ -23,7 +23,7 @@
 
 - **最終承認**: `approved`となった案の中から実際に投稿する1案を選ぶ
 - **実投稿**: X上への実際の投稿操作
-- 24時間後の実績数値の取得（X Analytics等からの手動取得。詳細は[6. 不足している前提条件](#6-不足している前提条件本番開始前に埋めるべきもの)を参照）
+- 24時間後の実績数値の取得（X Analytics等からの手動取得。手順は[5-3.](#5-3-24時間後の簡易記録投稿翌日)を参照）
 - 投稿完了後の`status: posted`への更新の最終確認
 
 ### 明示的にやらないこと
@@ -55,7 +55,7 @@
 |---|---|---|---|
 | 主KPI | `impressions` | 表示回数 | `ops/logs/metrics_snapshots.csv` |
 | 主KPI | `profile_visit_rate` | `profile_visits / impressions` | [kpi-definition.md](../../docs/strategy/kpi-definition.md)の定義に準拠 |
-| 副KPI | `follow_rate` | `フォロー数 / profile_visits` | X Analytics等から手動取得したフォロー数を用いる（取得方法は未確定。[6.](#6-不足している前提条件本番開始前に埋めるべきもの)参照） |
+| 副KPI | `follow_rate` | `フォロー数 / profile_visits` | Phase 1ではアカウント全体のフォロワー純増数を参考値として`daily_brief.md`に記録する（投稿起因かどうかの厳密な切り分けは行わない）。`metrics_snapshot.schema.json`にフォロー数を格納するフィールドがないため、`follow_rate`の厳密な算出は次フェーズのschema拡張後に持ち越す |
 
 **初週の目標は数値目標の達成ではなく、ベースライン（基準値）の確立とする。** 過去の実運用実績が存在しないため、5投稿分のKPI実績を「初期基準値」として記録し、Phase 2以降の比較対象とする。
 
@@ -87,21 +87,23 @@
 2. **growth-marketer**: 当日テーマに対する施策設計（狙うKPI: `impressions`/`profile_visit_rate`、CTA type: `profile_visit`）
 3. **x-copywriter**: `templates/x_post_template.md`準拠で投稿案を**2案**作成
 4. **affiliate-compliance-reviewer**: 2案を`templates/review_template.md`でレビュー
-   - `needs_revision`の場合: x-copywriterが同一post_id維持で修正版を再提出 → affiliate-compliance-reviewerが再レビュー（[logger.mdの再提出ルール](../../.claude/agents/logger.md)に準拠）。当日中に`approved`まで到達しない場合は[6.](#6-不足している前提条件本番開始前に埋めるべきもの)のフォールバック方針を参照
+   - `needs_revision`の場合: x-copywriterが同一post_id維持で修正版を再提出 → affiliate-compliance-reviewerが再レビュー（[logger.mdの再提出ルール](../../.claude/agents/logger.md)に準拠）
+   - **当日中に`approved`が1本も出ない場合**: その日の投稿はスキップしてよい（Phase 1では投稿本数より運用安定を優先する）。スキップ理由・対象post_id・翌日の扱い（再レビュー優先/新規テーマ優先）を`daily_brief.md`の「スキップ/持ち越し記録」欄に記入する。翌日、修正版がその日のうちに用意できる場合は再レビューを優先し、用意できない場合はスプリント表の新規テーマ生成を優先する。持ち越し案は週末時点で保留のままなら`archived`としてよい
 5. **logger**: レビュー提出時点で`post_id`を発行し、`draft`/`needs_revision`/`approved`の状態遷移を`ops/logs/post_log.jsonl`に記録
 6. **人間（最終承認）**: `approved`となった案（1〜2件）の中から実際に投稿する1案を選ぶ
 7. **人間（実投稿）**: 選んだ案をXに実際に投稿する
 
 ### 5-2. 投稿後の記録（当日中）
 
-8. 実際に投稿したpost_idと投稿URL・投稿時刻を、`ops/reports/daily_brief.md`に暫定記録する（schemaに投稿URL/実投稿時刻を格納するフィールドが現状ないための暫定運用。[6.](#6-不足している前提条件本番開始前に埋めるべきもの)参照）
-9. 投稿しなかった側の案（2案のうち選ばれなかった`approved`案）は、`status: approved`のまま`archived`として扱ってよいかを人間が判断する
+8. **人間**: 投稿完了を確認したら、投稿したpost_id・投稿URL・投稿時刻・投稿者を`ops/reports/daily_brief.md`の「実投稿記録」欄に記入する（`post_log.schema.json`にこれらを格納するフィールドがないための暫定運用。[.claude/agents/logger.mdの`posted`状態の暫定運用](../../.claude/agents/logger.md)を参照）
+9. **logger**: 人間からの投稿完了確認を受け、既存行を上書きせず新しい行を追記する形で`status: posted`を記録する
+10. 投稿しなかった側の案（2案のうち選ばれなかった`approved`案）は、`status: approved`のまま`archived`として扱ってよいかを人間が判断する
 
 ### 5-3. 24時間後の簡易記録（投稿翌日）
 
-10. **人間**: 前日投稿の24時間後実績（`impressions`/`engagements`/`profile_visits`等）をX Analytics等から取得する
-11. **logger**: 取得値を`window: 24h`のスナップショットとして`ops/logs/metrics_snapshots.csv`に記録
-12. **performance-analyst**: 前日投稿1件分の簡易振り返り（`profile_visit_rate`の実績値と一言コメントのみ。詳細分析は週次でまとめて行う）を`ops/reports/daily_brief.md`に追記
+11. **人間**: 前日投稿の24時間後実績のうち、最小項目（`impressions`/`likes`/`replies`/`profile_visits`/フォロワー純増数（参考、取れれば））をX Analytics等から取得し、`daily_brief.md`の「24時間後実績記録」欄にも書き残す。取得できない項目は空欄にせず「未取得」と明記する
+12. **logger**: 取得値を`window: 24h`のスナップショットとして`ops/logs/metrics_snapshots.csv`に記録する。未取得の項目はschema上null不可のため暫定的に`0`を記録し、実測ゼロと区別できるよう`daily_brief.md`側の「未取得」注記を正とする。`link_clicks`/`conversions`/`revenue`/`epc`は集客モードでは常に`0`（リンクを使わないため未取得ではなく実測ゼロ）
+13. **performance-analyst**: 前日投稿1件分の簡易振り返り（`profile_visit_rate`の実績値と一言コメントのみ。詳細分析は週次でまとめて行う）を`ops/reports/daily_brief.md`に追記。分析前に`daily_brief.md`の「未取得」注記を必ず確認する
 
 ---
 
@@ -117,24 +119,23 @@
 
 ---
 
-## 7. 本番開始前に埋めるべき不足前提条件（最大5件）
+## 7. 本番開始前に埋めるべき不足前提条件
 
-Phase 1の設計時点で、以下5点は仕様として未確定、または既存schemaの制約により暫定運用に留まっている。本番開始前、または開始後早い段階で埋める必要がある。
+### 今回のラウンドで解決した項目
 
-1. **`posted`状態への遷移条件・実際の投稿URL/投稿時刻を記録する場所が未定義**
-   `schemas/post_log.schema.json`は`additionalProperties: false`であり、現行フィールドに投稿URL・実投稿時刻を格納する場所がない。今回は暫定的に`ops/reports/daily_brief.md`への手記録で回避しているが、投稿数が増えると破綻する。次フェーズでのschema拡張候補（[next_phase_alignment_review_2026-08-03.md](next_phase_alignment_review_2026-08-03.md)のC-1と合わせて検討するのが望ましい）
+以下3点は、最小運用ルールを定義することで解決済み（詳細は5節の日次フローと`ops/reports/daily_brief.md`を参照）。
 
-2. **24時間後実績・フォロー数の取得方法（手動取得の具体的な手順）が未確定**
-   「人間が手動取得する」という前提のみで、X Analyticsのどの画面から何を見るか、`follow_rate`算出に必要なフォロー数をどう計測するか（アカウント全体のフォロワー純増数か、投稿起因と推定できる数かなど）の具体的な手順が定義されていない
+- **`posted`状態の暫定運用**: `posted` = 人間がXへの投稿完了を確認した状態と定義し、投稿URL・投稿時刻・投稿者は`daily_brief.md`の「実投稿記録」欄に記録する運用とした（[.claude/agents/logger.md](../../.claude/agents/logger.md)参照）
+- **24時間後実績の手動取得手順**: 最小取得項目（`impressions`/`likes`/`replies`/`profile_visits`/フォロワー純増数）を定義し、記録先（`metrics_snapshots.csv`が正、`daily_brief.md`が「未取得」注記の置き場）を分離した
+- **needs_revisionが当日中に解消しない場合のフォールバック**: 当日スキップ可、スキップ理由と翌日の扱いを`daily_brief.md`に記録する運用とした
 
-3. **投稿の実行者・アカウント権限が未確認**
+### まだ残っている不足前提条件（最大2件）
+
+1. **投稿の実行者・アカウント権限が未確認**
    どのXアカウントに、誰が実際にログインして投稿するか（本人か、権限委任された運用者か）が仕様書レベルで明示されていない
 
-4. **2案とも`approved`だった場合の選定基準がない**
+2. **2案とも`approved`だった場合の選定基準がない**
    「人間が1案選ぶ」とあるが、選定時に何を基準にするか（フックの強さ、テーマの新鮮さ、直近投稿との重複回避など）のガイドが未整備。判断が属人化するリスクがある
-
-5. **needs_revisionが当日中に解消しない場合のフォールバック方針がない**
-   1日1本ペースで再レビューに時間がかかった場合、その日の投稿を見送るか、翌日に2本投稿するか、テーマ順を入れ替えるかの運用ルールが未定義。スプリント計画（[4.](#4-1週間スプリント計画)）が崩れた場合の扱いを事前に決めておく必要がある
 
 ---
 

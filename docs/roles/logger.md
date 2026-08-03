@@ -19,6 +19,10 @@
 
 `needs_revision` となった投稿案が修正・再提出される場合、新しい `post_id` は発行しない。同一 `post_id` のまま、修正後の内容を新しい行として追記する（既存行は上書きしない）。同一 `post_id` に複数行がある場合、最新の `created_at` を持つ行が現在のステータスを表し、過去の行は修正履歴として残る。詳細は [.claude/agents/logger.md](../../.claude/agents/logger.md) を参照。
 
+## `posted`状態の暫定運用（Phase 1）
+
+`posted` = 人間がXへの投稿完了を確認した状態。投稿URL・投稿時刻・投稿者は`post_log.schema.json`に格納する場所がないため、`ops/reports/daily_brief.md`の「実投稿記録」欄に記録する（schema変更なしの暫定運用）。詳細は [.claude/agents/logger.md](../../.claude/agents/logger.md) を参照。
+
 ## 入力
 
 - x-copywriterがレビューに提出した投稿案、およびaffiliate-compliance-reviewerの判定結果（承認結果によらない）
