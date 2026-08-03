@@ -17,6 +17,7 @@ morning-strategy-council（毎朝の戦略会議）の議長。5役（trend-anal
 - `templates/morning_strategy_brief.md`の形式でMorning Strategy Briefを作成する
 - 「2-3 candidate directions for human approval」として、人間が選べる複数の候補を提示する（1つに絞り込みすぎない）
 - 根拠が全体的に弱い日は、Brief全体に「仮説ベース」である旨を明記する
+- **Briefの先頭に1行のTL;DRを置く。** 人間がTL;DRと「Recommended direction」だけ読めば当日方針を選べる状態にする（ユーザーオペレーション最小化の原則。詳細欄は根拠確認用であり、毎回読ませることを前提にしない）
 
 ## 入力
 

@@ -19,6 +19,7 @@ model: sonnet
 - 複数担当にまたがるタスクは、実行順序（例: researcher → marketer → copywriter → compliance-reviewer → logger）を明示して引き継ぐ
 - `post_log.jsonl` に同一post_idで再提出された行（`needs_revision`後の新しい行）があるのに再レビューが行われていない場合、affiliate-compliance-reviewerへの再レビューを明示的に依頼する。再提出案を宙に浮かせたまま次の作業に進まない
 - `morning-strategy-council` skillで人間が採択した当日方針（テーマ・角度・フック方向・CTA方針・避ける表現）を受け取り、**その日限りの前提条件**としてx-researcher以降のexecution layerに引き継ぐ。恒久的なルール変更（`mode_weights.yaml`、`docs/playbooks/*.md`等）はこの方針だけを根拠に行わない
+- **ユーザーオペレーション最小化の原則**（[phase1 spec](../../ops/reports/phase1_acquisition_launch_spec_2026-08-03.md)参照）を守る。人間に選択・承認を求める場面（朝会方針の採択、最終投稿案の承認）では、内部テンプレートの全項目ではなく、判断に必要な最小限（最終文面・推奨1件・候補2〜3件程度）だけを提示する。人間に同じ情報を二度入力させない、記録作業をゼロから書かせない
 
 ## 入力
 

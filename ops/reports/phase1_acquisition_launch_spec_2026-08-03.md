@@ -27,12 +27,13 @@
 - ログ候補作成（logger、`ops/logs/post_log.jsonl`へのレビュー提出時点からの状態遷移記録）
 - 簡易振り返り（performance-analyst、日次の軽い振り返りと週次のまとめ）
 
-### 人間が行う範囲（Claude Codeは行わない）
+### 人間が行う範囲（Claude Codeは行わない） — 4手（A〜D）に集約
 
-- **最終承認**: `approved`となった案の中から実際に投稿する1案を選ぶ
-- **実投稿**: X上への実際の投稿操作
-- 24時間後の実績数値の取得（X Analytics等からの手動取得。手順は[5-3.](#5-3-24時間後の簡易記録投稿翌日)を参照）
-- 投稿完了後の`status: posted`への更新の最終確認
+- **A. 当日方針の採択**: Morning Strategy BriefのTL;DRと候補から1つ選ぶ
+- **B. 最終承認**: `approved`となった案の中から実際に投稿する1案を選ぶ
+- **C. 実投稿**: X上への実際の投稿操作
+- **D. 投稿URLの記録**: `daily_brief.md`の「実投稿記録」欄にURLを貼るだけ（`status: posted`への更新はloggerが自動で行う。post_id・投稿時刻・投稿者の入力は不要）
+- （例外）24時間後の実績数値の取得（X Analytics等からの手動取得。取得できた分だけ記入すればよく、空欄は未取得として扱われる。手順は[5.](#5-最小オペレーション標準フロー)を参照）
 
 ### 明示的にやらないこと
 
@@ -87,31 +88,34 @@
 
 ---
 
-## 5. 日次運用の標準フロー
+## 5. 最小オペレーション標準フロー
 
-### 5-1. 投稿候補生成〜承認（当日朝、実投稿前）
+**ユーザーオペレーション最小化の原則**: 人間は運用担当者ではなく最終承認者として扱う。Phase 1の人間の作業は、原則として以下の**4手**に収める。
 
-1. **mode-orchestrator**: 当日のテーマ（スプリント表参照）を確認し、担当へのタスク分解を行う
-2. **growth-marketer**: 当日テーマに対する施策設計（狙うKPI: `impressions`/`profile_visit_rate`、CTA type: `profile_visit`）
-3. **x-copywriter**: `templates/x_post_template.md`準拠で投稿案を**2案**作成
-4. **affiliate-compliance-reviewer**: 2案を`templates/review_template.md`でレビュー
-   - `needs_revision`の場合: x-copywriterが同一post_id維持で修正版を再提出 → affiliate-compliance-reviewerが再レビュー（[logger.mdの再提出ルール](../../.claude/agents/logger.md)に準拠）
-   - **当日中に`approved`が1本も出ない場合**: その日の投稿はスキップしてよい（Phase 1では投稿本数より運用安定を優先する）。スキップ理由・対象post_id・翌日の扱い（再レビュー優先/新規テーマ優先）を`daily_brief.md`の「スキップ/持ち越し記録」欄に記入する。翌日、修正版がその日のうちに用意できる場合は再レビューを優先し、用意できない場合はスプリント表の新規テーマ生成を優先する。持ち越し案は週末時点で保留のままなら`archived`としてよい
-5. **logger**: レビュー提出時点で`post_id`を発行し、`draft`/`needs_revision`/`approved`の状態遷移を`ops/logs/post_log.jsonl`に記録
-6. **人間（最終承認）**: `approved`となった案（1〜2件）の中から実際に投稿する1案を選ぶ
-7. **人間（実投稿）**: 選んだ案をXに実際に投稿する
+| # | 人間がすること | かかる手間 |
+|---|---|---|
+| A | Morning Strategy Brief（`.claude/skills/morning-strategy-council/SKILL.md`）を見て、当日方針を1つ選ぶ | TL;DR＋候補2〜3個から1つ選ぶだけ |
+| B | 最終投稿案（`approved`）を1つ承認する | 最終文面を見て1つ選ぶだけ |
+| C | Xへ実投稿する | 通常の投稿操作 |
+| D | 投稿URLを1回記録する（`ops/reports/daily_brief.md`の「実投稿記録」欄） | URLを貼るだけ。post_id・投稿時刻・投稿者はAIが補う |
 
-### 5-2. 投稿後の記録（当日中）
+翌日の24時間後実績のみ例外で、人間は取得できた数値（最大5項目）を空欄のまま埋めるだけでよく、取得できない項目は空欄で放置してよい（「未取得」と書き添える必要はない。将来API連携できれば、この工程自体もAI側に寄せる）。
 
-8. **人間**: 投稿完了を確認したら、投稿したpost_id・投稿URL・投稿時刻・投稿者を`ops/reports/daily_brief.md`の「実投稿記録」欄に記入する（`post_log.schema.json`にこれらを格納するフィールドがないための暫定運用。[.claude/agents/logger.mdの`posted`状態の暫定運用](../../.claude/agents/logger.md)を参照）
-9. **logger**: 人間からの投稿完了確認を受け、既存行を上書きせず新しい行を追記する形で`status: posted`を記録する
-10. 投稿しなかった側の案（2案のうち選ばれなかった`approved`案）は、`status: approved`のまま`archived`として扱ってよいかを人間が判断する
+### 5-1. AI側の内部フロー（参考。人間はこの詳細を読む必要はない）
 
-### 5-3. 24時間後の簡易記録（投稿翌日）
+1. **morning-strategy-council**（trend-analyst/competitor-analyst/audience-representative/growth-strategist/risk-compliance-observer → council-chair）: 前日実績・スプリント計画・アカウント設計をもとにMorning Strategy Briefを作成 → **人間がAで採択**
+2. **mode-orchestrator**: 採択方針をその日限りの前提条件として引き継ぐ
+3. **x-researcher → growth-marketer → x-copywriter**: 採択方針に沿って投稿案を**2案**作成（`templates/x_post_template.md`準拠）
+4. **market-grounded review layer → x-copywriter（必要なら1回だけ修正）→ pre-post-self-check**: reviewer提出前の品質改善
+5. **affiliate-compliance-reviewer**: 2案をレビュー
+   - `needs_revision`の場合: x-copywriterが同一post_id維持で修正版を再提出 → 再レビュー
+   - **当日中に`approved`が1本も出ない場合**: mode-orchestratorがスキップ案を`daily_brief.md`の「スキップ/持ち越し記録」欄に下書きする。人間は確認するだけでよい（Phase 1では投稿本数より運用安定を優先する）
+6. **logger**: レビュー提出時点で`post_id`を発行し、状態遷移を`ops/logs/post_log.jsonl`に記録。`approved`が確定したら、`daily_brief.md`の「実投稿記録」欄にpost_idの行をあらかじめ用意しておく → **人間がBで承認、Cで投稿、Dで投稿URLのみ記入**
+7. **logger**: 投稿URLの記入を受け、post_id・投稿時刻・投稿者を補って`status: posted`を記録する。投稿されなかった側の案は`archived`への変更をloggerが提案し、人間は追認するだけでよい
+8. **人間**: 翌日、24時間後実績のうち取得できた数値のみ`daily_brief.md`に記入（空欄＝未取得）
+9. **logger → performance-analyst**: `window: 24h`のスナップショットとして記録し、前日投稿1件分の簡易振り返りを`daily_brief.md`に追記
 
-11. **人間**: 前日投稿の24時間後実績のうち、最小項目（`impressions`/`likes`/`replies`/`profile_visits`/フォロワー純増数（参考、取れれば））をX Analytics等から取得し、`daily_brief.md`の「24時間後実績記録」欄にも書き残す。取得できない項目は空欄にせず「未取得」と明記する
-12. **logger**: 取得値を`window: 24h`のスナップショットとして`ops/logs/metrics_snapshots.csv`に記録する。未取得の項目はschema上null不可のため暫定的に`0`を記録し、実測ゼロと区別できるよう`daily_brief.md`側の「未取得」注記を正とする。`link_clicks`/`conversions`/`revenue`/`epc`は集客モードでは常に`0`（リンクを使わないため未取得ではなく実測ゼロ）
-13. **performance-analyst**: 前日投稿1件分の簡易振り返り（`profile_visit_rate`の実績値と一言コメントのみ。詳細分析は週次でまとめて行う）を`ops/reports/daily_brief.md`に追記。分析前に`daily_brief.md`の「未取得」注記を必ず確認する
+将来のGoogle Sheets／DB移行設計は[gsheets_ledger_design_2026-08-03.md](gsheets_ledger_design_2026-08-03.md)を参照（未実装、設計のみ）。
 
 ---
 
@@ -134,8 +138,9 @@
 以下3点は、最小運用ルールを定義することで解決済み（詳細は5節の日次フローと`ops/reports/daily_brief.md`を参照）。
 
 - **`posted`状態の暫定運用**: `posted` = 人間がXへの投稿完了を確認した状態と定義し、投稿URL・投稿時刻・投稿者は`daily_brief.md`の「実投稿記録」欄に記録する運用とした（[.claude/agents/logger.md](../../.claude/agents/logger.md)参照）
-- **24時間後実績の手動取得手順**: 最小取得項目（`impressions`/`likes`/`replies`/`profile_visits`/フォロワー純増数）を定義し、記録先（`metrics_snapshots.csv`が正、`daily_brief.md`が「未取得」注記の置き場）を分離した
+- **24時間後実績の手動取得手順**: 最小取得項目（`impressions`/`likes`/`replies`/`profile_visits`/フォロワー純増数）を定義し、記録先（`metrics_snapshots.csv`が正、`daily_brief.md`が入力窓口）を分離した
 - **needs_revisionが当日中に解消しない場合のフォールバック**: 当日スキップ可、スキップ理由と翌日の扱いを`daily_brief.md`に記録する運用とした
+- **（2026-08-03追加ラウンド）ユーザーオペレーション最小化**: 上記3点をさらに簡略化した。投稿記録は投稿URLの1入力のみ（post_id・投稿時刻・投稿者はloggerが補完）、24時間後実績は空欄＝未取得としこれまで求めていた「未取得」の注記自体を不要にし、スキップ記録はmode-orchestratorが下書きして人間は確認のみにした。詳細は[5.](#5-最小オペレーション標準フロー)参照
 
 ### まだ残っている不足前提条件（最大2件）
 

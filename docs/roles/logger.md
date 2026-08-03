@@ -19,9 +19,9 @@
 
 `needs_revision` となった投稿案が修正・再提出される場合、新しい `post_id` は発行しない。同一 `post_id` のまま、修正後の内容を新しい行として追記する（既存行は上書きしない）。同一 `post_id` に複数行がある場合、最新の `created_at` を持つ行が現在のステータスを表し、過去の行は修正履歴として残る。詳細は [.claude/agents/logger.md](../../.claude/agents/logger.md) を参照。
 
-## `posted`状態の暫定運用（Phase 1）
+## `posted`状態の暫定運用（Phase 1） — 人間の入力はURLのみ
 
-`posted` = 人間がXへの投稿完了を確認した状態。投稿URL・投稿時刻・投稿者は`post_log.schema.json`に格納する場所がないため、`ops/reports/daily_brief.md`の「実投稿記録」欄に記録する（schema変更なしの暫定運用）。詳細は [.claude/agents/logger.md](../../.claude/agents/logger.md) を参照。
+`posted` = 人間がXへの投稿完了を確認した状態。**人間が入力するのは投稿URL1つだけ**（ユーザーオペレーション最小化の原則）。post_id・投稿時刻・投稿者はloggerが承認時点の情報とURL記入時刻から補う。投稿URLは`post_log.schema.json`に格納する場所がないため`ops/reports/daily_brief.md`の「実投稿記録」欄に記録する（schema変更なしの暫定運用。将来的な正本移行先の設計は[gsheets_ledger_design_2026-08-03.md](../../ops/reports/gsheets_ledger_design_2026-08-03.md)参照）。詳細は [.claude/agents/logger.md](../../.claude/agents/logger.md) を参照。
 
 ## 入力
 

@@ -38,13 +38,18 @@ affiliate-compliance-reviewer が `needs_revision` と判定した投稿案が�
 - 同一 `post_id` の行が複数存在する場合、`created_at` が最も新しい行をその投稿の現在のステータスとみなす。過去の行は修正履歴(監査証跡)として残す
 - 新しい `post_id` を発行するのは、別の投稿案(訴求角度や本文の起点が異なるもの)を新規に立てる場合のみ
 
-## `posted`状態の暫定運用(Phase 1)
+## `posted`状態の暫定運用(Phase 1) — 人間の入力はURLのみ
 
-`posted` = 人間がXへの投稿完了を確認した状態(自動投稿ではない)。
+`posted` = 人間がXへの投稿完了を確認した状態(自動投稿ではない)。**人間に求める入力は投稿URL1つだけにする**（ユーザーオペレーション最小化の原則。[phase1 spec](../../ops/reports/phase1_acquisition_launch_spec_2026-08-03.md)参照）。
 
-- 人間から投稿完了の確認を受けたら、既存行を上書きせず新しい行を追記する(`post_id`は同一、`status: posted`、`final_text`は投稿済み本文)
-- **投稿URL・投稿時刻・投稿者は`post_log.schema.json`に格納する場所がないため、`post_log.jsonl`には書かず、`ops/reports/daily_brief.md`の「実投稿記録」欄に記録する**(schemaを変更しない前提の暫定運用。将来的なschema拡張は提案に留める)
-- `approved`のまま投稿されなかった案(2案のうち選ばれなかった側)は、`status`を無理に`posted`にせず、`approved`のまま残すか、人間の判断で`archived`とする
+- `approved`が確定した時点で、loggerは`ops/reports/daily_brief.md`の「実投稿記録」欄にその`post_id`の行をあらかじめ用意しておく(人間が承認した案は、post_idも投稿対象もこの時点で確定しているため)
+- 人間が投稿URLだけを貼ったら、logger は以下を自分で補って`posted`状態を確定させる:
+  - `post_id`: 承認済み候補から自明（人間が承認した案のURLとして扱う。複数approved案がある場合は、承認時点でどちらを投稿するか人間が既に選んでいる前提）
+  - 投稿時刻: URL記入時点の日時
+  - 投稿者: 既定値（単独運用中は固定名。複数人運用になった場合のみ選択を求める）
+- 既存行を上書きせず新しい行を追記する(`post_id`は同一、`status: posted`、`final_text`は投稿済み本文)
+- **投稿URL・投稿時刻・投稿者は`post_log.schema.json`に格納する場所がないため、`post_log.jsonl`には書かず、`ops/reports/daily_brief.md`の「実投稿記録」欄に記録する**(schemaを変更しない前提の暫定運用。将来的にはGoogle Sheets等の正本への移行を検討する。[gsheets_ledger_design_2026-08-03.md](../../ops/reports/gsheets_ledger_design_2026-08-03.md)参照)
+- `approved`のまま投稿されなかった案(2案のうち選ばれなかった側)は、loggerが`archived`への変更を提案し、人間は追認するだけでよい（ゼロから判断させない）
 
 ## 入力
 

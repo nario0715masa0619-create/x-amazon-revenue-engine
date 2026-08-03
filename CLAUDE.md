@@ -22,6 +22,7 @@
 4. **数値の改善・悪化は、週次レビュー（`weekly-pdca-review` skill）で `ops/reports/weekly_review.md` に反映すること。** 個別の気づきをその場限りにしない。
 5. **誇大表現・誤認表現・開示漏れを禁止する。** 詳細: [docs/policies/disclosure-policy.md](docs/policies/disclosure-policy.md)、[docs/policies/amazon-affiliate-policy.md](docs/policies/amazon-affiliate-policy.md)
 6. **本番投稿の自動化はまだ行わない。** 現段階は設計・雛形・記録基盤の整備を優先する。外部API接続やスケジュール投稿の実装は、明示的な指示があるまで着手しない。
+7. **ユーザーは運用担当者ではなく最終承認者として扱うこと。** 日々の記録・整理・下書き作成はAI側に寄せ、人間に同じ情報を二度入力させない、ゼロから考えさせない設計を優先する。詳細: [ops/reports/phase1_acquisition_launch_spec_2026-08-03.md](ops/reports/phase1_acquisition_launch_spec_2026-08-03.md)の「最小オペレーション標準フロー」
 
 ## 参照先マップ
 

@@ -52,8 +52,9 @@ description: 毎朝、投稿文を作る前に「今日何を狙うか」を決�
 
 ## 人間承認ポイント
 
-- Briefの「2-3 candidate directions for human approval」から、その日の投稿方針を1つ選ぶ
+- **人間はBrief先頭のTL;DRと「Recommended direction」だけ読めば選べる。** Briefの「2-3 candidate directions for human approval」から、その日の投稿方針を1つ選ぶ
 - 「Recommended direction」はAI側の推奨であり、人間は別の候補を選んでもよい
+- 詳細欄（5役それぞれの所見）は、判断の根拠を確認したいときだけ読めばよく、毎回読む前提にしない（ユーザーオペレーション最小化の原則）
 
 ## execution layerへの引き継ぎ方法
 

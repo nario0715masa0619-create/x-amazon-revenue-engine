@@ -7,6 +7,7 @@
 
 # Morning Strategy Brief
 
+- **TL;DR（1行）**: 人間はこの1行と「Recommended direction」だけ読めば当日方針を選べる状態にする。詳細欄は根拠を確認したいときのみ参照する
 - Date:
 - Mode:
 - Account:
