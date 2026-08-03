@@ -32,6 +32,8 @@ X（旧Twitter）× Amazonアフィリエイト運用を、Claude Code上で複�
 
 担当（agents）はモードをまたいで横断的に動き、モード（skills / state）は「今どの目的で動くか」を切り替えるレイヤーです。両者は独立した軸として設計されています。
 
+x-copywriterとcompliance-reviewerの間には、`pre-post-self-check` skillとmarket-grounded review layer（`trend-reality-reviewer`/`competitor-reality-reviewer`/`audience-market-fit-reviewer`）という2つの前段品質改善レイヤーがあります。いずれもcompliance-reviewerの最終判断を代替しません（詳細は`.claude/agents/`参照）。
+
 ## 3. 「担当」と「モード」の違い
 
 | | 担当（Roles） | モード（Modes） |

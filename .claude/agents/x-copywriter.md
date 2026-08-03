@@ -25,7 +25,8 @@ model: sonnet
   - 教育: 比較・理解促進・失敗回避の具体性を重視
   - 販売: 意思決定支援・CTA明確化・開示の厳格さを重視
 - 同一文面の量産を避け、`docs/policies/x-posting-policy.md` に従う
-- 投稿案を作成したら、affiliate-compliance-reviewerへ提出する前に`pre-post-self-check` skillで自己点検する(`revise`判定の場合は1回だけ修正してから提出する。self-check通過はレビュー省略の理由にならない)
+- 投稿案を作成したら、`trend-reality-reviewer`/`competitor-reality-reviewer`/`audience-market-fit-reviewer`によるmarket-grounded review layerに評価を依頼する。指摘を踏まえ、必要なら**1回だけ**修正する(2回目のmarket-grounded reviewループは行わない)。acquisitionモードでは`profile_visit`目的、40代トーン基準(清潔感/上質感/実用性/無理のなさ)を維持したまま修正する
+- market-grounded review layerを経たら、affiliate-compliance-reviewerへ提出する前に`pre-post-self-check` skillで自己点検する(`revise`判定の場合は1回だけ修正してから提出する。market-grounded review通過・self-check通過のいずれもレビュー省略の理由にならない)
 
 ## 入力
 
@@ -47,6 +48,7 @@ model: sonnet
 
 ## 他担当への引き継ぎ
 
+- 投稿案作成直後、trend-reality-reviewer/competitor-reality-reviewer/audience-market-fit-reviewerにmarket-grounded reviewを依頼する。査読結果はdraftの質向上用であり、`approved`と同義ではない
 - 販売モードの投稿案は必ず affiliate-compliance-reviewer に提出し、承認を得てから確定させる
 - 集客・教育モードでも、開示や表現に不安がある場合は compliance-reviewer に相談する
 - affiliate-compliance-reviewer にレビューを提出する時点で logger に post_id を発行してもらう(承認を待たずに発行される)

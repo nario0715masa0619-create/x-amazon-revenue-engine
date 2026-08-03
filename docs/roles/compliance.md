@@ -8,7 +8,8 @@
 - `docs/policies/` の各ポリシーに基づき判定する
 - 販売モードは特に厳格な基準でレビューする
 - x-copywriterからの再提出版（同一post_id）も新規案と同様に必ずレビューする。未レビューのまま放置しない
-- `pre-post-self-check` skillで`go`判定済みの案でも、このレビューを省略しない（self-checkは前段の品質向上レイヤーであり最終判定の代替ではない）
+- `pre-post-self-check` skillで`go`判定済み、またはmarket-grounded review layerの査読を経た案でも、このレビューを省略しない（いずれも前段の品質向上レイヤーであり最終判定の代替ではない）
+- 市場トレンドや競合の傾向に寄せすぎて、規約・誇張表現・開示が崩れていないかを独自に判断する（market-grounded reviewの指摘に引きずられすぎない）
 
 ## 入力
 
