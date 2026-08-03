@@ -6,6 +6,7 @@
 
 - 投稿ログ・施策ログ・数値ログの整合性を保つ
 - `post_id` / `experiment_id` / `snapshot_id` を命名規則に従って発行する
+- 投稿案がレビューに提出された時点で`post_id`を発行し、`draft`/`needs_revision`/`approved`等の状態遷移を同一IDのもとで一貫して記録する（承認済みのものだけを記録対象とするわけではない）
 - ログの欠損・不整合を検知し警告する
 
 ## ID命名規則
@@ -20,7 +21,7 @@
 
 ## 入力
 
-- affiliate-compliance-reviewerが承認した投稿案
+- x-copywriterがレビューに提出した投稿案、およびaffiliate-compliance-reviewerの判定結果（承認結果によらない）
 - growth-marketerからの施策情報
 - 数値取得結果
 

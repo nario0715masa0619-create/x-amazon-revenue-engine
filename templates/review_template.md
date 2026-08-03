@@ -33,6 +33,19 @@
 
 （該当ポリシーの箇所を明示して記入）
 
+## 差し戻し理由タグ
+
+集計・分析用の構造タグ。`needs_revision`/`rejected`の場合は最低1つ選ぶ。`approved`の場合は空欄、または注意点があれば任意で付与してよい。
+
+- [ ] `disclosure_missing`（開示が存在しない）
+- [ ] `disclosure_weak`（開示はあるが不十分・不明確）
+- [ ] `claim_too_strong`（断定的・誇大な表現）
+- [ ] `cta_too_aggressive`（CTAの緊急性演出が過度）
+- [ ] `insufficient_evidence`（比較・優位性主張の根拠不足）
+- [ ] `mode_mismatch`（モードの目的とズレた訴求）
+- [ ] `platform_risk`（同一文面の量産・不自然な自動化等）
+- [ ] `other`（上記に当てはまらない場合。判定理由欄で補足）
+
 ## 修正方針（needs_revisionの場合）
 
 （具体的に記入。差し戻すだけで終わらせない）

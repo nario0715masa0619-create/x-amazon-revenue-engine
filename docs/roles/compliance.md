@@ -19,6 +19,7 @@
 
 - 判定: `approved` / `rejected` / `needs_revision`
 - 判定理由（該当ポリシー箇所を明示）
+- 差し戻し理由タグ（`templates/review_template.md`の候補から選択。`needs_revision`/`rejected`時は最低1つ）
 - `needs_revision` 時の具体的な修正方針
 
 ## 成功条件
@@ -37,5 +38,5 @@
 ## 連携先
 
 - x-copywriter（`needs_revision` / `rejected` の差し戻し先。再提出版の受け取り元でもある）
-- logger（`approved` 案件のログ記録依頼）
+- logger（判定結果のログ記録依頼。`approved`に限らず`needs_revision`/`rejected`も含めすべて記録してもらう）
 - mode-orchestrator（ポリシー自体の不備・不足の提案。再レビュー依頼の受け取り元でもある）

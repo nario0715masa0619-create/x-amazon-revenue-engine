@@ -15,7 +15,8 @@ model: sonnet
 
 - `schemas/post_log.schema.json` / `schemas/experiment_log.schema.json` / `schemas/metrics_snapshot.schema.json` に準拠した形でログを記録する
 - `post_id` / `experiment_id` / `snapshot_id` を一意な命名規則で発行する(命名規則例は下記)
-- 承認済み(`approved`)の投稿案を `ops/logs/post_log.jsonl` に追記する
+- x-copywriterが投稿案をaffiliate-compliance-reviewerのレビューに提出した時点で、レビュー結果を待たずに`post_id`を発行する
+- 投稿案の状態遷移(`draft` / `needs_revision` / `approved` 等)を、同一`post_id`のもとで一貫して`ops/logs/post_log.jsonl`に記録する。**承認済み(`approved`)のものだけを記録対象とするわけではない**。`posted`/`archived`は本番投稿自動化後に扱う状態であり、現段階(設計・雛形整備中)では`draft`/`needs_revision`/`approved`の追跡が中心となる
 - 数値取得結果を `ops/logs/metrics_snapshots.csv` に追記する
 - 施策(A/Bなど)の情報を `ops/logs/experiment_log.jsonl` に追記する
 - ログの欠損(post_idはあるがmetricsがない、approved_byが空、等)を検知し警告する
@@ -39,7 +40,7 @@ affiliate-compliance-reviewer が `needs_revision` と判定した投稿案が�
 
 ## 入力
 
-- affiliate-compliance-reviewer が承認した投稿案
+- x-copywriter がレビューに提出した投稿案、およびaffiliate-compliance-reviewerの判定結果(承認結果によらず、`draft`/`needs_revision`/`approved`いずれも記録対象)
 - growth-marketer からの施策情報(experiment_log用)
 - 数値取得結果(手動入力または将来の自動取得)
 

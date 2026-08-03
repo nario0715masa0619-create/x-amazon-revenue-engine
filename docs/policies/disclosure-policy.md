@@ -18,11 +18,13 @@
 
 - 販売モード（sales-playbook）の投稿は、開示ルールにおいて最も厳格に扱う。開示欄が空、または曖昧な投稿案は `affiliate-compliance-reviewer` が承認しない（[docs/policies/amazon-affiliate-policy.md](amazon-affiliate-policy.md)、[.claude/skills/sales-playbook/SKILL.md](../../.claude/skills/sales-playbook/SKILL.md)）
 - 集客・教育モードでリンクを含める場合も、同様に開示を行う。モードによって開示ルール自体が緩くなることはない（緩くなるのは訴求の強さであり、開示の要件ではない）
+- 開示の強さの目安: 「#PR」「#ad」のみ、絵文字のみといった短いタグだけの表示は**不十分な開示**として扱う。「本投稿はAmazonアソシエイトとして紹介料を得ています」等、平易な文章で紹介料を得ている旨が明記されているものを**十分な開示**とする。affiliate-compliance-reviewerは、開示が全くない場合は`templates/review_template.md`の`disclosure_missing`タグ、存在するが不十分な場合は`disclosure_weak`タグを用いて`needs_revision`とする
 
 ## 4. ログとの関係
 
 - `post_log.schema.json` の `disclosure_included` フィールドで、開示の有無を機械的に追跡する（[schemas/post_log.schema.json](../../schemas/post_log.schema.json)）
 - `disclosure_included: false` かつリンクを含む投稿は、`logger` が警告を出す運用とする
+- `disclosure_included`は開示の「有無」のみを表すboolean値であり、「開示はあるが弱い」までは表現できない。その差は`post_log`ではなくレビュー記録（`disclosure_weak`タグ）側で追跡する運用とする（schema自体の拡張は将来の検討課題とする）
 
 ## 5. 参照
 
