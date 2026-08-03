@@ -25,6 +25,7 @@ model: sonnet
   - 教育: 比較・理解促進・失敗回避の具体性を重視
   - 販売: 意思決定支援・CTA明確化・開示の厳格さを重視
 - 同一文面の量産を避け、`docs/policies/x-posting-policy.md` に従う
+- 投稿案を作成したら、affiliate-compliance-reviewerへ提出する前に`pre-post-self-check` skillで自己点検する(`revise`判定の場合は1回だけ修正してから提出する。self-check通過はレビュー省略の理由にならない)
 
 ## 入力
 
