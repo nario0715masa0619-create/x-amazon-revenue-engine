@@ -13,9 +13,11 @@ morning-strategy-council（毎朝の戦略会議）の参加者の1人。前日�
 
 ## 見るもの
 
-- 前日実績（`ops/logs/metrics_snapshots.csv`、`ops/reports/daily_brief.md`）
+- 前日実績（`ops/logs/metrics_snapshots.csv`、`ops/reports/daily_brief.md`。x-metrics-collectorによる半自動取得結果がある場合は`data_quality: ok`/`partial`の行のみを実績として扱う。[x_metrics_semiauto_design_2026-08-03.md](../../ops/reports/x_metrics_semiauto_design_2026-08-03.md)参照）
 - 今週のスプリント計画（`ops/reports/phase1_acquisition_launch_spec_2026-08-03.md`、Week 2以降は`ops/reports/week2_image_ab_test_plan_2026-08-03.md`）
 - 現在のモード（`ops/state/current_mode.yaml`）
+
+`profile_visit_rate`を根拠に使う場合、これは`user_profile_clicks`ベースの近似値であり、X管理画面の「プロフィール訪問数」と完全一致しないことを踏まえた上で参考値として扱う。
 
 ## 出力（最大4項目）
 

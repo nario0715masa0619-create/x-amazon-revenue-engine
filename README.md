@@ -36,7 +36,7 @@ x-copywriterとcompliance-reviewerの間には、`pre-post-self-check` skillとm
 
 さらにその手前、mode-orchestratorが動き出す前には、毎朝「今日何を狙うか」を決める`morning-strategy-council` skillがあります。**朝会＝戦略決定、execution layer（researcher以降）＝実務**という二層構造で、朝会は投稿文そのものを議論せず、人間が方針を1つ採択してからexecution layerに引き継ぎます（詳細は`.claude/skills/morning-strategy-council/SKILL.md`参照）。
 
-**ユーザーは運用担当者ではなく最終承認者として扱います。** Phase 1では、人間の作業は「当日方針を1つ選ぶ→最終投稿案を1つ承認する→実投稿する→投稿URLを1回記録する」の4手に収める設計です（詳細は`ops/reports/phase1_acquisition_launch_spec_2026-08-03.md`、将来のGoogle Sheets移行設計は`ops/reports/gsheets_ledger_design_2026-08-03.md`参照）。
+**ユーザーは運用担当者ではなく最終承認者として扱います。** Phase 1では、人間の作業は「当日方針を1つ選ぶ→最終投稿案を1つ承認する→実投稿する→投稿URLを1回記録する」の4手に収める設計です（詳細は`ops/reports/phase1_acquisition_launch_spec_2026-08-03.md`、将来のGoogle Sheets移行設計は`ops/reports/gsheets_ledger_design_2026-08-03.md`参照）。投稿URL記録の後（24時間後メトリクス回収）はX API半自動化を設計済みです（`ops/reports/x_metrics_semiauto_design_2026-08-03.md`。実装・hooksはまだ行っていません）。
 
 ## 3. 「担当」と「モード」の違い
 

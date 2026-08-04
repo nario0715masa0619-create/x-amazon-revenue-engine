@@ -38,6 +38,7 @@ model: sonnet
 - サンプル数が極端に少ない結果を、確定的な結論として報告しない(「試行回数が少なく参考値」等を明記する)
 - ログにない情報を推測で補って分析しない(欠損があれば logger に確認を依頼する)
 - Phase 1では、`ops/reports/daily_brief.md`の「24時間後実績記録」欄で**空欄のセルは未取得を意味する**（人間は注記を書かない運用）。空欄を0として扱わず、未取得として除外して集計する。`link_clicks`等リンク関連の`0`は実測ゼロ（集客モードはリンクを使わないため）であり未取得ではない
+- x-metrics-collectorによる半自動取得結果を使う場合、`data_quality`が`auth_missing`/`api_error`/`url_unresolved`の行は「未取得」として除外する（`ok`/`partial`/`manual`のみ実績として扱う）。`profile_visit_rate`は`user_profile_clicks`の近似値であり、X管理画面の「プロフィール訪問数」と完全一致しない旨を分析結果に明記する（[x_metrics_semiauto_design_2026-08-03.md](../../ops/reports/x_metrics_semiauto_design_2026-08-03.md)参照）
 - 施策の是非を独断で決めない(示唆の提示にとどめ、意思決定は growth-marketer / mode-orchestrator に委ねる)
 
 ## 他担当への引き継ぎ

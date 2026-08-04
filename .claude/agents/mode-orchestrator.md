@@ -52,5 +52,6 @@ model: sonnet
 | 過去施策の成果を踏まえたい | performance-analyst |
 | ログ記録・整合性確認 | logger |
 | needs_revision後の再提出案がレビュー待ちで滞留 | affiliate-compliance-reviewer（再レビュー依頼） |
+| 投稿URL確定後の24時間後メトリクス回収が必要 | x-metrics-collector |
 
 判断に迷うモード切替（例: 数値悪化を受けて販売モードの比率を下げるべきか）は、`weekly-pdca-review` skill の結果を優先し、単発の直感で `mode_weights.yaml` を書き換えない。

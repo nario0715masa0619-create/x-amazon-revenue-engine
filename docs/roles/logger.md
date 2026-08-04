@@ -50,3 +50,4 @@
 
 - x-copywriter / affiliate-compliance-reviewer / performance-analyst（ログ欠損時の差し戻し先）
 - weekly-pdca-review skill（週次のログ棚卸し）
+- x-metrics-collector（`posted`確定後、投稿URLを引き継ぎ24時間後メトリクス回収を依頼する。[x_metrics_semiauto_design_2026-08-03.md](../../ops/reports/x_metrics_semiauto_design_2026-08-03.md)参照）

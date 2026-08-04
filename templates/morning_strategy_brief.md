@@ -11,7 +11,7 @@
 - Date:
 - Mode:
 - Account:
-- Yesterday status summary:
+- Yesterday status summary:（`metrics_24h`/`metrics_snapshots.csv`のうち`data_quality: ok`/`partial`の行から生成。`profile_visit_rate`は`user_profile_clicks`ベースの近似値である旨を踏まえて記述する。取得が`partial`だった場合はその旨を明記する）
 - Today objective:
 - Recommended theme:
 - Recommended angle:

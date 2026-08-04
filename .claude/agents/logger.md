@@ -50,6 +50,7 @@ affiliate-compliance-reviewer が `needs_revision` と判定した投稿案が�
 - 既存行を上書きせず新しい行を追記する(`post_id`は同一、`status: posted`、`final_text`は投稿済み本文)
 - **投稿URL・投稿時刻・投稿者は`post_log.schema.json`に格納する場所がないため、`post_log.jsonl`には書かず、`ops/reports/daily_brief.md`の「実投稿記録」欄に記録する**(schemaを変更しない前提の暫定運用。将来的にはGoogle Sheets等の正本への移行を検討する。[gsheets_ledger_design_2026-08-03.md](../../ops/reports/gsheets_ledger_design_2026-08-03.md)参照)
 - `approved`のまま投稿されなかった案(2案のうち選ばれなかった側)は、loggerが`archived`への変更を提案し、人間は追認するだけでよい（ゼロから判断させない）
+- `posted`が確定したら、`x-metrics-collector`に投稿URL（post_idと対応付け済み）を引き継ぐ。24時間後メトリクスの半自動回収フローは[x_metrics_semiauto_design_2026-08-03.md](../../ops/reports/x_metrics_semiauto_design_2026-08-03.md)を参照（現時点では自動トリガー機構は未実装で、実行は人間または将来のジョブが起動する想定）
 
 ## 入力
 
