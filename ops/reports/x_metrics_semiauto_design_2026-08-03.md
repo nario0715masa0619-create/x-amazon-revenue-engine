@@ -1,6 +1,8 @@
 # x_metrics_semiauto_design_2026-08-03.md — X APIによる24hメトリクス半自動回収 設計
 
-> **これは設計ドキュメントであり、実装（hooks・スケジューラ・実際のAPI呼び出し）は含まない。** 本番用の認証情報・APIキーは記載しない。CLAUDE.mdの「本番投稿の自動化はまだ行わない」「hooks実装は明示的な指示があるまで着手しない」方針に従い、今回は「実装可能な仕様」としての整理に留める。対象は[phase1_acquisition_launch_spec_2026-08-03.md](phase1_acquisition_launch_spec_2026-08-03.md)の最小オペレーション標準フロー（A〜D）のうち、**Dの後（24時間後メトリクス回収）を半自動化する設計**。
+> 対象は[phase1_acquisition_launch_spec_2026-08-03.md](phase1_acquisition_launch_spec_2026-08-03.md)の最小オペレーション標準フロー（A〜D）のうち、**Dの後（24時間後メトリクス回収）を半自動化する設計**。本番用の認証情報・APIキーはこの設計ドキュメントにもコード側にも記載しない。CLAUDE.mdの「本番投稿の自動化はまだ行わない」「hooks実装は明示的な指示があるまで着手しない」方針は維持しており、24時間後の自動起動機構（cron/スケジューラ/hooks）自体は未実装。
+
+> **実装状況（2026-08-04追記）**: 本設計のA案（最小実装）を[scripts/x_metrics_collector/](../../scripts/x_metrics_collector/)としてコード化済み。手動実行（`python -m scripts.x_metrics_collector --post-id <id>`または`--all-pending`）でGoogle Sheets（`posts`/`metrics_24h`）とX APIを実際に読み書きできる。セットアップ・実行手順は[scripts/x_metrics_collector/README.md](../../scripts/x_metrics_collector/README.md)参照。B/C案（自動トリガー、URL入力不要化）は引き続き未実装で、本ドキュメントのF/G節に整理したまま。
 
 ---
 

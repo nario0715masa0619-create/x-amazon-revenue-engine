@@ -65,8 +65,11 @@ metrics_24h (数値スナップショット、追記のみ)
 
 ## 現状との関係
 
-- 今のPhase 1は`ops/logs/*.jsonl`/`*.csv`と`ops/reports/daily_brief.md`で運用しており、この設計はまだ適用していない
-- Google Sheetsへの移行を実際に行う場合は、hooks実装や外部連携の議論と合わせて別途着手する（今回は見送り）
+> **実装状況（2026-08-04追記）**: 対象スプレッドシート（ID: `19QBFTd6j4_hlV38VhPaVtTLmhlzw5HNQNmyPhmkfmtM`）が実際に作成され、`posts`/`reviews`/`metrics_24h`の3シートが存在する。[scripts/x_metrics_collector/](../../scripts/x_metrics_collector/)（最小実装）がこの実シートを対象に`posts`の読み取りと`metrics_24h`への書き込みを行う。`reviews`シートへの書き込みはまだ実装していない（現状は空でよい運用のまま）。
+
+- 投稿候補生成〜承認〜投稿（`posts`/`reviews`）は引き続き`ops/logs/*.jsonl`/`*.csv`と`ops/reports/daily_brief.md`が正本であり、この設計・実装はまだ適用していない
+- 24時間後メトリクス回収（`metrics_24h`）のみ、Google Sheets実シートへの読み書きを先行実装した（本ドキュメントおよび[x_metrics_semiauto_design_2026-08-03.md](x_metrics_semiauto_design_2026-08-03.md)参照）
+- `posts`/`reviews`シート側の本格運用移行（hooks実装や外部連携含む）は引き続き見送り
 
 ## 作成手順（実施する場合の参考）
 

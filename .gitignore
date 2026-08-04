@@ -1,0 +1,11 @@
+# 認証情報・環境変数（実値は絶対にコミットしない）
+.env
+*.env
+service-account*.json
+*credentials*.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/

@@ -112,7 +112,7 @@
    - **当日中に`approved`が1本も出ない場合**: mode-orchestratorがスキップ案を`daily_brief.md`の「スキップ/持ち越し記録」欄に下書きする。人間は確認するだけでよい（Phase 1では投稿本数より運用安定を優先する）
 6. **logger**: レビュー提出時点で`post_id`を発行し、状態遷移を`ops/logs/post_log.jsonl`に記録。`approved`が確定したら、`daily_brief.md`の「実投稿記録」欄にpost_idの行をあらかじめ用意しておく → **人間がBで承認、Cで投稿、Dで投稿URLのみ記入**
 7. **logger**: 投稿URLの記入を受け、post_id・投稿時刻・投稿者を補って`status: posted`を記録する。投稿されなかった側の案は`archived`への変更をloggerが提案し、人間は追認するだけでよい
-8. **x-metrics-collector**（設計済み・未実装）: 投稿URLからtweet_idを解決し、X APIから取得を試みる。取得できた項目は`window: 24h`のスナップショットとして記録し、取得できなかった項目・認証未設定等は理由付きで残す
+8. **x-metrics-collector**（最小実装あり。[scripts/x_metrics_collector/](../../scripts/x_metrics_collector/)、手動実行）: 投稿URLからtweet_idを解決し、X APIから取得を試みる。取得できた項目は`metrics_24h`（Google Sheets）に記録し、取得できなかった項目・認証未設定等は理由付きで残す
 9. **人間（例外時のみ）**: x-metrics-collectorが取得できなかった数値のみ`daily_brief.md`に記入（空欄＝未取得）
 10. **logger → performance-analyst**: 記録されたスナップショットをもとに、前日投稿1件分の簡易振り返りを`daily_brief.md`に追記
 
