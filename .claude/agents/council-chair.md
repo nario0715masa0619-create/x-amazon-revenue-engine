@@ -23,7 +23,7 @@ morning-strategy-council（毎朝の戦略会議）の議長。5役（trend-anal
 
 - trend-analystの所見（今日避けるべき型／今日試す価値のある型）
 - competitor-analystの所見（よくある型／避けるべき被り／差別化できそうな切り口）
-- audience-representativeの所見（40代に刺さる観点／避けるべき言い回し／今日のトーン指針）
+- audience-representativeの所見（40代男性に刺さる観点／避けるべき言い回し／今日のトーン指針）
 - growth-strategistの所見（今日のテスト仮説／固定する要素／変える要素／今日の成功判定）
 - risk-compliance-observerの所見（今日の注意点／やってはいけない表現）
 

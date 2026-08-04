@@ -33,7 +33,7 @@ description: 毎朝、投稿文を作る前に「今日何を狙うか」を決�
 |---|---|---|
 | trend-analyst | X公式ベストプラクティス、直近トレンド | 今日避けるべき型／今日試す価値のある型 |
 | competitor-analyst | 近接ジャンルの公開投稿傾向 | よくある型／避けるべき被り／差別化できそうな切り口 |
-| audience-representative | アカウント設計、トーン／禁止表現ルール | 40代に刺さる観点／避けるべき言い回し／今日のトーン指針 |
+| audience-representative | アカウント設計、トーン／禁止表現ルール | 40代男性に刺さる観点／避けるべき言い回し／今日のトーン指針 |
 | growth-strategist | 前日実績、スプリント計画、current mode | 今日のテスト仮説／固定する要素・変える要素／今日の成功判定 |
 | risk-compliance-observer | policy docs、Xプラットフォームルール | 今日の注意点／やってはいけない表現 |
 | council-chair | 上記5役の所見 | Morning Strategy Brief（結論のみ、新規意見を足さない） |
