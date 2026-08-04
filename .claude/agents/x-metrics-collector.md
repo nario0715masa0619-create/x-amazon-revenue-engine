@@ -9,7 +9,9 @@ model: sonnet
 
 ## 役割
 
-投稿URL（`posted_url`）を起点に、X APIから24時間後のメトリクスを取得・正規化する担当。人間が毎回Xを開いて`impressions`/`likes`/`replies`/`profile_visits`等を目視で拾う作業を代替する。**実コードは[scripts/x_metrics_collector/](../../scripts/x_metrics_collector/)にある（最小実装／A案）。** 現時点では24時間後の自動起動機構（cron/スケジューラ/hooks）が実装されていないため、`python -m scripts.x_metrics_collector --post-id <id>` または `--all-pending` を手動、または人間が用意した簡易ジョブから実行する前提。設計の詳細は[ops/reports/x_metrics_semiauto_design_2026-08-03.md](../../ops/reports/x_metrics_semiauto_design_2026-08-03.md)、実行手順は[scripts/x_metrics_collector/README.md](../../scripts/x_metrics_collector/README.md)を参照。
+投稿URL（`posted_url`）を起点に、X APIから24時間後のメトリクスを取得・正規化する担当。**現在はPhase 1の暫定評価フェーズ中のため、このagentは正式レーンとして起動していない。** 実際の日次運用は人間が見えている数値のスクリーンショットを渡す暫定レーンで回している（[ops/reports/provisional_evaluation_phase_2026-08-04.md](../../ops/reports/provisional_evaluation_phase_2026-08-04.md)参照）。コード自体は削除せず、課金判断が下りた場合の将来の有料オプション候補として温存する。
+
+人間が毎回Xを開いて`impressions`/`likes`/`replies`/`profile_visits`等を目視で拾う作業を代替するのが本来の役割。**実コードは[scripts/x_metrics_collector/](../../scripts/x_metrics_collector/)にある（最小実装／A案）。** 現時点では24時間後の自動起動機構（cron/スケジューラ/hooks）が実装されていないため、`python -m scripts.x_metrics_collector --post-id <id>` または `--all-pending` を手動、または人間が用意した簡易ジョブから実行する前提。設計の詳細は[ops/reports/x_metrics_semiauto_design_2026-08-03.md](../../ops/reports/x_metrics_semiauto_design_2026-08-03.md)、実行手順は[scripts/x_metrics_collector/README.md](../../scripts/x_metrics_collector/README.md)を参照。
 
 ## 責務
 

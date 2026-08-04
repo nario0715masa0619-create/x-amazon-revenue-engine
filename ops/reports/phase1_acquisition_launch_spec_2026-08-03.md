@@ -34,7 +34,7 @@
 - **B. 最終承認**: `approved`となった案の中から実際に投稿する1案を選ぶ
 - **C. 実投稿**: X上への実際の投稿操作
 - **D. 投稿URLの記録**: `daily_brief.md`の「実投稿記録」欄にURLを貼るだけ（`status: posted`への更新はloggerが自動で行う。post_id・投稿時刻・投稿者の入力は不要）
-- （例外）24時間後の実績数値の取得（**半自動化を設計済み**。x-metrics-collectorがX APIから取得を試み、取得できなかった項目のみ人間が補う。詳細は[x_metrics_semiauto_design_2026-08-03.md](x_metrics_semiauto_design_2026-08-03.md)。手順は[5.](#5-最小オペレーション標準フロー)を参照）
+- （例外）24時間後の実績数値の取得（**現在は暫定評価フェーズ中**。人間が見えている数値のスクショを1枚渡し、AIが見えた値だけ記入する。X API半自動化（x-metrics-collector）は設計・実装済みだが、課金判断が下りるまで正式レーンとしては保留。詳細は[provisional_evaluation_phase_2026-08-04.md](provisional_evaluation_phase_2026-08-04.md)、手順は[5.](#5-最小オペレーション標準フロー)を参照）
 
 ### 明示的にやらないこと
 
@@ -100,7 +100,7 @@
 | C | Xへ実投稿する | 通常の投稿操作 |
 | D | 投稿URLを1回記録する（`ops/reports/daily_brief.md`の「実投稿記録」欄） | URLを貼るだけ。post_id・投稿時刻・投稿者はAIが補う |
 
-翌日の24時間後実績のみ例外で、人間は取得できた数値（最大5項目）を空欄のまま埋めるだけでよく、取得できない項目は空欄で放置してよい（「未取得」と書き添える必要はない）。**半自動化の設計は完了しており**（[x_metrics_semiauto_design_2026-08-03.md](x_metrics_semiauto_design_2026-08-03.md)）、x-metrics-collectorがX APIから取得を試みたうえで、取得できなかった項目だけ人間に確認を求める形に置き換えられる。ただし24時間後の自動起動機構（スケジューラ/hooks）は未実装のため、実運用は当面「人間または将来のジョブが取得処理を起動する」前提で回す。
+翌日の24時間後実績のみ例外で、人間は**見えている数値のスクリーンショットを1枚渡すだけ**でよい。AIが見えた値だけ記入し、見えない項目は空欄で放置してよい（「未取得」と書き添える必要はない）。**現在はPhase 1の暫定評価フェーズ中であり、これが正式な暫定レーンである**（[provisional_evaluation_phase_2026-08-04.md](provisional_evaluation_phase_2026-08-04.md)）。X API半自動化（x-metrics-collector）は設計・実装済みだが、課金する価値があるかをこの評価フェーズで見極めるまでは正式レーンとして起動しない（コードは`scripts/x_metrics_collector/`に温存）。
 
 ### 5-1. AI側の内部フロー（参考。人間はこの詳細を読む必要はない）
 
@@ -113,8 +113,8 @@
    - **当日中に`approved`が1本も出ない場合**: mode-orchestratorがスキップ案を`daily_brief.md`の「スキップ/持ち越し記録」欄に下書きする。人間は確認するだけでよい（Phase 1では投稿本数より運用安定を優先する）
 6. **logger**: レビュー提出時点で`post_id`を発行し、状態遷移を`ops/logs/post_log.jsonl`に記録。`approved`が確定したら、`daily_brief.md`の「実投稿記録」欄にpost_idの行をあらかじめ用意しておく → **人間がBで承認、Cで投稿、Dで投稿URLのみ記入**
 7. **logger**: 投稿URLの記入を受け、post_id・投稿時刻・投稿者を補って`status: posted`を記録する。投稿されなかった側の案は`archived`への変更をloggerが提案し、人間は追認するだけでよい
-8. **x-metrics-collector**（最小実装あり。[scripts/x_metrics_collector/](../../scripts/x_metrics_collector/)、手動実行）: 投稿URLからtweet_idを解決し、X APIから取得を試みる。取得できた項目は`metrics_24h`（Google Sheets）に記録し、取得できなかった項目・認証未設定等は理由付きで残す
-9. **人間（例外時のみ）**: x-metrics-collectorが取得できなかった数値のみ`daily_brief.md`に記入（空欄＝未取得）
+8. **人間**: 投稿から約24時間後、見えている数値のスクリーンショットを1枚渡す（暫定評価レーン。[provisional_evaluation_phase_2026-08-04.md](provisional_evaluation_phase_2026-08-04.md)のE節参照）
+9. **logger（または対応するAI）**: スクショで見えた値だけ`metrics_24h`に記入し、`data_quality: manual`とする。見えない項目は空欄のままにする（x-metrics-collectorはコードとして温存しているが、課金判断が下りるまで正式レーンとしては起動しない）
 10. **logger → performance-analyst**: 記録されたスナップショットをもとに、前日投稿1件分の簡易振り返りを`daily_brief.md`に追記
 
 将来のGoogle Sheets／DB移行設計は[gsheets_ledger_design_2026-08-03.md](gsheets_ledger_design_2026-08-03.md)を参照（未実装、設計のみ）。

@@ -13,7 +13,7 @@ morning-strategy-council（毎朝の戦略会議）の参加者の1人。前日�
 
 ## 見るもの
 
-- 前日実績（`ops/logs/metrics_snapshots.csv`、`ops/reports/daily_brief.md`。x-metrics-collectorによる半自動取得結果がある場合は`data_quality: ok`/`partial`の行のみを実績として扱う。[x_metrics_semiauto_design_2026-08-03.md](../../ops/reports/x_metrics_semiauto_design_2026-08-03.md)参照）
+- 前日実績（`ops/logs/metrics_snapshots.csv`、`ops/reports/daily_brief.md`）。**現在はPhase 1の暫定評価フェーズ中**であり、`data_quality: manual`（スクショ由来）の行が実績の中心。X API半自動化は課金判断が下りるまで保留中（[provisional_evaluation_phase_2026-08-04.md](../../ops/reports/provisional_evaluation_phase_2026-08-04.md)参照）
 - 今週のスプリント計画（`ops/reports/phase1_acquisition_launch_spec_2026-08-03.md`、Week 2以降は`ops/reports/week2_image_ab_test_plan_2026-08-03.md`）
 - 現在のモード（`ops/state/current_mode.yaml`）
 
@@ -32,6 +32,7 @@ morning-strategy-council（毎朝の戦略会議）の参加者の1人。前日�
 - 個別の投稿案（文面）を作らない・評価しない（→ x-copywriter / pre-post-self-check）
 - 複数の変数を同時に変える提案をしない（比較のノイズになるため、変える変数は1つに絞る）
 - compliance判断・最終承認をしない
+- 指標が`impression_count`など一部しかない日に、テーマ・投稿全体を「失敗」と断定しない。データ欠損時はフック仮説の検証を優先し、confidenceを`low`にする
 
 ## 他担当への引き継ぎ
 
