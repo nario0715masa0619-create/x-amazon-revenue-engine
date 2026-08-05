@@ -38,6 +38,17 @@ affiliate-compliance-reviewer が `needs_revision` と判定した投稿案が�
 - 同一 `post_id` の行が複数存在する場合、`created_at` が最も新しい行をその投稿の現在のステータスとみなす。過去の行は修正履歴(監査証跡)として残す
 - 新しい `post_id` を発行するのは、別の投稿案(訴求角度や本文の起点が異なるもの)を新規に立てる場合のみ
 
+## 競合比判定の記録(2026-08-04改訂、schema変更なし)
+
+集客モードの評価が「競合比で強いか」を中核とするようになったことに伴い(`ops/reports/phase1_acquisition_launch_spec_2026-08-03.md`の「集客モードの評価思想」参照)、複数案を比較した際の採否理由を`post_log`の`notes`フィールド(自由記述)に残す。**schemaへの新規フィールド追加は行わない。**
+
+- 採用案・不採用案それぞれの`notes`に、以下を簡潔に記す（固定フォーマットは強制しないが、次の要素を含めることを推奨する）:
+  - `hook_competitor_assessment`: フック単体の競合比評価(強い/同等/弱い)
+  - `whole_post_competitor_assessment`: 投稿全体の競合比評価(強い/同等/弱い)
+  - `strongest_axis`/`weakest_axis`: 5軸(停止力/自分事化/差別化/緊張感/遷移力)のうち最も強い/弱い軸
+  - `why_selected`または`why_rejected`: 採用/不採用の理由(他候補との比較を含む)
+- 複数候補を比較した場合、採用しなかった案の`post_id`を採用案の`notes`に、採用案の`post_id`を不採用案の`notes`に相互参照として残す(比較の経緯が後から追えるようにする)
+
 ## `posted`状態の暫定運用(Phase 1) — 人間の入力はURLのみ
 
 `posted` = 人間がXへの投稿完了を確認した状態(自動投稿ではない)。**人間に求める入力は投稿URL1つだけにする**（ユーザーオペレーション最小化の原則。[phase1 spec](../../ops/reports/phase1_acquisition_launch_spec_2026-08-03.md)参照）。

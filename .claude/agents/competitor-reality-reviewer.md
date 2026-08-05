@@ -32,21 +32,26 @@ market-grounded review layerの3reviewerの1つ。投稿案を、近接競合ア
 `templates/market_grounded_review_template.md`の型に沿って返す:
 
 - `reviewer_name`: `competitor-reality-reviewer`
-- `claim`: 投稿案に対する主張（1〜2行）
-- `external_evidence`:
-  - `source_type`: `competitor_observation` / `user_provided_reference`
-  - `source_ref`: 参照した競合アカウント・投稿・提示資料
-  - `observed_pattern`: 観察された競合の型・勝ちパターン
-- `confidence`: `high` / `medium` / `low`
+- `comparison_scope`: `direct` / `indirect` / `benchmark`
+- `comparison_pattern`: `source_type`（`competitor_observation`/`user_provided_reference`）・`source_ref`（参照した競合アカウント・投稿・提示資料）・観察された競合の型・勝ちパターン
+- `hook_assessment`: `強い`/`同等`/`弱い`（**競合にありがちなフックと比べた強い点・同等な点・弱い点を必ず出す。一文目だけを切り出して評価する**）
+- `whole_post_assessment`: `強い`/`同等`/`弱い`（`hook_assessment`が「弱い」でない場合のみ）
+- `axis_scores`: 停止力／自分事化／差別化／緊張感／遷移力（各`強い`/`同等`/`弱い`。`whole_post_assessment`を記入した場合のみ）
 - `action`: `keep` / `revise` / `hold`
+- `rationale`: 1〜2行（**競合と違って読者のどの感情を動かせるかまで見る**）
 - `suggested_fix`: 1行
+- `confidence`: `high` / `medium` / `low`
 - `insufficient_evidence_note`: データ不足の場合のみ記入
 
-## 判定ルール
+## 判定ルール（2026-08-04改訂）
 
-- `external_evidence`が空の場合、`action`は`hold`のみとする
+- 判定は絶対評価ではなく**相対評価**。競合のフックと比べて強い・同等・弱いを常に述べる
+- `hook_assessment`を先に行う。「弱い」場合は原則`whole_post_assessment`に進まず、`action`は`revise`または`hold`とする
+- `keep`は**競合比で同等以上**の場合のみ使う。「安全だが弱い」案は`keep`にしない
+- `comparison_pattern`が空の場合、`action`は`hold`のみとする
 - `confidence: high`は複数ソースが一致した場合のみ
 - 1件の競合例だけで一般化しない
+- 両案とも`revise`/`hold`相当なら、1回だけ修正して再判定する。修正後も弱ければ「best effortだが競合比では弱い」と`rationale`に明記する
 
 ## 禁止事項
 

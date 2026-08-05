@@ -13,7 +13,7 @@ market-grounded review layerの3reviewer（[trend-reality-reviewer](trend-realit
 
 ## 見る観点
 
-- 今のXで伸びやすい文頭・展開・長さ・テンポに合っているか
+- 今のXで伸びやすい文頭・展開・長さ・テンポに合っているか（**一文目の勢いを必ず見る**）
 - トレンド実態と比べて地味すぎないか、重すぎないか
 - 直近の流れに対して投稿案が古くさくないか
 
@@ -32,21 +32,26 @@ market-grounded review layerの3reviewer（[trend-reality-reviewer](trend-realit
 `templates/market_grounded_review_template.md`の型に沿って返す:
 
 - `reviewer_name`: `trend-reality-reviewer`
-- `claim`: 投稿案に対する主張（1〜2行）
-- `external_evidence`:
-  - `source_type`: `official_best_practice` / `trend_search` / `user_provided_reference`（このreviewerでは`competitor_observation`は使わない）
-  - `source_ref`: 参照した情報源（URL・検索クエリ・提示資料名）
-  - `observed_pattern`: 観察された型・傾向
-- `confidence`: `high` / `medium` / `low`
+- `comparison_scope`: `direct` / `indirect` / `benchmark`
+- `comparison_pattern`: `source_type`（`official_best_practice`/`trend_search`/`user_provided_reference`。このreviewerでは`competitor_observation`は使わない）・`source_ref`・比較対象に多い型の要約
+- `hook_assessment`: `強い`/`同等`/`弱い`（**一文目だけを切り出して評価。他の観点より先に行う**）
+- `whole_post_assessment`: `強い`/`同等`/`弱い`（`hook_assessment`が「弱い」でない場合のみ）
+- `axis_scores`: 停止力／自分事化／差別化／緊張感／遷移力（各`強い`/`同等`/`弱い`。`whole_post_assessment`を記入した場合のみ）
 - `action`: `keep` / `revise` / `hold`
+- `rationale`: 1〜2行
 - `suggested_fix`: 1行
+- `confidence`: `high` / `medium` / `low`
 - `insufficient_evidence_note`: データ不足の場合のみ記入
 
-## 判定ルール
+## 判定ルール（2026-08-04改訂）
 
-- `external_evidence`が空の場合、`action`は`hold`のみとする
+- 判定は絶対評価ではなく**相対評価**。「今のXで止まりやすい型」と比較して、今回の案が相対的に強いか弱いかを常に述べる
+- `hook_assessment`を先に行う。「弱い」場合は原則`whole_post_assessment`に進まず、`action`は`revise`または`hold`とする
+- `keep`は**競合比で同等以上**の場合のみ使う。「安全だが弱い」案は`keep`にしない
+- `comparison_pattern`が空の場合、`action`は`hold`のみとする
 - `confidence: high`は複数ソースが一致した場合のみ
 - 1件の観察例だけで一般化しない
+- 両案とも`revise`/`hold`相当なら、1回だけ修正して再判定する。修正後も弱ければ「best effortだが競合比では弱い」と`rationale`に明記する
 
 ## 禁止事項
 

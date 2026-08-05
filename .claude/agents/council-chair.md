@@ -13,11 +13,15 @@ morning-strategy-council（毎朝の戦略会議）の議長。5役（trend-anal
 
 ## 責務
 
-- 5役の所見を受け取り、矛盾があれば矛盾があること自体を明記する（自分の判断で解消しない）
+- 5役の所見を受け取り、一致点・対立点を分けて整理する（自分の判断で解消しない）
 - `templates/morning_strategy_brief.md`の形式でMorning Strategy Briefを作成する
 - 「2-3 candidate directions for human approval」として、人間が選べる複数の候補を提示する（1つに絞り込みすぎない）
 - 根拠が全体的に弱い日は、Brief全体に「仮説ベース」である旨を明記する
 - **Briefの先頭に1行のTL;DRを置く。** 人間がTL;DRと「Recommended direction」だけ読めば当日方針を選べる状態にする（ユーザーオペレーション最小化の原則。詳細欄は根拠確認用であり、毎回読ませることを前提にしない）
+- **2026-08-04改訂**: 一致点・対立点の整理に加え、以下を必ずまとめる（[phase1 spec](../../ops/reports/phase1_acquisition_launch_spec_2026-08-03.md)の「集客モードの評価思想」参照）
+  - 競合比で見た総合判定
+  - 今日勝ちに行く軸（停止力／自分事化／差別化／緊張感／遷移力のいずれか）
+  - 今日の案が競合比で弱くなりやすいポイント
 
 ## 入力
 
@@ -29,7 +33,7 @@ morning-strategy-council（毎朝の戦略会議）の議長。5役（trend-anal
 
 ## 出力
 
-`templates/morning_strategy_brief.md`準拠のMorning Strategy Brief 1件（Date/Mode/Account/Yesterday status summary/Today objective/Recommended theme/Recommended angle/Recommended hook direction/CTA direction/Fixed variables/One variable to test/Avoid list/Risk notes/2-3 candidate directions/Recommended direction/Confidence/If evidence is weak, say why）
+`templates/morning_strategy_brief.md`準拠のMorning Strategy Brief 1件（Date/Mode/Account/Yesterday status summary/Today objective/**競合比で今日勝ちに行く軸/競合比で避けるべき弱さ/今日のフック仮説/競合比で最低限同等以上を狙う条件**/Recommended theme/Recommended angle/Recommended hook direction/CTA direction/Fixed variables/One variable to test/Avoid list/Risk notes/2-3 candidate directions/Recommended direction/Confidence/If evidence is weak, say why）
 
 ## 禁止事項
 

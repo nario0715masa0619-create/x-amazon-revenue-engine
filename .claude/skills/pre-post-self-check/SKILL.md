@@ -34,7 +34,7 @@ description: x-copywriterが投稿案をaffiliate-compliance-reviewerに提出�
 
 ### 2. audience_fit_40s(ターゲット適合性) ※アカウント設計依存、mode非依存
 
-- 40代向けの落ち着きがあるか
+- 40代男性向けの落ち着きがあるか
 - 清潔感/上質感/実用性/無理のなさを壊していないか
 - 若作り訴求や若年層ノリになっていないか
 - 別のアカウント設計に切り替える場合、この観点はそのアカウント設計の重視する価値観に置き換える(観点名・判定基準はアカウント設計に依存し、mode切り替えとは別軸で管理する)
@@ -60,20 +60,38 @@ description: x-copywriterが投稿案をaffiliate-compliance-reviewerに提出�
 - 不自然に強い緊急性
 - アカウント設計からの逸脱
 
+### 6. hook_vs_competitors(競合比でのフック強度) ※2026-08-04追加。集客モードで重視
+
+- 一文目だけを切り出して、競合（直接／間接／準ベンチマーク）と比べて強い／同等／弱いか
+- 「一文目だけ見て続きを読みたくなるか」を強く見る
+- `market-grounded review layer`の`hook_assessment`と矛盾する場合は、その旨を明記する（自分の判断で上書きしない）
+
+### 7. differentiation_vs_competitors(競合比での差別化) ※2026-08-04追加。集客モードで重視
+
+- よくある整理論・身だしなみ論・生活感論に埋もれていないか
+- 競合と比べて差別化できているポイントがあるか
+
+### 8. profile_visit_reason_strength(プロフィール遷移理由の強さ) ※2026-08-04追加。集客モードで重視
+
+- プロフィールへ飛ぶ理由が自然に生まれているか
+- CTAの文言だけでなく、フック〜本文の流れ全体としてプロフィールへの興味を作れているか
+
 ## 判定
 
 `go` / `revise` / `stop`
 
-- `go`: 主要観点に問題なし。このままaffiliate-compliance-reviewerへ提出してよい
-- `revise`: 公開は可能だがフックやトーンの修正余地がある
+- `go`: 主要観点に問題なし。**かつ`hook_vs_competitors`/`differentiation_vs_competitors`が「弱い」ではない**。このままaffiliate-compliance-reviewerへ提出してよい
+- `revise`: 公開は可能だがフックやトーンの修正余地がある。**「安全だが弱い（weak but safe）」案、つまり誇大表現等はないが競合比で弱い案は`go`にせず`revise`とする**
 - `stop`: アカウント設計を壊す、または危険表現がある。構成から見直す
+
+**2026-08-04改訂**: 集客モードでは「破綻していないか」だけでなく「競合比で強いか」を判定に含める（[phase1 spec](../../../ops/reports/phase1_acquisition_launch_spec_2026-08-03.md)の「集客モードの評価思想」参照）。危険表現がなく無難にまとまっているだけの案（weak but safe）を安易に`go`にしない。
 
 ## 出力形式
 
 毎回、以下の形式で返す:
 
 - 総合判定(`go`/`revise`/`stop`)
-- 5観点の短評(各1〜2行)
+- 8観点の短評(各1〜2行)
 - 強み
 - 弱み
 - 危険表現の有無
@@ -89,8 +107,9 @@ description: x-copywriterが投稿案をaffiliate-compliance-reviewerに提出�
 
 ## チェックポイント
 
-- [ ] 5観点すべてに短評が付いているか
+- [ ] 8観点すべてに短評が付いているか
 - [ ] `revise`判定なのに修正版が付いていないケースがないか
+- [ ] 危険表現がないだけで「安全だが弱い」案を`go`にしていないか
 - [ ] self-check通過を理由にaffiliate-compliance-reviewerへの提出を省略していないか
 - [ ] 同一案への再提案が2回目に達していないか(ループ防止)
 
@@ -100,3 +119,4 @@ description: x-copywriterが投稿案をaffiliate-compliance-reviewerに提出�
 - `revise`の修正を繰り返し行い、reviewerに渡すタイミングを逃す(1回修正ルールを破る)
 - `audience_fit_40s`の観点を、別のアカウント設計に流用する際に観点名だけ変えて中身(判定基準)を使い回してしまう
 - 「バズるかどうか」を断定的に評価してしまう(このskillは相対評価に留める設計)
+- 誇大表現や危険表現がないことだけを根拠に`go`にしてしまい、競合比で埋もれている（weak but safe）ことを見落とす
