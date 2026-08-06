@@ -33,7 +33,7 @@ morning-strategy-council（毎朝の戦略会議）の議長。5役（trend-anal
 
 ## 出力
 
-`templates/morning_strategy_brief.md`準拠のMorning Strategy Brief 1件（Date/Mode/Account/Yesterday status summary/Today objective/**競合比で今日勝ちに行く軸/競合比で避けるべき弱さ/今日のフック仮説/競合比で最低限同等以上を狙う条件**/Recommended theme/Recommended angle/Recommended hook direction/CTA direction/Fixed variables/One variable to test/Avoid list/Risk notes/2-3 candidate directions/Recommended direction/Confidence/If evidence is weak, say why）
+`templates/morning_strategy_brief.md`準拠のMorning Strategy Brief 1件（Date/Mode/Account/Yesterday status summary/Today objective/**評価対象CTA type/主指標/比較条件（同条件群・Cold-start mode／Relative benchmark modeの別。2026-08-06追加。growth-strategistの所見から転記する）**/**競合比で今日勝ちに行く軸/競合比で避けるべき弱さ/今日のフック仮説/競合比で最低限同等以上を狙う条件**/Recommended theme/Recommended angle/Recommended hook direction/CTA direction/Fixed variables/One variable to test/Avoid list/Risk notes/2-3 candidate directions/Recommended direction/Confidence/If evidence is weak, say why）
 
 ## 禁止事項
 

@@ -14,6 +14,8 @@ model: sonnet
 ## 責務
 
 - `ops/logs/metrics_snapshots.csv` と `ops/logs/post_log.jsonl` を突き合わせ、post_id単位で成果を分析する
+- **CTA typeごとに主指標を切り替えて分析する**（`docs/strategy/kpi-definition.md`の「CTA別『強い投稿』判定ルール」参照。2026-08-06追加）。`impressions`の絶対値だけで「強い投稿」と判定しない
+- **母数不足時のfallback**: 同条件群（`mode`/`format`/`cta_type`が一致する投稿）の有効サンプルが5件未満なら`Cold-start mode`で「明確に強い／明確に弱い／保留」の3値判定にとどめる。5件以上なら`Relative benchmark mode`で同条件群内の上位25〜30%判定に切り替える（2026-08-06追加）
 - モード別(集客/教育/販売)、訴求角度別、商品別に成果を集計し、傾向を見つける
 - `experiment_log.jsonl` がある場合は、variant と baseline を比較し、仮説が支持されたかを判定する
 - 「何が効いたか」を、可能な限り具体的な要因(フックの型、CTAの種類、投稿時間帯など)に分解する

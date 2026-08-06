@@ -57,12 +57,23 @@
   - 強い: 本文の終わり方に未解決の興味・続きを示唆する要素があり、CTA文言だけに遷移理由を頼っていない
   - 弱い: CTA文言（「プロフィールへ」等）だけが遷移理由で、本文内容自体には続きを見たくなる要素がない
 
+## cta_fit_assessment（2026-08-06追加。`whole_post_assessment`を記入した案のみ）
+
+「なんとなく強いか」ではなく、投稿案の`cta_type`（`docs/strategy/kpi-definition.md`の「CTA別『強い投稿』判定ルール」参照）に対応する主指標を実際に取りに行ける構造か、を判定する。
+
+- 対象`cta_type`: `profile_visit` / `reply_prompt` / `link_click` / `save` / `reach`のいずれか
+- 判定: `強い` / `同等` / `弱い`
+  - 強い: この`cta_type`の主指標につながる導線（例: `profile_visit`なら「プロフィールを見たくなる未解決の興味」）が本文に具体的に存在し、既存のbenchmark candidate（あれば）より劣化していない
+  - 弱い: CTA文言だけに導線を頼っている、または主指標につながる構造が本文にない
+- `insufficient_evidence_note`: benchmark candidateが存在しない（Cold-start mode中）場合はその旨を明記する
+
 ## action
 
 `keep` / `revise` / `hold`
 
 - `keep`は**競合比で同等以上**の場合のみ使う。「安全だが弱い（weak but safe）」案は`keep`にしない
 - `hook_assessment`が「弱い」の場合、原則`action`は`revise`または`hold`とする
+- **`cta_fit_assessment`が「弱い」の場合も`keep`にしない（`revise`または`hold`とする）。競合比の5軸が強くても、CTA typeの主指標につながる構造がなければ「強い投稿」ではない**（2026-08-06追加）
 - `comparison_pattern`（外部根拠）が空の場合、`action`は`hold`のみとする
 - 両案とも`revise`／`hold`相当なら、1回だけ修正して再判定する。修正後も弱ければ「best effortだが競合比では弱い」と`rationale`に明記する
 

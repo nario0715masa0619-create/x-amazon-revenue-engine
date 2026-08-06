@@ -39,6 +39,7 @@ market-grounded review layerの3reviewerの1つ。投稿案が「40代ファッ�
 - `hook_assessment`: `強い`/`同等`/`弱い`（一文目だけを切り出して評価。**「刺さらない理由」を遠慮なく出す**）
 - `whole_post_assessment`: `強い`/`同等`/`弱い`（`hook_assessment`が「弱い」でない場合のみ）
 - `axis_scores`: 停止力／自分事化／差別化／緊張感／遷移力（各`強い`/`同等`/`弱い`。`whole_post_assessment`を記入した場合のみ）
+- `cta_fit_assessment`: `強い`/`同等`/`弱い`（この投稿案の`cta_type`が主指標につながる構造か。2026-08-06追加。`docs/strategy/kpi-definition.md`のCTA別判定ルール参照）
 - `action`: `keep` / `revise` / `hold`
 - `rationale`: 1〜2行
 - `suggested_fix`: 1行
@@ -50,6 +51,7 @@ market-grounded review layerの3reviewerの1つ。投稿案が「40代ファッ�
 - 判定は絶対評価ではなく**相対評価**。市場実態と比べて強い・同等・弱いを常に述べる
 - `hook_assessment`を先に行う。「弱い」場合は原則`whole_post_assessment`に進まず、`action`は`revise`または`hold`とする
 - `keep`は**競合比で同等以上**の場合のみ使う。「安全だが弱い」案は`keep`にしない
+- **`cta_fit_assessment`が「弱い」の場合も`keep`にしない**（2026-08-06追加）
 - `comparison_pattern`が空の場合、`action`は`hold`のみとする
 - **`WebSearch`/`WebFetch`を実行していない（かつユーザー提示の参考URL・スクショもない）場合、`action`は`hold`固定とする。`comparison_pattern`が文章として埋まっていても、実際の検索・取得を経ていなければ「空」と同じ扱いとする**（2026-08-06追加。空欄チェックだけでは推測による捏造を防げないため）
 - `confidence: high`は複数ソースが一致した場合のみ
