@@ -156,7 +156,7 @@
 以下3点は、最小運用ルールを定義することで解決済み（詳細は5節の日次フローと`ops/reports/daily_brief.md`を参照）。
 
 - **`posted`状態の暫定運用**: `posted` = 人間がXへの投稿完了を確認した状態と定義し、投稿URL・投稿時刻・投稿者は`daily_brief.md`の「実投稿記録」欄に記録する運用とした（[.claude/agents/logger.md](../../.claude/agents/logger.md)参照）
-- **24時間後実績の手動取得手順**: 最小取得項目（`impressions`/`likes`/`replies`/`profile_visits`/フォロワー純増数）を定義し、記録先（`metrics_snapshots.csv`が正、`daily_brief.md`が入力窓口）を分離した
+- **24時間後実績の手動取得手順**: 最小取得項目（`impressions`/`likes`/`replies`/`profile_visits`/フォロワー純増数）を定義した。当初は記録先を「`metrics_snapshots.csv`が正、`daily_brief.md`が入力窓口」と分離する想定だったが、`data_quality`/`notes`を伴う実績は`metrics_snapshots.csv`のschemaでは保持できないことが判明したため、**2026-08-06修正: `daily_brief.md`の「24時間後実績記録」表が`data_quality`/`notes`付き記録の実質的な正となる**（`metrics_snapshots.csv`はschema準拠の数値のみを保持する）
 - **needs_revisionが当日中に解消しない場合のフォールバック**: 当日スキップ可、スキップ理由と翌日の扱いを`daily_brief.md`に記録する運用とした
 - **（2026-08-03追加ラウンド）ユーザーオペレーション最小化**: 上記3点をさらに簡略化した。投稿記録は投稿URLの1入力のみ（post_id・投稿時刻・投稿者はloggerが補完）、24時間後実績は空欄＝未取得としこれまで求めていた「未取得」の注記自体を不要にし、スキップ記録はmode-orchestratorが下書きして人間は確認のみにした。詳細は[5.](#5-最小オペレーション標準フロー)参照
 

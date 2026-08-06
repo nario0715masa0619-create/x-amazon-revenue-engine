@@ -121,7 +121,7 @@ X管理画面のUI上に表示される「プロフィール訪問数（profile 
 4. 24時間後実行ジョブの登録（下記「実装オプション」参照。Phase 1では人間トリガーが現実的）
 5. X API認証（User Context前提）の必要条件確認（未設定なら`auth_missing`で処理を打ち切る）
 6. メトリクスAPI呼び出し（`public_metrics`は常に試行、`non_public_metrics`/`organic_metrics`は認証がある場合のみ）
-7. 正規化して`metrics_24h`（または`ops/logs/metrics_snapshots.csv`）に保存
+7. 正規化して`metrics_24h`（Google Sheets移行後）または`ops/reports/daily_brief.md`の「24時間後実績記録」表（現在の暫定評価フェーズ）に保存する。**`ops/logs/metrics_snapshots.csv`は`data_quality`/`notes`を保持できない（2026-08-06修正）ため、この用途では使わない**
 8. 失敗時は`data_quality`/`notes`に反映（E節参照）
 9. 翌朝Brief用の要約データとして`performance-analyst`→`growth-strategist`/`council-chair`に引き継ぐ
 
@@ -140,7 +140,8 @@ def fetch_metrics(tweet_id: str, user_context_token: str | None) -> dict:
     ...
 
 def normalize_and_write(post_id: str, metrics: dict, quality: str, notes: str) -> None:
-    # metrics_24h シート（または metrics_snapshots.csv）に1行追記
+    # metrics_24h シート（または daily_brief.md の「24時間後実績記録」表）に1行追記
+    # metrics_snapshots.csv は data_quality/notes を持たないため対象外（2026-08-06修正）
     ...
 ```
 
