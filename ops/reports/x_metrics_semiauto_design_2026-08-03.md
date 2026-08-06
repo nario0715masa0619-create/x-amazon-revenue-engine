@@ -108,7 +108,7 @@ X管理画面のUI上に表示される「プロフィール訪問数（profile 
 
 ## Morning Strategy Councilでの参照方法（技術論点9）
 
-- `growth-strategist`が「前日実績」を見る際、参照先を`ops/logs/metrics_snapshots.csv`（またはGoogle Sheets移行後は`metrics_24h`シート）とし、`data_quality`が`ok`/`partial`の行のみを実績として扱う（`auth_missing`/`api_error`の行は「未取得」として扱い、確定した傾向として使わない）
+- `growth-strategist`が「前日実績」を見る際、`data_quality`は`ops/logs/metrics_snapshots.csv`には存在しない（`schemas/metrics_snapshot.schema.json`にフィールドがなく、2026-08-06に判明・修正した記録先バグ）。参照先は`ops/reports/daily_brief.md`の「24時間後実績記録」表（暫定評価フェーズ中の実質的な記録先）、またはGoogle Sheets移行後は`metrics_24h`シートとし、`data_quality`が`ok`/`partial`/`manual`の行のみを実績として扱う（`auth_missing`/`api_error`の行は「未取得」として扱い、確定した傾向として使わない）
 - `council-chair`はMorning Strategy Briefの「Yesterday status summary」に、取得できたメトリクスと`profile_visit_rate`近似値を反映する。取得が`partial`だった場合はTL;DRに「一部データ未取得」と明記する
 
 ---

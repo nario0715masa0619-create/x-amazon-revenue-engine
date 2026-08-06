@@ -29,11 +29,13 @@ YYYY-MM-DD
 
 ## 24時間後実績記録（投稿翌日。**現在は暫定評価フェーズ中のスクショ運用**）
 
-**現在はPhase 1の暫定評価フェーズ中。** X API半自動化（x-metrics-collector）はコードとして温存しているが、課金判断が下りるまで正式レーンとして起動しない（詳細: [provisional_evaluation_phase_2026-08-04.md](provisional_evaluation_phase_2026-08-04.md)）。人間は見えている数値のスクリーンショットを1枚渡すだけでよく、AIが見えた値だけ`metrics_24h`に記入する。**空欄＝未取得**（「未取得」と書き添える必要はない）。最小5項目: `impressions` / `likes` / `replies` / `profile_visits` / フォロワー純増数（参考）。`data_quality`は`manual`とし、`notes`に「スクショ確認ベース」と見えた範囲を残す。`link_clicks`等リンク関連はAIが常に`0`で補う（集客モードはリンクを使わないため実測ゼロ）。
+**現在はPhase 1の暫定評価フェーズ中。** X API半自動化（x-metrics-collector）はコードとして温存しているが、課金判断が下りるまで正式レーンとして起動しない（詳細: [provisional_evaluation_phase_2026-08-04.md](provisional_evaluation_phase_2026-08-04.md)）。人間は見えている数値のスクリーンショットを1枚渡すだけでよく、AIが見えた値だけこの表に記入する。**空欄＝未取得**（「未取得」と書き添える必要はない）。最小5項目: `impressions` / `likes` / `replies` / `profile_visits` / フォロワー純増数（参考）。`data_quality`は`manual`とし、`notes`に「スクショ確認ベース」と見えた範囲を残す。`link_clicks`等リンク関連はAIが常に`0`で補う（集客モードはリンクを使わないため実測ゼロ）。
 
-| post_id | impressions（人間） | likes（人間） | replies（人間） | profile_visits（人間） | フォロワー純増数・参考（人間） |
-|---|---|---|---|---|---|
-| （AI事前記入） | | | | | |
+**2026-08-06修正（記録先バグ）**: `data_quality`/`notes`は`ops/logs/metrics_snapshots.csv`（`schemas/metrics_snapshot.schema.json`準拠）には存在しないフィールドであり、書き込めない（`additionalProperties: false`）。**この表（`daily_brief.md`）を`data_quality`/`notes`付きの実績記録として使う。** `metrics_snapshots.csv`は引き続きschema準拠の数値のみのスナップショット（`data_quality`なし）として、完全なAPIデータが揃った場合の記録用に温存する。将来Google Sheets `metrics_24h`シートへ移行する場合は、そちらが正本になる（[gsheets_ledger_design_2026-08-03.md](gsheets_ledger_design_2026-08-03.md)参照）。
+
+| post_id | impressions（人間） | likes（人間） | replies（人間） | profile_visits（人間） | フォロワー純増数・参考（人間） | data_quality（AI） | notes（AI） |
+|---|---|---|---|---|---|---|---|
+| （AI事前記入） | | | | | | | |
 
 ## 投稿案の競合比較記録（複数候補から1本を選んだ場合のみ。AI記入）
 

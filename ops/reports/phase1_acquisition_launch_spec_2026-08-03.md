@@ -79,7 +79,7 @@
 
 | 区分 | 指標 | 定義 | 備考 |
 |---|---|---|---|
-| 主KPI | `impressions` | 表示回数 | `ops/logs/metrics_snapshots.csv` |
+| 主KPI | `impressions` | 表示回数 | `ops/logs/metrics_snapshots.csv`（schema準拠の数値のみ）または`ops/reports/daily_brief.md`の「24時間後実績記録」表（`data_quality`/`notes`付き、暫定評価フェーズ中はこちらが実質の記録先。2026-08-06修正: `metrics_snapshot.schema.json`に`data_quality`/`notes`フィールドは存在しないため） |
 | 主KPI | `profile_visit_rate` | `profile_visits / impressions` | [kpi-definition.md](../../docs/strategy/kpi-definition.md)の定義に準拠 |
 | 副KPI | `follow_rate` | `フォロー数 / profile_visits` | Phase 1ではアカウント全体のフォロワー純増数を参考値として`daily_brief.md`に記録する（投稿起因かどうかの厳密な切り分けは行わない）。`metrics_snapshot.schema.json`にフォロー数を格納するフィールドがないため、`follow_rate`の厳密な算出は次フェーズのschema拡張後に持ち越す |
 
@@ -130,7 +130,7 @@
 6. **logger**: レビュー提出時点で`post_id`を発行し、状態遷移を`ops/logs/post_log.jsonl`に記録。`approved`が確定したら、`daily_brief.md`の「実投稿記録」欄にpost_idの行をあらかじめ用意しておく → **人間がBで承認、Cで投稿、Dで投稿URLのみ記入**
 7. **logger**: 投稿URLの記入を受け、post_id・投稿時刻・投稿者を補って`status: posted`を記録する。投稿されなかった側の案は`archived`への変更をloggerが提案し、人間は追認するだけでよい
 8. **人間**: 投稿から約24時間後、見えている数値のスクリーンショットを1枚渡す（暫定評価レーン。[provisional_evaluation_phase_2026-08-04.md](provisional_evaluation_phase_2026-08-04.md)のE節参照）
-9. **logger（または対応するAI）**: スクショで見えた値だけ`metrics_24h`に記入し、`data_quality: manual`とする。見えない項目は空欄のままにする（x-metrics-collectorはコードとして温存しているが、課金判断が下りるまで正式レーンとしては起動しない）
+9. **logger（または対応するAI）**: スクショで見えた値だけ`ops/reports/daily_brief.md`の「24時間後実績記録」表に記入し、`data_quality: manual`とする（2026-08-06修正: `metrics_24h`はGoogle Sheets移行後の正本名称であり、現在の暫定評価フェーズでは`daily_brief.md`が実際の記録先）。見えない項目は空欄のままにする（x-metrics-collectorはコードとして温存しているが、課金判断が下りるまで正式レーンとしては起動しない）
 10. **logger → performance-analyst**: 記録されたスナップショットをもとに、前日投稿1件分の簡易振り返りを`daily_brief.md`に追記
 
 将来のGoogle Sheets／DB移行設計は[gsheets_ledger_design_2026-08-03.md](gsheets_ledger_design_2026-08-03.md)を参照（未実装、設計のみ）。

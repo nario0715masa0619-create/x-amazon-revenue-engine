@@ -12,7 +12,7 @@
 - Date:
 - Mode:
 - Account:
-- Yesterday status summary:（`metrics_24h`/`metrics_snapshots.csv`から生成。現在は`data_quality: manual`（スクショ由来の暫定評価レーン）が中心。将来API有効化時は`ok`/`partial`行も対象になる。`profile_visit_rate`は`user_profile_clicks`ベースの近似値である旨を踏まえて記述する。データが不完全な場合は下記「不完全データの扱い」に従う）
+- Yesterday status summary:（`ops/reports/daily_brief.md`の「24時間後実績記録」表から生成。現在は`data_quality: manual`（スクショ由来の暫定評価レーン）が中心。**`data_quality`は`ops/logs/metrics_snapshots.csv`には存在しない（2026-08-06修正。schema準拠の数値のみを持つ別ファイル）**。将来Google Sheets `metrics_24h`シート移行後はそちらが正本になり、`ok`/`partial`行も対象になる。`profile_visit_rate`は`user_profile_clicks`ベースの近似値である旨を踏まえて記述する。データが不完全な場合は下記「不完全データの扱い」に従う）
 - Today objective:
 - **競合比で今日勝ちに行く軸**:（停止力／自分事化／差別化／緊張感／遷移力のいずれか。詳細は`ops/reports/phase1_acquisition_launch_spec_2026-08-03.md`の「集客モードの評価思想」参照）
 - **競合比で避けるべき弱さ**:（例: 抽象論、ありふれた整理論、説明から入る導入）

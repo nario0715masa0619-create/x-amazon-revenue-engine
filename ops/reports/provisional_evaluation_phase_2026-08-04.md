@@ -71,14 +71,16 @@
 
 ## E. オペレーター向けの暫定ルール（スクショ運用）
 
+**2026-08-06修正（記録先バグ）**: 以下の`data_quality`/`notes`は`ops/logs/metrics_snapshots.csv`（`schemas/metrics_snapshot.schema.json`準拠）には記録できない（同スキーマにこれらのフィールドが存在せず、`additionalProperties: false`のため）。**`ops/reports/daily_brief.md`の「24時間後実績記録」表（`data_quality`/`notes`列を2026-08-06に追加済み）に記録する。** Google Sheetsの`metrics_24h`シートが将来正本になった場合はそちらに移行する。
+
 - 見えている数値だけ記入する（推測・補完・0埋めをしない）
 - 見えない値は空欄のままにする
-- 例: impressionしか見えなければ`impression_count`のみ記入し、他は空欄のまま
+- 例: impressionしか見えなければ`impressions`のみ記入し、他は空欄のまま
 - `data_quality`は**`manual`**を設定する
   - `partial`ではなく`manual`を使う理由: `partial`はX API collectorが「publicのみ自動取得できた」場合の値として既に予約されている（[x-metrics-collector.md](../../.claude/agents/x-metrics-collector.md)参照）。スクショ由来の行を`manual`にしておくことで、将来collectorを有効化した際にこの評価期間中の行を誤って上書きさせない（collectorは`data_quality: manual`の行を上書きしない設計に既になっている）
   - 見えた範囲が多い・少ないの違いは`data_quality`ではなく`notes`と「どの列が埋まっているか」で表現する
 - `notes`に「スクショ確認ベース」である旨と、見えた範囲（例: 「impressionのみ視認」）を残す
-- `checked_at`はスクショを確認した日時、`check_window`は`24h`のまま
+- `checked_at`はスクショを確認した日時、`check_window`は`24h`のまま（`daily_brief.md`の表には`checked_at`/`check_window`列は設けていないため、必要なら`notes`列に併記する）
 
 ---
 

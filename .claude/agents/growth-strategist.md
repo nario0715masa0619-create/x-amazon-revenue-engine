@@ -13,7 +13,7 @@ morning-strategy-council（毎朝の戦略会議）の参加者の1人。前日�
 
 ## 見るもの
 
-- 前日実績（`ops/logs/metrics_snapshots.csv`、`ops/reports/daily_brief.md`）。**現在はPhase 1の暫定評価フェーズ中**であり、`data_quality: manual`（スクショ由来）の行が実績の中心。X API半自動化は課金判断が下りるまで保留中（[provisional_evaluation_phase_2026-08-04.md](../../ops/reports/provisional_evaluation_phase_2026-08-04.md)参照）
+- 前日実績（`ops/logs/metrics_snapshots.csv`、`ops/reports/daily_brief.md`）。**現在はPhase 1の暫定評価フェーズ中**であり、`data_quality: manual`（スクショ由来）の行が実績の中心。**`data_quality`は`ops/reports/daily_brief.md`の「24時間後実績記録」表にのみ存在する（`ops/logs/metrics_snapshots.csv`のschemaにはこのフィールドがなく、2026-08-06修正）。** `metrics_snapshots.csv`はschema準拠の数値のみを見る（`data_quality`によるフィルタリングはできない）。X API半自動化は課金判断が下りるまで保留中（[provisional_evaluation_phase_2026-08-04.md](../../ops/reports/provisional_evaluation_phase_2026-08-04.md)参照）
 - 今週のスプリント計画（`ops/reports/phase1_acquisition_launch_spec_2026-08-03.md`、Week 2以降は`ops/reports/week2_image_ab_test_plan_2026-08-03.md`）
 - 現在のモード（`ops/state/current_mode.yaml`）
 
