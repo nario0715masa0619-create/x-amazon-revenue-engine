@@ -35,6 +35,14 @@ YYYY-MM-DD
 |---|---|---|---|---|---|
 | （AI事前記入） | | | | | |
 
+## 投稿案の競合比較記録（複数候補から1本を選んだ場合のみ。AI記入）
+
+**2026-08-06追加**: `post_log.schema.json`に`notes`フィールドが存在しないため（2026-08-06の機能監査で判明）、複数候補を比較した際の競合比判定・採否理由はここに記録する（schema変更なし。`posted_url`等と同じく、schemaに格納場所がない情報を扱う欄）。詳細は[.claude/agents/logger.md](../../.claude/agents/logger.md)の「競合比判定の記録」参照。
+
+| 対象日 | 採用post_id | 不採用post_id | hook_competitor_assessment（採用案） | whole_post_competitor_assessment（採用案） | strongest_axis | weakest_axis | why_selected | why_rejected（不採用案） |
+|---|---|---|---|---|---|---|---|---|
+| | | | | | | | | |
+
 ## スキップ/持ち越し記録（AIが下書き、人間は確認のみ）
 
 当日中に`approved`が出ない場合、mode-orchestratorが状況・理由・翌日の扱い案を自動で下書きする。人間はそれを確認し、必要なら1点だけ修正すればよい（ゼロから書かない）。

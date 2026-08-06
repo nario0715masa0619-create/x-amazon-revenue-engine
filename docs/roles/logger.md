@@ -19,9 +19,9 @@
 
 `needs_revision` となった投稿案が修正・再提出される場合、新しい `post_id` は発行しない。同一 `post_id` のまま、修正後の内容を新しい行として追記する（既存行は上書きしない）。同一 `post_id` に複数行がある場合、最新の `created_at` を持つ行が現在のステータスを表し、過去の行は修正履歴として残る。詳細は [.claude/agents/logger.md](../../.claude/agents/logger.md) を参照。
 
-## 競合比判定の記録（2026-08-04改訂、schema変更なし）
+## 競合比判定の記録（2026-08-06修正: 記録先バグを修正。schema変更なし）
 
-集客モードの評価が「競合比で強いか」を中核とするようになったことに伴い、複数案を比較した際の採否理由を`post_log`の`notes`フィールド（自由記述）に残す（フック/投稿全体の競合比評価、最強・最弱軸、採用/不採用理由、他候補との相互参照）。schemaへの新規フィールド追加は行わない。詳細は [.claude/agents/logger.md](../../.claude/agents/logger.md) を参照。
+集客モードの評価が「競合比で強いか」を中核とするようになったことに伴い、複数案を比較した際の採否理由を記録する。**`post_log.schema.json`に`notes`フィールドは存在しない（2026-08-06の機能監査で判明。`additionalProperties: false`のため実行不可能だった）ため、`post_log`には書かない。** 代わりに`ops/reports/daily_brief.md`の「投稿案の競合比較記録」欄に、フック/投稿全体の競合比評価、最強・最弱軸、採用/不採用理由、他候補との相互参照を記録する（`posted_url`等と同じく、schemaに格納場所がない情報を`daily_brief.md`で扱う既存パターンを踏襲）。詳細は [.claude/agents/logger.md](../../.claude/agents/logger.md) を参照。
 
 ## `posted`状態の暫定運用（Phase 1） — 人間の入力はURLのみ
 

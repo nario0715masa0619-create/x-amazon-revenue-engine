@@ -64,6 +64,7 @@ description: 毎朝、投稿文を作る前に「今日何を狙うか」を決�
 - x-researcher／growth-marketer／x-copywriterは、採択された方針に沿って動く。勝手に別テーマへ逸れない
 - **この方針はその日限りの条件であり、`docs/playbooks/`や`.claude/skills/*-playbook/SKILL.md`等の恒久ルールを書き換えるものではない**
 - 投稿文そのもののレビュー（market-grounded review layer、pre-post-self-check、affiliate-compliance-reviewer）はexecution layer側で別途行う。朝会はその代替ではない
+- **2026-08-06追加（自己追認バイアスの防止）**: 採択された方針（「今日勝ちに行く軸」「今日のフック仮説」「Recommended direction」等）は**x-copywriterの執筆材料としてのみ**引き継ぐ。**`market-grounded review layer`（trend-reality-reviewer/competitor-reality-reviewer/audience-market-fit-reviewer）には渡さない。** 朝会が立てた仮説をreview layerがそのまま追認してしまう構造（2026-08-06の機能監査で実際に確認された不具合）を避けるため、reviewerには投稿案本文とテーマ／ターゲット／CTA等の客観条件のみを渡し、「どの仮説で書かれたか」は伝えない
 
 ## チェックポイント
 
@@ -73,6 +74,7 @@ description: 毎朝、投稿文を作る前に「今日何を狙うか」を決�
 - [ ] Briefに人間が選べる候補が2〜3個提示されているか
 - [ ] 採択された方針が「その日限り」であり、playbook等の恒久ルールと混同されていないか
 - [ ] 「競合比で今日勝ちに行く軸」「競合比で避けるべき弱さ」がBriefに明記されているか
+- [ ] 採択された仮説・推奨方向が、x-copywriterにのみ引き継がれ、market-grounded review layerには渡っていないか（2026-08-06追加。自己追認バイアス防止）
 
 ## 失敗例
 
@@ -80,3 +82,4 @@ description: 毎朝、投稿文を作る前に「今日何を狙うか」を決�
 - council-chairが独自の新しい意見を追加してしまう（要約役に徹していない）
 - 朝会の結論を「投稿文の最終承認」であるかのように扱い、affiliate-compliance-reviewerを省略してしまう
 - 採択された当日方針を、翌日以降も自動的に引き継いでしまう（本来は日次でリセットされるべき）
+- 朝会が示した仮説・推奨方向をmarket-grounded review layerにそのまま渡してしまい、reviewerが独立した検証ではなく仮説の追認になってしまう（2026-08-06追加。過去に実際に発生した不具合）
