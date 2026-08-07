@@ -67,6 +67,23 @@
   - 弱い: CTA文言だけに導線を頼っている、または主指標につながる構造が本文にない
 - `insufficient_evidence_note`: benchmark candidateが存在しない（Cold-start mode中）場合はその旨を明記する
 
+## transfer_fidelity（2026-08-07追加。価値カードを使った案のみ。Phase A試験運用）
+
+投稿案が「勝ち投稿の価値カード」をどれだけ忠実に引き継いでいるかを判定する。`axis_scores`が**投稿単体の強さ**を測るのに対し、`transfer_fidelity`は**なぜその強さが生まれるはずだったメカニズムが実際に保持されているか**を、元の価値カード（[ops/reports/value_transfer_design_2026-08-07.md](../ops/reports/value_transfer_design_2026-08-07.md)参照）の5項目と1対1で照合して判定する。価値カードを使わない案（従来通りのフリー生成）では記入不要。
+
+- `value_card_id`: 参照した価値カード（例: `vc-p-20260807-002`）
+- 5項目それぞれについて`保持` / `弱化` / `毀損`のいずれかを判定する:
+  - `stopping_reason`
+  - `self_relevance_trigger`
+  - `emotional_trigger`
+  - `promised_utility`
+  - `cta_bridge_reason`
+  - 保持: メカニズムが変わらず引き継がれている
+  - 弱化: メカニズムは残っているが効きが鈍っている（例: 出来事の提示が曖昧になった）
+  - 毀損: メカニズム自体が別のものに置き換わった、または失われた
+- 判定基準: **可変要素（具体物・場所・語り口等）が変わったこと自体は毀損ではない。** 不変要素（5項目のメカニズム）が変わっていれば毀損とする
+- 1項目でも`毀損`があれば、`axis_scores`の結果によらず`action`は`revise`とする（「表層は変わったが強い（axis_scores）」と「価値カードが正しく転写された」は別軸であるため、両方を満たして初めて`keep`とする）
+
 ## action
 
 `keep` / `revise` / `hold`
@@ -74,6 +91,7 @@
 - `keep`は**競合比で同等以上**の場合のみ使う。「安全だが弱い（weak but safe）」案は`keep`にしない
 - `hook_assessment`が「弱い」の場合、原則`action`は`revise`または`hold`とする
 - **`cta_fit_assessment`が「弱い」の場合も`keep`にしない（`revise`または`hold`とする）。競合比の5軸が強くても、CTA typeの主指標につながる構造がなければ「強い投稿」ではない**（2026-08-06追加）
+- **価値カードを使った案で、`transfer_fidelity`に`毀損`が1項目でもあれば`keep`にしない**（2026-08-07追加。詳細は上記`transfer_fidelity`節）
 - `comparison_pattern`（外部根拠）が空の場合、`action`は`hold`のみとする
 - 両案とも`revise`／`hold`相当なら、1回だけ修正して再判定する。修正後も弱ければ「best effortだが競合比では弱い」と`rationale`に明記する
 
