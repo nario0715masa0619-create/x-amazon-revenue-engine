@@ -10,33 +10,35 @@
 
 ## セットアップ
 
-1. 依存関係のインストール:
+1. 依存関係のインストール(**下記「起動インタプリタ」に記載した実体と同じPython**に入れること):
    ```bash
-   python -m pip install -r scripts/requirements.txt
+   <起動インタプリタのパス> -m pip install -r scripts/requirements.txt
    ```
 2. 認証情報は `scripts/x_metrics_collector/README.md` の手順と同じ `.env` を使う（`GOOGLE_SHEETS_SPREADSHEET_ID` / `GOOGLE_SERVICE_ACCOUNT_JSON_PATH` または `GOOGLE_SERVICE_ACCOUNT_JSON_BASE64`）。このサーバー専用の追加設定は不要。
 3. Google Sheetsの対象スプレッドシートに **`reviews`シート**を追加する（`posts`/`metrics_24h`は既存。`reviews`は今回新規追加。列名は下記「Sheets設計」参照）
 4. `metrics_24h`シートに **`source`列**（`manual_screenshot` / `x_api`）を追加する（既存の `gsheets_ledger_design_2026-08-03.md` 設計に対する2026-08-07の小拡張）
 
-## 起動
+## 起動インタプリタ（2026-08-07固定）
 
-`.mcp.json`（リポジトリルート、project-scope）に登録済み:
+**このマシンには`python`（3.12、依存パッケージ未インストール）と`python3`（3.14、依存パッケージ導入済み）という別々のPython実体が存在することが判明したため、`.mcp.json`では`command`をあいまいなコマンド名にせず絶対パスで固定している:**
 
 ```json
 {
   "mcpServers": {
     "ops-state": {
-      "command": "python",
+      "command": "C:\\Users\\nario\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
       "args": ["-m", "scripts.ops_state_mcp.server"]
     }
   }
 }
 ```
 
-Claude Codeが新しいセッションを開始した時点で自動的に起動される（`.mcp.json`の変更はセッション開始時に読み込まれる）。手動起動する場合はリポジトリルートで:
+**このパスは実行環境固有です。** 他のマシン・別ユーザー環境で使う場合は、`mcp`パッケージが実際に入っているPythonの絶対パス（`python3 -c "import sys; print(sys.executable)"`等で確認）に書き換える必要がある。曖昧な`python`/`python3`コマンド名での指定は、PATH解決がClaude Codeの起動プロセスと開発時のシェルとで一致しない場合に`ModuleNotFoundError`で起動失敗する（2026-08-07に実際に発生・特定した障害）。
+
+Claude Codeが新しいセッションを開始した時点で自動的に起動される（`.mcp.json`の変更はセッション開始時に読み込まれる）。手動起動する場合はリポジトリルートで、上記と同じ絶対パスを使う:
 
 ```bash
-python -m scripts.ops_state_mcp.server
+"C:\Users\nario\AppData\Local\Python\pythoncore-3.14-64\python.exe" -m scripts.ops_state_mcp.server
 ```
 
 認証情報が未設定でもサーバー自体は起動し、ツール一覧も確認できる（`SheetsClient`への接続は最初のツール呼び出し時まで遅延される）。実際にpost/review/metricsを読み書きするツール呼び出し時に、未設定なら`GOOGLE_SHEETS_SPREADSHEET_ID が未設定です`等のエラーが返る。
