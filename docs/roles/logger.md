@@ -19,13 +19,13 @@
 
 `needs_revision` となった投稿案が修正・再提出される場合、新しい `post_id` は発行しない。同一 `post_id` のまま、修正後の内容を新しい行として追記する（既存行は上書きしない）。同一 `post_id` に複数行がある場合、最新の `created_at` を持つ行が現在のステータスを表し、過去の行は修正履歴として残る。詳細は [.claude/agents/logger.md](../../.claude/agents/logger.md) を参照。
 
-## 競合比判定の記録（2026-08-06修正: 記録先バグを修正。schema変更なし）
+## 競合比判定の記録（2026-08-07改訂: 記録先をops-state MCP経由のreviewsシートへ）
 
-集客モードの評価が「競合比で強いか」を中核とするようになったことに伴い、複数案を比較した際の採否理由を記録する。**`post_log.schema.json`に`notes`フィールドは存在しない（2026-08-06の機能監査で判明。`additionalProperties: false`のため実行不可能だった）ため、`post_log`には書かない。** 代わりに`ops/reports/daily_brief.md`の「投稿案の競合比較記録」欄に、フック/投稿全体の競合比評価、最強・最弱軸、採用/不採用理由、他候補との相互参照を記録する（`posted_url`等と同じく、schemaに格納場所がない情報を`daily_brief.md`で扱う既存パターンを踏襲）。詳細は [.claude/agents/logger.md](../../.claude/agents/logger.md) を参照。
+集客モードの評価が「競合比で強いか」を中核とするようになったことに伴い、複数案を比較した際の採否理由を記録する。**正本はGoogle Sheetsの`reviews`シートに移行した**（`record_review_result`ツール。`post_log`には書かない、という2026-08-06修正時点の方針は維持しつつ、記録先の実体を`daily_brief.md`からSheetsへ移した）。フック/投稿全体の競合比評価、最強・最弱軸、採用/不採用理由、他候補との相互参照を`rationale`/`notes`に記録する。詳細は [.claude/agents/logger.md](../../.claude/agents/logger.md) を参照。
 
 ## `posted`状態の暫定運用（Phase 1） — 人間の入力はURLのみ
 
-`posted` = 人間がXへの投稿完了を確認した状態。**人間が入力するのは投稿URL1つだけ**（ユーザーオペレーション最小化の原則）。post_id・投稿時刻・投稿者はloggerが承認時点の情報とURL記入時刻から補う。投稿URLは`post_log.schema.json`に格納する場所がないため`ops/reports/daily_brief.md`の「実投稿記録」欄に記録する（schema変更なしの暫定運用。将来的な正本移行先の設計は[gsheets_ledger_design_2026-08-03.md](../../ops/reports/gsheets_ledger_design_2026-08-03.md)参照）。詳細は [.claude/agents/logger.md](../../.claude/agents/logger.md) を参照。
+`posted` = 人間がXへの投稿完了を確認した状態。**人間が入力するのは投稿URL1つだけ**（ユーザーオペレーション最小化の原則）。post_id・投稿時刻・投稿者はloggerが承認時点の情報とURL記入時刻から補う。**2026-08-07改訂**: 投稿URLは`posts`シートの専用列（`posted_url`）に記録する（`post_log.schema.json`に場所がなかったため`daily_brief.md`で代替していた暫定運用は終了。詳細は[gsheets_ledger_design_2026-08-03.md](../../ops/reports/gsheets_ledger_design_2026-08-03.md)、[mcp_architecture_2026-08-07.md](../../ops/reports/mcp_architecture_2026-08-07.md)参照）。詳細は [.claude/agents/logger.md](../../.claude/agents/logger.md) を参照。
 
 ## 入力
 
@@ -35,7 +35,7 @@
 
 ## 出力
 
-- `ops/logs/post_log.jsonl`、`ops/logs/experiment_log.jsonl`、`ops/logs/metrics_snapshots.csv` への追記
+- `ops-state` MCPツール（`record_post_draft`/`set_post_status`/`record_review_result`/`record_metrics_snapshot`）経由でのGoogle Sheets記録（2026-08-07改訂。`ops/logs/*`への直接追記は行わない。read-only archiveの扱いは[ops/logs/README.md](../../ops/logs/README.md)参照）
 - ログ欠損・不整合のレポート
 
 ## 成功条件

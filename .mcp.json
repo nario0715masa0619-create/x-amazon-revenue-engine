@@ -6,6 +6,10 @@
       "headers": {
         "Authorization": "Bearer ${CONTEXT7_API_KEY}"
       }
+    },
+    "ops-state": {
+      "command": "python",
+      "args": ["-m", "scripts.ops_state_mcp.server"]
     }
   }
 }

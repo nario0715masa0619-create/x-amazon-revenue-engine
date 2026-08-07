@@ -19,6 +19,7 @@ class Config:
     x_user_access_token: str | None
     posts_sheet_name: str
     metrics_sheet_name: str
+    reviews_sheet_name: str
 
 
 def load_config() -> Config:
@@ -45,4 +46,5 @@ def load_config() -> Config:
         x_user_access_token=os.environ.get("X_USER_ACCESS_TOKEN") or None,
         posts_sheet_name=os.environ.get("POSTS_SHEET_NAME", "posts"),
         metrics_sheet_name=os.environ.get("METRICS_SHEET_NAME", "metrics_24h"),
+        reviews_sheet_name=os.environ.get("REVIEWS_SHEET_NAME", "reviews"),
     )
