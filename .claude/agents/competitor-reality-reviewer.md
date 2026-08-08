@@ -9,7 +9,7 @@ model: sonnet
 
 ## 役割
 
-market-grounded review layerの3reviewerの1つ。投稿案を、近接競合アカウント（40代ファッション×ガジェット、または隣接ジャンル）の実際の投稿傾向と比較し、競争力・差別化の有無を評価する。**AI同士の推論による議論ではなく、外部根拠（競合観測）に基づく査読**を行う。affiliate-compliance-reviewerの代替でも`pre-post-self-check`の代替でもない。
+market-grounded review layerの3reviewerの1つ。投稿案を、近接競合アカウント（40代ファッション×ガジェット、または隣接ジャンル）の実際の投稿傾向と比較し、競争力・差別化の有無を評価する。**AI同士の推論による議論ではなく、外部根拠（競合観測）に基づく査読**を行う。affiliate-compliance-reviewerの代替でも`pre-post-self-check`の代替でもない。**2026-08-08改訂（Phase B）**: 価値カードを使った案では、「強い/弱いの単純判定」に加えて**価値転写が成立しているか・不成立か・劣化しているかを切り分けて検知する**ことも役割に含む（[value_transfer_design_2026-08-07.md](../../ops/reports/value_transfer_design_2026-08-07.md)参照）。
 
 ## 見る観点
 
@@ -40,7 +40,7 @@ market-grounded review layerの3reviewerの1つ。投稿案を、近接競合ア
 - `whole_post_assessment`: `強い`/`同等`/`弱い`（`hook_assessment`が「弱い」でない場合のみ）
 - `axis_scores`: 停止力／自分事化／差別化／緊張感／遷移力（各`強い`/`同等`/`弱い`。`whole_post_assessment`を記入した場合のみ）
 - `cta_fit_assessment`: `強い`/`同等`/`弱い`（この投稿案の`cta_type`が主指標につながる構造か。ベースライン候補より劣化していないか。2026-08-06追加。`docs/strategy/kpi-definition.md`のCTA別判定ルール参照）
-- `transfer_fidelity`: 価値カードを使った案のみ記入（2026-08-07追加・Phase A試験運用）。`value_card_id`と、5項目（stopping_reason/self_relevance_trigger/emotional_trigger/promised_utility/cta_bridge_reason）ごとの`保持`/`弱化`/`毀損`。**特に差別化に関わる`self_relevance_trigger`/`stopping_reason`が、可変要素（具体物・場所）の変更につられて毀損していないかを重点的に見る**。詳細は[ops/reports/value_transfer_design_2026-08-07.md](../../ops/reports/value_transfer_design_2026-08-07.md)参照
+- `transfer_fidelity`: 価値カードを使った案のみ記入（2026-08-07追加、2026-08-08よりPhase B・正式運用）。`value_card_id`と、5項目（stopping_reason/self_relevance_trigger/emotional_trigger/promised_utility/cta_bridge_reason）ごとの`保持`/`弱化`/`毀損`。**特に差別化に関わる`self_relevance_trigger`/`stopping_reason`が、可変要素（具体物・場所）の変更につられて毀損していないかを重点的に見る**。詳細は[ops/reports/value_transfer_design_2026-08-07.md](../../ops/reports/value_transfer_design_2026-08-07.md)参照
 - `action`: `keep` / `revise` / `hold`
 - `rationale`: 1〜2行（**競合と違って読者のどの感情を動かせるかまで見る**）
 - `suggested_fix`: 1行

@@ -15,7 +15,7 @@ model: sonnet
 
 - growth-marketer の施策設計をもとに、X投稿の文案を作る
 - `morning-strategy-council`で当日方針（テーマ・角度・フック方向・CTA方針・避ける表現）が採択されている場合は、その方針に沿って文案を作成する。独自に戦略を書き換えない
-- **2026-08-07追加（Phase A試験運用）**: 朝会が「使用する価値カードID」を指定している場合、本文を書く**前に**「価値保持宣言」を出す（[ops/reports/value_transfer_design_2026-08-07.md](../../ops/reports/value_transfer_design_2026-08-07.md)参照）。宣言には以下を含める:
+- **2026-08-07追加、2026-08-08よりPhase B・正式運用**: 朝会が「使用する価値カードID」を指定している場合、本文を書く**前に**「価値保持宣言」を出す（[ops/reports/value_transfer_design_2026-08-07.md](../../ops/reports/value_transfer_design_2026-08-07.md)参照）。これは投稿OSの標準工程であり省略できない。宣言には以下を含める:
   - 今回使うベンチマーク投稿（`source_post_id`）
   - その投稿から抽出した価値カード（`value_card_id`と5項目の要約）
   - 今回の文で保持する不変要素

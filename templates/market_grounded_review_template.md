@@ -6,6 +6,8 @@
 > **2026-08-04改訂**: 集客モードでは「破綻していないか」ではなく「競合比で強いか・弱いか・同等か」を中核判定とする（[phase1 spec](../ops/reports/phase1_acquisition_launch_spec_2026-08-03.md)の「集客モードの評価思想」参照）。判定は絶対評価ではなく**相対評価**（競合比で強い／同等／弱い）。フック単体を先に評価し、フックが競合比で「弱い」場合は原則として`action: hold`とし、本文全体の評価に進まない。
 >
 > **2026-08-06改訂（機能監査に基づく修正）**: (1) `comparison_pattern.source_ref`は`WebSearch`/`WebFetch`を実際に実行した結果、またはユーザー提示の参考情報のみを記入する。未実行のまま推測で埋めることを禁止する（未実行の場合`action`は`hold`固定。各reviewer定義の「外部根拠の取得方針」参照）。(2) reviewerはmorning-strategy-councilが示した推奨方向・フック仮説を判定根拠に使わない（本文と外部根拠のみで判定する。詳細は各reviewer定義の禁止事項）。
+>
+> **2026-08-08改訂（Phase B: 価値カード方式の正式運用化）**: reviewの役割は「強い/弱いの単純判定」に加えて、**「価値転写が成立しているか／不成立か／劣化しているか」を切り分けて検知すること**を含む（詳細: [ops/reports/value_transfer_design_2026-08-07.md](../ops/reports/value_transfer_design_2026-08-07.md)の11節）。**これは成果改善の実証ではなく、判定の切り分け精度を上げる目的の役割拡張である。** 価値カードを使わない投稿案（新規探索日）では`transfer_fidelity`は不要。
 
 ---
 
@@ -67,7 +69,7 @@
   - 弱い: CTA文言だけに導線を頼っている、または主指標につながる構造が本文にない
 - `insufficient_evidence_note`: benchmark candidateが存在しない（Cold-start mode中）場合はその旨を明記する
 
-## transfer_fidelity（2026-08-07追加。価値カードを使った案のみ。Phase A試験運用）
+## transfer_fidelity（2026-08-07追加、2026-08-08よりPhase B・正式運用。価値カードを使った案のみ）
 
 投稿案が「勝ち投稿の価値カード」をどれだけ忠実に引き継いでいるかを判定する。`axis_scores`が**投稿単体の強さ**を測るのに対し、`transfer_fidelity`は**なぜその強さが生まれるはずだったメカニズムが実際に保持されているか**を、元の価値カード（[ops/reports/value_transfer_design_2026-08-07.md](../ops/reports/value_transfer_design_2026-08-07.md)参照）の5項目と1対1で照合して判定する。価値カードを使わない案（従来通りのフリー生成）では記入不要。
 

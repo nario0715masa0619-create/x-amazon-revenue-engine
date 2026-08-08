@@ -1,6 +1,8 @@
-# value_transfer_design_2026-08-07.md — 価値転写不全（Value Transfer Failure）対策・Phase A
+# value_transfer_design_2026-08-07.md — 価値転写不全（Value Transfer Failure）対策
 
-> **Phase Aのみ。** ドキュメント変更・価値カード1枚の試作・次回1サイクル分の試験運用準備までを対象とする。schema新設・Google Sheets構造追加・value card専用保存先・measured_winner昇格ロジックは今回対象外。judgment layerの既存の強さ判定基準（axis_scores、cta_fit_assessment、weak but safeの排除、Cold-start mode）は変更しない。
+> **2026-08-08改訂: Phase B（正式運用化）。** 価値カード方式を、投稿OSの通常運用における正式なオブジェクト・標準フローとして位置づける。**これは「価値カード方式による成果改善が実証された」ことを意味しない。** 実投稿の`profile_visits`実測が依然として不足しており、成果面の優劣は未証明のままである。Phase Bは「試験要素→正式運用単位への昇格」であり、「成果責任化」ではない。schema新設・Google Sheets構造追加・value card専用保存先・`measured_winner`昇格ロジックの実装は引き続き対象外（12節「Phase Bの非目的」参照）。judgment layerの既存の強さ判定基準（axis_scores、cta_fit_assessment、weak but safeの排除、Cold-start mode）は変更しない。
+>
+> 1〜8節はPhase A時点の記録（欠陥定義・方式・スキーマ試作・初期訂正・切り分けルール・試作カード・当初の使い方案・当初の未着手一覧）としてそのまま残す。9節以降がPhase Bでの追加・正式化内容。
 
 ## 1. 欠陥定義（正式反映）
 
@@ -91,10 +93,88 @@ variable_slots:          [具体的な物品(ケーブル/ペンケース等), �
 4. pre-post-self-checkが、宣言した不変要素との照合観点で確認する
 5. 結果は`record_review_result`の`rationale`/`notes`に記録する（新規schema/シートは使わない）
 
-## 8. 未着手として残したもの
+## 8. 未着手として残したもの（Phase A時点）
 
 - schema新設・Google Sheets構造追加（`value_cards`専用シート等）
 - `measured_winner`昇格ロジックの実装（`profile_visits`データが十分に蓄積してから）
 - 価値カード方式の効果測定そのもの（次回1サイクルを実際に回してから判断）
 - axis_scoresとtransfer_fidelityの概念的重複の整理（実運用で実害が出てから検討）
 - judgment layerの大規模再設計、投稿文そのものの改善ロジック追加
+
+---
+
+# Phase B（2026-08-08、正式運用化）
+
+## 9. `evidence_basis`の正式ルール
+
+- **`measured_winner`**: 実測で十分な根拠がある場合のみ使う。「十分」の基準は、`docs/strategy/kpi-definition.md`の「CTA別『強い投稿』判定ルール」のCold-start mode/Relative benchmark mode切り替え閾値（同条件群の有効サンプル5件）と整合させる。具体的には、当該カード由来の投稿について`profile_visit_rate`の実測値が最低1件以上取得され、かつ同条件群内で「明確に強い」（Cold-start mode）または上位25〜30%（Relative benchmark mode）と判定された場合にのみ昇格を検討する。**この判断ロジック自体の実装はPhase B対象外**（Phase Bの非目的、12節）。今回は基準の明文化のみ行う
+- **`review_approved`**: Cold-start mode下のデフォルト利用を許可する。ただし常に「フラグ付き」で扱う——`evidence_basis: review_approved`であることを、価値カード自体・morning brief・reviews記録のいずれでも省略せず明記し、`measured_winner`と混同しない
+  - **サブルール（2026-08-08追加）**: `review_approved`のうち、実文面ではなくangle情報等からの再構成であるもの（例: `vc-p-20260803-001`。実投稿の本文記録が手元に残っておらず、angleからの再構成だった実例）は、`confidence: low`を必須とし、`notes`に「実文面からの抽出ではなく再構成」である旨を明記する。新しい`evidence_basis`区分は追加しない（2区分のまま）
+
+## 10. 標準フロー見取り図
+
+```
+朝会（morning-strategy-council）
+  growth-strategist: 使用する価値カードID／source_post_id／evidence_basis／
+                      固定する不変要素／試す可変要素（原則1つ）を明示
+        ↓（x-copywriterにのみ引き継ぐ。reviewerには渡さない。2026-08-06の
+           自己追認バイアス防止ルールを価値カードにも同様に適用する）
+x-copywriter
+  価値保持宣言（ベンチマーク／価値カード／保持する不変要素／変える可変要素／
+                毀損しないと考える理由）→ 本文生成
+        ↓
+market-grounded review layer（3reviewer）
+  axis_scores・cta_fit_assessment（従来通り）
+  + transfer_fidelity（5項目×保持/弱化/毀損。1項目でも毀損があればkeep不可）
+        ↓
+pre-post-self-check
+  value_card_fidelity（宣言と本文の整合確認。9観点の1つとして）
+        ↓
+affiliate-compliance-reviewer（従来通り、判定基準は不可侵）
+        ↓
+logger（`record_review_result`のrationale/notesに記録。専用シートなし）
+        ↓
+人間最終承認（文章が壊れている場合のみ却下。“もっと刺さる”を理由にした
+              人手最適化はしない）
+```
+
+## 11. reviewの役割拡張（正式反映）
+
+market-grounded review layer（3reviewer）の役割を、「投稿案が強いか弱いか」の単純判定に加えて、**「価値転写が成立しているか／不成立か／劣化しているか」を切り分けて検知すること**を正式な責務として位置づける。これにより:
+
+- **転写不成立**（`transfer_fidelity`に毀損あり）と、**元カードの弱さ**（`transfer_fidelity`は全保持だが`axis_scores`が弱い。実例: `vc-p-20260803-001`検証サイクル、13節参照）を区別できる
+- 「弱い」という一言で終わらせず、原因が転写の失敗にあるのか、そもそも参照した価値カードのメカニズムが競合比で強くないのかを、reviewerが構造的に説明できる状態にする
+- reviewerの独立性（それぞれ個別に判定し、討論しない）と、外部根拠取得の必須化（WebSearch/WebFetch）は維持したまま拡張する。役割の「拡張」であり「変更」ではない
+
+## 12. Phase Bの非目的（明記）
+
+以下は今回の正式運用化の範囲に含まれない:
+
+1. 「価値カード方式で成果改善が実証済み」という結論
+2. `measured_winner`昇格ロジックの本格導入
+3. `profile_visit`実測不足のままのwinner certification
+4. Google Sheetsの大規模schema変更
+5. value card専用DB・専用永続ストアの新設
+6. `transfer_fidelity`の定量スコアリング制度化
+7. Phase C相当のperformance-analyst/weekly-pdca-review統合
+8. 人手で「もっと刺さる文」へ編集する運用への回帰
+9. judgment layerの思想変更
+10. 実投稿成果の改善を今回のマージ条件にすること
+
+## 13. Phase A期間中に実施した検証サイクル（実績記録）
+
+| サイクル | value_card_id | 動かした可変要素 | transfer_fidelity | axis_scores | action |
+|---|---|---|---|---|---|
+| 1回目 | `vc-p-20260807-002` | 具体的な物品（ケーブル→ペン） | 全5項目保持 | 差別化のみ同等、他は強い | keep |
+| 2回目 | `vc-p-20260807-002` | 場所（オフィス→新幹線車内） | 全5項目保持 | 差別化含め強い | keep |
+| 3回目 | `vc-p-20260803-001`（静かな違和感型、angle再構成） | 具体的な持ち物（未特定→スマホケース） | 全5項目保持 | 差別化・緊張感が弱い、強い軸なし | revise |
+
+3サイクルを通じて確認できたこと: (1) 同一カードの継続利用でも機構は安定動作した、(2) 異なるメカニズムのカードでも機構は機能した、(3) **「転写の忠実さ（transfer_fidelity）」と「元カードのメカニズムの強さ（axis_scores）」は独立した軸として切り分けて検出できた**（3回目は転写完全成功・結果は弱い、という組み合わせを正しく検出）。これはchat上の検証であり、実ファイルへの記録・実投稿は行っていない。
+
+## 14. 未解決課題（Phase B移行後も残るもの）
+
+- **独立性の課題**: 3サイクルとも同一実行コンテキスト（私）による評価であり、過去の機能監査で指摘した自己採点構造は未解決のまま
+- **`measured_winner`昇格の実運用ロジック**: 9節で基準は明文化したが、実装・自動判定はPhase C以降の課題
+- **`axis_scores`と`transfer_fidelity`の概念的重複**: 実運用で頻発するようなら整理を検討（Phase B時点では未整理のまま）
+- **`vc-p-20260803-001`のような再構成カードの品質保証**: `confidence: low`＋`notes`明記で運用するが、根本的な保証策ではない
+- **`evidence_basis: measured_winner`への到達条件（`profile_visits`実測）自体がまだ一度も満たされていない**: Phase Bはこの状態を前提に正式運用化しており、状況が変わればここに立ち返る必要がある

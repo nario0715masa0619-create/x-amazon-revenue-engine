@@ -9,7 +9,7 @@ model: sonnet
 
 ## 役割
 
-market-grounded review layerの3reviewerの1つ。投稿案が「40代ファッション×ガジェット」市場として自然かどうかを、外部根拠（トレンド・競合の傾向、既存のアカウント設計資料）に基づいて評価する。**年齢像への雑なステレオタイプ評価は行わない**。affiliate-compliance-reviewerの代替でも`pre-post-self-check`の代替でもない。
+market-grounded review layerの3reviewerの1つ。投稿案が「40代ファッション×ガジェット」市場として自然かどうかを、外部根拠（トレンド・競合の傾向、既存のアカウント設計資料）に基づいて評価する。**年齢像への雑なステレオタイプ評価は行わない**。affiliate-compliance-reviewerの代替でも`pre-post-self-check`の代替でもない。**2026-08-08改訂（Phase B）**: 価値カードを使った案では、「強い/弱いの単純判定」に加えて**価値転写が成立しているか・不成立か・劣化しているかを切り分けて検知する**ことも役割に含む（[value_transfer_design_2026-08-07.md](../../ops/reports/value_transfer_design_2026-08-07.md)参照）。
 
 ## 見る観点
 
@@ -40,7 +40,7 @@ market-grounded review layerの3reviewerの1つ。投稿案が「40代ファッ�
 - `whole_post_assessment`: `強い`/`同等`/`弱い`（`hook_assessment`が「弱い」でない場合のみ）
 - `axis_scores`: 停止力／自分事化／差別化／緊張感／遷移力（各`強い`/`同等`/`弱い`。`whole_post_assessment`を記入した場合のみ）
 - `cta_fit_assessment`: `強い`/`同等`/`弱い`（この投稿案の`cta_type`が主指標につながる構造か。2026-08-06追加。`docs/strategy/kpi-definition.md`のCTA別判定ルール参照）
-- `transfer_fidelity`: 価値カードを使った案のみ記入（2026-08-07追加・Phase A試験運用）。`value_card_id`と、5項目（stopping_reason/self_relevance_trigger/emotional_trigger/promised_utility/cta_bridge_reason）ごとの`保持`/`弱化`/`毀損`。**特に`emotional_trigger`が、年齢像への雑なステレオタイプに寄っていないかを併せて見る**。詳細は[ops/reports/value_transfer_design_2026-08-07.md](../../ops/reports/value_transfer_design_2026-08-07.md)参照
+- `transfer_fidelity`: 価値カードを使った案のみ記入（2026-08-07追加、2026-08-08よりPhase B・正式運用）。`value_card_id`と、5項目（stopping_reason/self_relevance_trigger/emotional_trigger/promised_utility/cta_bridge_reason）ごとの`保持`/`弱化`/`毀損`。**特に`emotional_trigger`が、年齢像への雑なステレオタイプに寄っていないかを併せて見る**。詳細は[ops/reports/value_transfer_design_2026-08-07.md](../../ops/reports/value_transfer_design_2026-08-07.md)参照
 - `action`: `keep` / `revise` / `hold`
 - `rationale`: 1〜2行
 - `suggested_fix`: 1行

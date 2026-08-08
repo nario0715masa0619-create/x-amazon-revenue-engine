@@ -76,7 +76,7 @@ description: x-copywriterが投稿案をaffiliate-compliance-reviewerに提出�
 - プロフィールへ飛ぶ理由が自然に生まれているか
 - CTAの文言だけでなく、フック〜本文の流れ全体としてプロフィールへの興味を作れているか
 
-### 9. value_card_fidelity(価値カードとの整合) ※2026-08-07追加・Phase A試験運用。価値カードを使った案のみ
+### 9. value_card_fidelity(価値カードとの整合) ※2026-08-07追加、2026-08-08よりPhase B・正式運用。価値カードを使った案のみ
 
 - x-copywriterが出した「価値保持宣言」（[ops/reports/value_transfer_design_2026-08-07.md](../../../ops/reports/value_transfer_design_2026-08-07.md)参照）で「保持する」と宣言した不変要素が、実際の本文に残っているかを照合する
 - 宣言と本文が食い違う場合（例: 「他者の視線を保持する」と宣言したのに本文では内面的な気づきのみになっている）は、その旨を明記する（自分の判断で宣言を上書きしない。`market-grounded review layer`の`transfer_fidelity`と矛盾する場合も同様に併記する）
@@ -118,7 +118,7 @@ description: x-copywriterが投稿案をaffiliate-compliance-reviewerに提出�
 - [ ] 危険表現がないだけで「安全だが弱い」案を`go`にしていないか
 - [ ] self-check通過を理由にaffiliate-compliance-reviewerへの提出を省略していないか
 - [ ] 同一案への再提案が2回目に達していないか(ループ防止)
-- [ ] 価値カードを使った案で、宣言した不変要素が本文に残っているか確認したか(2026-08-07追加・Phase A)
+- [ ] 価値カードを使った案で、宣言した不変要素が本文に残っているか確認したか(2026-08-08よりPhase B・正式運用)
 
 ## 失敗例
 

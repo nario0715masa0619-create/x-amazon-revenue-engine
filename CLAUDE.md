@@ -43,6 +43,7 @@
 | 投稿ログ・レビュー・実測値の記録先（正本） | `ops-state` MCP（`.mcp.json`で設定）／[scripts/ops_state_mcp/README.md](scripts/ops_state_mcp/README.md)／このファイルの実行ルール8 |
 | 現在の運用状態 | `ops/state/*.yaml` |
 | 技術docs検索（Context7）の設定・使用範囲 | `.mcp.json`（設定）／このファイルの実行ルール9 |
+| 価値カード方式（value transfer、Phase B・正式運用） | [ops/reports/value_transfer_design_2026-08-07.md](ops/reports/value_transfer_design_2026-08-07.md)（**成果改善の実証ではなく、判定の切り分け精度を上げる目的の正式運用化**） |
 
 ## 迷ったときの優先順位
 
