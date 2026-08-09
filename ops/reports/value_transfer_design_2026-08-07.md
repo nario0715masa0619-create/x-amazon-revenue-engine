@@ -180,6 +180,7 @@ market-grounded review layer（3reviewer）の役割を、「投稿案が強い�
 - **除外継続: 4回目（語り口変更版）**。`revise`判定のまま投稿候補一覧に含めない
 - **`evidence_basis`は両候補とも引き続き`review_approved`。`measured_winner`扱い・winner認定はしていない。** これは実投稿候補の優先順位付けであり、成果改善の実証ではない
 - **段階**: 実投稿候補確定済み（cycle2が本命）。実投稿・投稿URL記入は人間の操作待ち。post_id発行・正式ログ記録（`ops-state` MCP経由）は、MCP接続確認後に行う（`ops/logs/post_log.jsonl`は凍結済みのため直接追記しない）
+- **正式確定（2026-08-08、二回目確認）**: 上記の優先順位（cycle2第一候補／cycle1第二候補／4回目除外継続）を人間が改めて明示的に確定。以後、ユーザーへの候補提示は原則cycle2を先に提示する。**この確定は候補順位の確定であり、成果改善の証明・`measured_winner`昇格・winner認定を意味しない**
 
 ## 14. 未解決課題（Phase B移行後も残るもの）
 
