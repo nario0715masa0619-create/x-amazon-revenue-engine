@@ -38,6 +38,7 @@ market-grounded review layerの3reviewerの1つ。投稿案が「40代ファッ�
 - `comparison_pattern`: `source_type`（`official_best_practice`/`trend_search`/`competitor_observation`/`user_provided_reference`）・`source_ref`・観察された市場傾向
 - `hook_assessment`: `強い`/`同等`/`弱い`（一文目だけを切り出して評価。**「刺さらない理由」を遠慮なく出す**）
 - `whole_post_assessment`: `強い`/`同等`/`弱い`（`hook_assessment`が「弱い」でない場合のみ）
+- `hook_visibility`/`target_clarity`/`cta_bridge_clarity`: **2026-08-09追加。全案で先に記入する。** x-copywriterのMode 1（想定フック／想定ターゲット／プロフィール遷移理由）と本文を照合して判定する。**特に`target_clarity`が、男女共通の抽象論に流れて曖昧になっていないかを見る**。詳細は`templates/market_grounded_review_template.md`参照
 - `axis_scores`: 停止力／自分事化／差別化／緊張感／遷移力（各`強い`/`同等`/`弱い`。`whole_post_assessment`を記入した場合のみ）
 - `cta_fit_assessment`: `強い`/`同等`/`弱い`（この投稿案の`cta_type`が主指標につながる構造か。2026-08-06追加。`docs/strategy/kpi-definition.md`のCTA別判定ルール参照）
 - `transfer_fidelity`: 価値カードを使った案のみ記入（2026-08-07追加、2026-08-08よりPhase B・正式運用）。`value_card_id`と、5項目（stopping_reason/self_relevance_trigger/emotional_trigger/promised_utility/cta_bridge_reason）ごとの`保持`/`弱化`/`毀損`。**特に`emotional_trigger`が、年齢像への雑なステレオタイプに寄っていないかを併せて見る**。詳細は[ops/reports/value_transfer_design_2026-08-07.md](../../ops/reports/value_transfer_design_2026-08-07.md)参照
@@ -54,6 +55,7 @@ market-grounded review layerの3reviewerの1つ。投稿案が「40代ファッ�
 - `keep`は**競合比で同等以上**の場合のみ使う。「安全だが弱い」案は`keep`にしない
 - **`cta_fit_assessment`が「弱い」の場合も`keep`にしない**（2026-08-06追加）
 - **価値カードを使った案で`transfer_fidelity`に`毀損`が1項目でもあれば`keep`にしない**（2026-08-07追加。可変要素の変更自体は毀損ではない。不変要素＝メカニズムが変わった場合のみ毀損とする）
+- **`hook_visibility`/`target_clarity`/`cta_bridge_clarity`のいずれかが弱い/不明/不成立の場合も`keep`にしない**（2026-08-09追加。`transfer_fidelity`が全保持でも例外にしない）
 - `comparison_pattern`が空の場合、`action`は`hold`のみとする
 - **`WebSearch`/`WebFetch`を実行していない（かつユーザー提示の参考URL・スクショもない）場合、`action`は`hold`固定とする。`comparison_pattern`が文章として埋まっていても、実際の検索・取得を経ていなければ「空」と同じ扱いとする**（2026-08-06追加。空欄チェックだけでは推測による捏造を防げないため）
 - `confidence: high`は複数ソースが一致した場合のみ

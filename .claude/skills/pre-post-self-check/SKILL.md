@@ -82,11 +82,26 @@ description: x-copywriterが投稿案をaffiliate-compliance-reviewerに提出�
 - 宣言と本文が食い違う場合（例: 「他者の視線を保持する」と宣言したのに本文では内面的な気づきのみになっている）は、その旨を明記する（自分の判断で宣言を上書きしない。`market-grounded review layer`の`transfer_fidelity`と矛盾する場合も同様に併記する）
 - 価値カードを使わない日（新規探索日）はこの観点を省略してよい
 
+### 10. hook_visibilityの自己点検 ※2026-08-09追加
+
+- x-copywriterがMode 1（戦略可視化）で宣言した「想定フック」（読者が止まる理由）が、実際の本文の一文目から読み取れるか照合する
+- 出来事の説明に留まり、停止理由が見えていない場合はその旨を明記する
+
+### 11. target_clarityの自己点検 ※2026-08-09追加
+
+- Mode 1で宣言した「想定ターゲット」（40代男性のどの層か）が、本文の具体性から読み取れるか照合する
+- 場面が一般化されすぎて対象が曖昧になっていないか確認する
+
+### 12. CTA bridgeの自己点検 ※2026-08-09追加
+
+- Mode 1で宣言した「プロフィール遷移理由」が、本文内で実際に成立しているか照合する
+- CTA文言だけに遷移理由を頼っていないか確認する
+
 ## 判定
 
 `go` / `revise` / `stop`
 
-- `go`: 主要観点に問題なし。**かつ`hook_vs_competitors`/`differentiation_vs_competitors`が「弱い」ではない**。このままaffiliate-compliance-reviewerへ提出してよい
+- `go`: 主要観点に問題なし。**かつ`hook_vs_competitors`/`differentiation_vs_competitors`が「弱い」ではない。かつhook_visibility/target_clarity/CTA bridgeの自己点検で問題が見つかっていない**（2026-08-09追加）。このままaffiliate-compliance-reviewerへ提出してよい
 - `revise`: 公開は可能だがフックやトーンの修正余地がある。**「安全だが弱い（weak but safe）」案、つまり誇大表現等はないが競合比で弱い案は`go`にせず`revise`とする**
 - `stop`: アカウント設計を壊す、または危険表現がある。構成から見直す
 
@@ -97,7 +112,7 @@ description: x-copywriterが投稿案をaffiliate-compliance-reviewerに提出�
 毎回、以下の形式で返す:
 
 - 総合判定(`go`/`revise`/`stop`)
-- 9観点の短評(各1〜2行。価値カードを使わない日は`value_card_fidelity`を「該当なし」と記す)
+- 12観点の短評(各1〜2行。価値カードを使わない日は`value_card_fidelity`を「該当なし」と記す)
 - 強み
 - 弱み
 - 危険表現の有無
@@ -113,12 +128,13 @@ description: x-copywriterが投稿案をaffiliate-compliance-reviewerに提出�
 
 ## チェックポイント
 
-- [ ] 9観点すべてに短評が付いているか(価値カード未使用日は`value_card_fidelity`を「該当なし」と明記)
+- [ ] 12観点すべてに短評が付いているか(価値カード未使用日は`value_card_fidelity`を「該当なし」と明記)
 - [ ] `revise`判定なのに修正版が付いていないケースがないか
 - [ ] 危険表現がないだけで「安全だが弱い」案を`go`にしていないか
 - [ ] self-check通過を理由にaffiliate-compliance-reviewerへの提出を省略していないか
 - [ ] 同一案への再提案が2回目に達していないか(ループ防止)
 - [ ] 価値カードを使った案で、宣言した不変要素が本文に残っているか確認したか(2026-08-08よりPhase B・正式運用)
+- [ ] Mode 1の宣言（想定フック／想定ターゲット／プロフィール遷移理由）と本文が一致しているか確認したか(2026-08-09追加)
 
 ## 失敗例
 
@@ -127,3 +143,4 @@ description: x-copywriterが投稿案をaffiliate-compliance-reviewerに提出�
 - `audience_fit_40s`の観点を、別のアカウント設計に流用する際に観点名だけ変えて中身(判定基準)を使い回してしまう
 - 「バズるかどうか」を断定的に評価してしまう(このskillは相対評価に留める設計)
 - 誇大表現や危険表現がないことだけを根拠に`go`にしてしまい、競合比で埋もれている（weak but safe）ことを見落とす
+- `transfer_fidelity`/`value_card_fidelity`が全て「保持」であることだけを根拠に`go`にしてしまい、フックが誰の何を刺す文か本文から見えない（`hook_visibility`/`target_clarity`が弱い）ことを見落とす（2026-08-09追加。「価値カードの整合性」と「本文の可視性」は別問題）

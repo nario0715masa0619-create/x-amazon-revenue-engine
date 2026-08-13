@@ -189,3 +189,34 @@ market-grounded review layer（3reviewer）の役割を、「投稿案が強い�
 - **`axis_scores`と`transfer_fidelity`の概念的重複**: 実運用で頻発するようなら整理を検討（Phase B時点では未整理のまま）
 - **`vc-p-20260803-001`のような再構成カードの品質保証**: `confidence: low`＋`notes`明記で運用するが、根本的な保証策ではない
 - **`evidence_basis: measured_winner`への到達条件（`profile_visits`実測）自体がまだ一度も満たされていない**: Phase Bはこの状態を前提に正式運用化しており、状況が変わればここに立ち返る必要がある
+
+---
+
+# 戦略可視化ゲート（2026-08-09追加）
+
+## 15. 問題認識
+
+直近の差戻し案では、`transfer_fidelity`と`value_card_fidelity`は通っていた一方で、運用責任者が「この投稿のフックは何か」「どのターゲットのどの層に刺すのか」「どの恥・不快・違和感を止める文なのか」を説明できない状態が生じた。これは価値カード方式そのものの失敗ではなく、**「価値カードの整合性（転写の忠実度）」と「価値の可視性（読者から見えているか）」が別軸であるにもかかわらず、後者を検証する仕組みが本文生成前・生成後のいずれにも存在しなかったことによる実行モードの不一致**である。
+
+## 16. 3-mode構成
+
+| Mode | 実行者 | 内容 |
+|---|---|---|
+| **朝会（接続補強）** | growth-strategist所見＋audience-representative所見 → council-chairが合成 | `who_and_pain_summary`（誰の・どの痛みを狙うかの一次案）をBriefに明記する |
+| **Mode 1: 戦略可視化** | x-copywriter | Briefの`who_and_pain_summary`を起点に、想定フック／想定ターゲット／刺したい感情／自分事化トリガー／プロフィール遷移理由／一文要約の6項目を具体化する。**本文は書かない** |
+| **Mode 2: 生成** | x-copywriter | Mode 1通過後、value retention declaration→本文生成（既存のまま） |
+| **Mode 3: 検証** | 3reviewer／self-check | 既存の`transfer_fidelity`/`value_card_fidelity`に加え、`hook_visibility`/`target_clarity`/`cta_bridge_clarity`を判定する |
+
+## 17. 差戻し基準（value card整合性が保たれていても差戻しになるケース）
+
+以下のいずれかに該当する場合、`transfer_fidelity`が全保持でも`keep`にしない:
+
+1. フックが説明できない（`hook_visibility`が弱い/不明）
+2. ターゲットがぼやけている（`target_clarity`がやや曖昧/不明）
+3. 状況説明はあるが止まる理由が見えない
+4. CTAに進む理由が弱い（`cta_bridge_clarity`が弱い/不成立）
+5. 「何に刺す文か」を一文で説明できない
+
+## 18. 位置づけの確認
+
+この修正は、**value card方式をやめるためではなく、価値が読者に見える形で前景化されるよう、本文生成前・生成後の戦略可視化ゲートを追加するための修正である。** 価値カード方式・tone/voiceのhigh-risk運用・measured_winnerとreview_approvedの区別・人手による"もっと刺さる文"編集の禁止は、いずれも変更していない。

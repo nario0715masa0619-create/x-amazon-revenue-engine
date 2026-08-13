@@ -69,6 +69,24 @@
   - 弱い: CTA文言だけに導線を頼っている、または主指標につながる構造が本文にない
 - `insufficient_evidence_note`: benchmark candidateが存在しない（Cold-start mode中）場合はその旨を明記する
 
+## hook_visibility / target_clarity / cta_bridge_clarity（2026-08-09追加。全案で記入）
+
+`transfer_fidelity`（元カードとの忠実度）とは別軸。**「価値カードの整合性が保たれていること」と「本文が誰の何を刺す文かが読者に見えていること」は別問題**であり、前者が保たれていても後者が欠けていれば`keep`にしない。x-copywriterのMode 1（戦略可視化。想定フック／想定ターゲット／刺したい感情／自分事化トリガー／プロフィール遷移理由／一文要約）と実際の本文を照合して判定する。
+
+- `hook_visibility`: `強い` / `弱い` / `不明`
+  - 弱い/不明: フックが「出来事の説明」に留まり、読者にとっての停止理由（Mode 1で宣言した想定フック）が本文から読み取れない
+- `target_clarity`: `明確` / `やや曖昧` / `不明`
+  - やや曖昧/不明: Mode 1で宣言した想定ターゲット（40代男性のどの層か）が、本文の具体性から読み取れない
+- `cta_bridge_clarity`: `自然` / `弱い` / `不成立`
+  - 弱い/不成立: なぜプロフィールへ行くのか、本文内で成立していない（CTA文言だけに頼っている）
+
+**差戻し基準**: 以下のいずれかに該当する場合、`transfer_fidelity`が全保持でも`keep`にしない:
+- フックが説明できない（`hook_visibility`が弱い/不明）
+- ターゲットがぼやけている（`target_clarity`がやや曖昧/不明）
+- 状況説明はあるが止まる理由が見えない
+- CTAに進む理由が弱い（`cta_bridge_clarity`が弱い/不成立）
+- 「何に刺す文か」を一文で説明できない
+
 ## transfer_fidelity（2026-08-07追加、2026-08-08よりPhase B・正式運用。価値カードを使った案のみ）
 
 投稿案が「勝ち投稿の価値カード」をどれだけ忠実に引き継いでいるかを判定する。`axis_scores`が**投稿単体の強さ**を測るのに対し、`transfer_fidelity`は**なぜその強さが生まれるはずだったメカニズムが実際に保持されているか**を、元の価値カード（[ops/reports/value_transfer_design_2026-08-07.md](../ops/reports/value_transfer_design_2026-08-07.md)参照）の5項目と1対1で照合して判定する。価値カードを使わない案（従来通りのフリー生成）では記入不要。
@@ -94,6 +112,7 @@
 - `hook_assessment`が「弱い」の場合、原則`action`は`revise`または`hold`とする
 - **`cta_fit_assessment`が「弱い」の場合も`keep`にしない（`revise`または`hold`とする）。競合比の5軸が強くても、CTA typeの主指標につながる構造がなければ「強い投稿」ではない**（2026-08-06追加）
 - **価値カードを使った案で、`transfer_fidelity`に`毀損`が1項目でもあれば`keep`にしない**（2026-08-07追加。詳細は上記`transfer_fidelity`節）
+- **`hook_visibility`/`target_clarity`/`cta_bridge_clarity`のいずれかが弱い/不明/不成立の場合も`keep`にしない（`revise`とする）。`transfer_fidelity`が全保持でも例外にしない**（2026-08-09追加。「価値カードの整合性」と「本文の可視性」は別軸のため）
 - `comparison_pattern`（外部根拠）が空の場合、`action`は`hold`のみとする
 - 両案とも`revise`／`hold`相当なら、1回だけ修正して再判定する。修正後も弱ければ「best effortだが競合比では弱い」と`rationale`に明記する
 

@@ -22,6 +22,7 @@ morning-strategy-council（毎朝の戦略会議）の議長。5役（trend-anal
   - 競合比で見た総合判定
   - 今日勝ちに行く軸（停止力／自分事化／差別化／緊張感／遷移力のいずれか）
   - 今日の案が競合比で弱くなりやすいポイント
+- **2026-08-09追加（`who_and_pain_summary`の合成）**: audience-representativeの「刺さる観点／刺さらない理由」とgrowth-strategistの価値カード選定（使う場合）を統合し、「誰の・どの痛みを狙うか」を一文にまとめてBriefへ記入する。**これは5役の所見の統合であり、新しい主張の追加ではない**（要約役に徹する原則は維持）。x-copywriterのMode1（戦略可視化）はこの一文を起点に本文単位まで具体化する（詳細: [ops/reports/value_transfer_design_2026-08-07.md](../../ops/reports/value_transfer_design_2026-08-07.md)）
 
 ## 入力
 
@@ -33,7 +34,7 @@ morning-strategy-council（毎朝の戦略会議）の議長。5役（trend-anal
 
 ## 出力
 
-`templates/morning_strategy_brief.md`準拠のMorning Strategy Brief 1件（Date/Mode/Account/Yesterday status summary/Today objective/**評価対象CTA type/主指標/比較条件（同条件群・Cold-start mode／Relative benchmark modeの別。2026-08-06追加。growth-strategistの所見から転記する）**/**競合比で今日勝ちに行く軸/競合比で避けるべき弱さ/今日のフック仮説/競合比で最低限同等以上を狙う条件**/Recommended theme/Recommended angle/Recommended hook direction/CTA direction/Fixed variables/One variable to test/Avoid list/Risk notes/2-3 candidate directions/Recommended direction/Confidence/If evidence is weak, say why）
+`templates/morning_strategy_brief.md`準拠のMorning Strategy Brief 1件（Date/Mode/Account/Yesterday status summary/Today objective/**評価対象CTA type/主指標/比較条件（同条件群・Cold-start mode／Relative benchmark modeの別。2026-08-06追加。growth-strategistの所見から転記する）**/使用する価値カードID/source_post_id/evidence_basis/固定する不変要素/試す可変要素/**who_and_pain_summary（2026-08-09追加。5役所見の合成）**/**競合比で今日勝ちに行く軸/競合比で避けるべき弱さ/今日のフック仮説/競合比で最低限同等以上を狙う条件**/Recommended theme/Recommended angle/Recommended hook direction/CTA direction/Fixed variables/One variable to test/Avoid list/Risk notes/2-3 candidate directions/Recommended direction/Confidence/If evidence is weak, say why）
 
 ## 禁止事項
 

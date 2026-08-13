@@ -22,6 +22,7 @@
 - **evidence_basis**:（`review_approved` / `measured_winner`のいずれか。`review_approved`が基本。angle情報等からの再構成カードの場合はその旨も明記する。上記が「なし」の場合は空欄）
 - **固定する不変要素**:（価値カードの5項目のうち、今回保持すると決めたもの。上記が「なし」の場合は空欄）
 - **試す可変要素**:（原則1つ。例: 具体物をケーブルから別のものに変える）
+- **who_and_pain_summary**:（2026-08-09追加。「誰の・どの痛みを狙うか」の一次案を一文で。council-chairがaudience-representativeの「刺さる観点／刺さらない理由」とgrowth-strategistの価値カード選定を統合して合成する。x-copywriterのMode1〔戦略可視化〕はこれを起点に本文単位まで具体化する。詳細は`ops/reports/value_transfer_design_2026-08-07.md`参照）
 - **競合比で今日勝ちに行く軸**:（停止力／自分事化／差別化／緊張感／遷移力のいずれか。詳細は`ops/reports/phase1_acquisition_launch_spec_2026-08-03.md`の「集客モードの評価思想」参照）
 - **競合比で避けるべき弱さ**:（例: 抽象論、ありふれた整理論、説明から入る導入）
 - **今日のフック仮説**:（例: 私的空間より対人空間のほうが40代男性には刺さる）
