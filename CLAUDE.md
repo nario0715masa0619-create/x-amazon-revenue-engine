@@ -21,7 +21,7 @@
 3. **ログ未記録の施策は、正式施策として扱わない。** `ops-state` MCPツール経由でGoogle Sheets（`posts`/`reviews`/`metrics_24h`）に記録されるまで「実施済み」とみなさない（2026-08-07改訂: 正本が`ops/logs/`からGoogle Sheetsへ移行。`ops/logs/`は2026-08-06以前の記録のread-only archive。詳細: [ops/reports/mcp_architecture_2026-08-07.md](ops/reports/mcp_architecture_2026-08-07.md)）。
 4. **数値の改善・悪化は、週次レビュー（`weekly-pdca-review` skill）で `ops/reports/weekly_review.md` に反映すること。** 個別の気づきをその場限りにしない。
 5. **誇大表現・誤認表現・開示漏れを禁止する。** 詳細: [docs/policies/disclosure-policy.md](docs/policies/disclosure-policy.md)、[docs/policies/amazon-affiliate-policy.md](docs/policies/amazon-affiliate-policy.md)
-6. **本番投稿の自動化はまだ行わない。** 現段階は設計・雛形・記録基盤の整備を優先する。外部API接続やスケジュール投稿の実装は、明示的な指示があるまで着手しない。
+6. **本番投稿の自動化はまだ行わない。** 現段階は設計・雛形・記録基盤の整備を優先する。外部API接続やスケジュール投稿の実装は、明示的な指示があるまで着手しない。**2026-08-14追加**: 学習モード／通常運用のカード方式（`sc-*`/`nc-*`）が安定するまで、`keep`/`revise`/`stop`判定が出ても自動投稿・自動確定・自動運用切替は行わない。人間確認前提のフローを維持し、生成本文・review結果を無断で書き換えない。詳細・禁止事項・終了条件: [ops/reports/operating_policy_human_confirmation_2026-08-14.md](ops/reports/operating_policy_human_confirmation_2026-08-14.md)
 7. **ユーザーは運用担当者ではなく最終承認者として扱うこと。** 日々の記録・整理・下書き作成はAI側に寄せ、人間に同じ情報を二度入力させない、ゼロから考えさせない設計を優先する。詳細: [ops/reports/phase1_acquisition_launch_spec_2026-08-03.md](ops/reports/phase1_acquisition_launch_spec_2026-08-03.md)の「最小オペレーション標準フロー」
 8. **`ops-state`（`.mcp.json`で導入。2026-08-07追加）が投稿ログ・レビュー結果・実測値の唯一の記録経路である。** `record_post_draft`/`set_post_status`/`record_review_result`/`record_metrics_snapshot`等のツール経由でGoogle Sheets（正本）へ書き込む。`ops/logs/*.jsonl`/`*.csv`への直接追記は行わない（凍結済み。[ops/logs/README.md](ops/logs/README.md)参照）。`daily_brief.md`は`render_daily_brief()`が生成するビューであり、手編集しない。**投稿OSの判断ロジック（何を出すか）はこの変更で一切変わっていない**（morning-strategy-council/review layer/self-check/compliance-reviewerの判定基準は不可侵のまま）。
 9. **Context7（`.mcp.json`で導入。2026-08-06追加）は「技術docs専用インフラ」であり、投稿文生成の品質改善ツールではない。** 使ってよいのは、ライブラリ／API／SDK／MCP／設定・実装・移行など**技術実装の検証**が必要なときのみ（例: Google Sheets/Google API/service accountの仕様確認、MCP・subagent連携の設定確認、X API等の外部APIの公式仕様確認）。**朝会（morning-strategy-council）・投稿文生成（x-copywriter）・market-grounded review layer・pre-post-self-check・CTA別強さ判定など、コピー品質・戦略判断・競合比較には一切使わない。** 不要なときは呼ばない。これらのskill/agentファイル自体への機能追加は行っていない（責務は変更なし）。**Context7のAPIキーはリポジトリに保存しない。** `.mcp.json`は`${CONTEXT7_API_KEY}`構文で環境変数を参照する（Claude Code公式の`.mcp.json`環境変数展開機能）。実キー文字列は、シェルの環境変数ではなく**Claude Codeのlocal settings（`.claude/settings.local.json`の`env`キー）**に各自の環境でのみ設定する（同ファイルはgit管理外＝`.gitignore`で除外済み。Claude Code公式のsettings階層における個人用スコープで、`env`に設定した値はMCPサーバーにも渡る）。`.env`ファイルによる直接読込は導入しない（Claude Code公式ドキュメントで確認できるサポート範囲は`.mcp.json`の環境変数展開とsettingsの`env`キーであり、`.env`直読は含まれないため）。実キー文字列自体は、X APIキー等の他の外部認証情報と同様、リポジトリのいかなるファイルにもコミットしない。
@@ -44,6 +44,15 @@
 | 現在の運用状態 | `ops/state/*.yaml` |
 | 技術docs検索（Context7）の設定・使用範囲 | `.mcp.json`（設定）／このファイルの実行ルール9 |
 | 価値カード方式（value transfer、Phase B・正式運用） | [ops/reports/value_transfer_design_2026-08-07.md](ops/reports/value_transfer_design_2026-08-07.md)（**成果改善の実証ではなく、判定の切り分け精度を上げる目的の正式運用化**） |
+| 学習モード（構成カード`sc-*`／ネタカード`nc-*`）の資産カタログ | [ops/reports/learning_library_2026-08-13.md](ops/reports/learning_library_2026-08-13.md) |
+| 自律化保留・人間確認前提の運用方針（固定） | [ops/reports/operating_policy_human_confirmation_2026-08-14.md](ops/reports/operating_policy_human_confirmation_2026-08-14.md) |
+| 「初稿生成×学習モード審査」循環接続設計（未実行・設計文書） | [ops/reports/rewrite_learning_loop_design_2026-08-14.md](ops/reports/rewrite_learning_loop_design_2026-08-14.md) |
+| 学習源external限定・X主教師化方針（v3、未実行・設計文書。主探索をXの勝ち投稿に固定し、note/ブログは補助ソースへ格下げ） | [ops/reports/external_only_learning_policy_2026-08-14.md](ops/reports/external_only_learning_policy_2026-08-14.md) |
+| 「アプローチ教師」×「構造教師」分離運用（未実行・設計文書。Xの勝ち投稿からは"勝ち方"のみ学び、完成形の骨組みはinternalの構造カードで固定する二層運用） | [ops/reports/approach_structure_teacher_separation_2026-08-14.md](ops/reports/approach_structure_teacher_separation_2026-08-14.md) |
+| X API最小運用設計（未実装・設計文書。実装は実行ルール6により別途明示的な着手指示とAPIキー発行等のユーザー側準備が必要） | [ops/reports/x_api_minimal_design_2026-08-14.md](ops/reports/x_api_minimal_design_2026-08-14.md) |
+| X探索ジャンル再定義（40代ファッション×ガジェットが本流。仕事小事故・会議文脈等は従属切り口） | [ops/reports/x_exploration_genre_redefinition_2026-08-15.md](ops/reports/x_exploration_genre_redefinition_2026-08-15.md) |
+| manual_review人間確認レビューシート（Phase 2.1後の17件を実質6件に統合し記入。human_final_labelはAI下書き提案でありユーザー確認前） | [ops/reports/manual_review_review_2026-08-15.md](ops/reports/manual_review_review_2026-08-15.md) |
+| pre_teacher_candidate 3件の用途分離メモ（keep/drop最終判定ではない。structure_observation/approach_observation/comparison_hold/not_for_primary_teacher_yetで参照候補として保持） | [ops/reports/pre_teacher_candidate_usage_2026-08-16.md](ops/reports/pre_teacher_candidate_usage_2026-08-16.md) |
 
 ## 迷ったときの優先順位
 
