@@ -1,0 +1,25 @@
+{
+  "run_id": "mainline-run-2026-08-30-004",
+  "source_post_id": "2093563849580691551",
+  "target_layer": "gadget",
+  "draft_ids": [
+    "gadget-mainline0830b-M",
+    "gadget-mainline0830b-N"
+  ],
+  "gate_a_pass_ids": [
+    "gadget-mainline0830b-M",
+    "gadget-mainline0830b-N"
+  ],
+  "human_selected_top": "gadget-mainline0830b-M",
+  "published_draft_id": null,
+  "selection_reason_short": "「ジムには…自宅には…」で使い分けの対比が冒頭から完成していて、一読で意図が伝わる。Nは情報量はあるが少し説明寄り。",
+  "primary_source_post_id": "2093563849580691551",
+  "fallback_source_post_id": null,
+  "used_fallback_source": false,
+  "mainline_status": "completed",
+  "enrichment_status": "completed",
+  "weekly_aggregation_status": "included",
+  "research_followup_required": true,
+  "published_at": null,
+  "post_url": null
+}
