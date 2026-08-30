@@ -1,0 +1,46 @@
+{
+  "period_start": "2026-08-27",
+  "period_end": "2026-08-30",
+  "run_ids": [
+    "shadow-run-2026-08-27-010",
+    "shadow-run-2026-08-27-011",
+    "shadow-run-2026-08-28-012",
+    "mainline-run-2026-08-29-001",
+    "mainline-run-2026-08-29-002",
+    "mainline-run-2026-08-30-003"
+  ],
+  "total_run_count": 6,
+  "mainline_completed_count": 6,
+  "mainline_closed_incomplete_count": 0,
+  "mainline_failed_count": 0,
+  "enrichment_completed_count": 6,
+  "enrichment_partial_count": 0,
+  "enrichment_failed_non_blocking_count": 0,
+  "enrichment_not_started_count": 0,
+  "structure_hook_divergence_count": 4,
+  "non_divergence_count": 2,
+  "split_human_matched_structure_count": 2,
+  "split_human_matched_hook_count": 2,
+  "split_human_matched_neither_count": 0,
+  "contamination_count": 1,
+  "fallback_source_used_count": 1,
+  "fallback_source_usage_rate": 0.16666666666666666,
+  "source_post_id_distribution": {
+    "2092424287672311915": 2,
+    "2092972468260774213": 1,
+    "2093229163213996215": 1,
+    "2093563849580691551": 2
+  },
+  "observations": [
+    "split発生4件のうち、structure側が的中2件、hook側が的中2件、どちらとも不一致0件",
+    "Step A disclosure contaminationが1件発生した",
+    "fallback source使用率: 17%（1/6件）"
+  ],
+  "next_week_research_focus": [
+    "Run14: divergence meta-gateのguarded live forward validation（新規source優先、研究専用の厳密プロトコルで）",
+    "non-divergenceのguarded live例をもう1本以上確保する（Run10はcontaminationのため代替が必要）",
+    "gadget teacher supplyの安定化（本線条件とは分離した別issueとして継続）",
+    "mainline-run-2026-08-30-003はnon-divergence（structure=hook=K）だがhuman選択はLで、structure/hookどちらとも不一致という新パターンを観測——non-divergence=auto_candidate_okの妥当性を見直す材料として次週以降も追跡"
+  ],
+  "one_line_takeaway": "6件のmainline runはすべて完了し、split 4件ではstructure的中2件・hook的中2件で拮抗、さらにnon-divergenceでもmachine-human不一致が1件出たため、現時点ではどちらか一方の自動優位やauto_candidate_okの安全性を断定せず、人間レビュー前提で運用しながら追加データを蓄積するのが妥当である。"
+}
