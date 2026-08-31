@@ -1,14 +1,14 @@
 {
-  "period_start": "2026-08-27",
+  "period_start": "2026-08-29",
   "period_end": "2026-08-30",
   "run_ids": [
-    "shadow-run-2026-08-27-010",
-    "shadow-run-2026-08-27-011",
-    "shadow-run-2026-08-28-012",
     "mainline-run-2026-08-29-001",
     "mainline-run-2026-08-29-002",
     "mainline-run-2026-08-30-003",
-    "mainline-run-2026-08-30-004"
+    "mainline-run-2026-08-30-004",
+    "mainline-run-2026-08-30-005",
+    "mainline-run-2026-08-30-006",
+    "mainline-run-2026-08-30-007"
   ],
   "total_run_count": 7,
   "mainline_completed_count": 7,
@@ -20,28 +20,27 @@
   "enrichment_not_started_count": 0,
   "structure_hook_divergence_count": 5,
   "non_divergence_count": 2,
-  "split_human_matched_structure_count": 2,
-  "split_human_matched_hook_count": 3,
+  "split_human_matched_structure_count": 1,
+  "split_human_matched_hook_count": 4,
   "split_human_matched_neither_count": 0,
-  "contamination_count": 1,
-  "fallback_source_used_count": 1,
-  "fallback_source_usage_rate": 0.14285714285714285,
+  "contamination_count": 0,
+  "fallback_source_used_count": 0,
+  "fallback_source_usage_rate": 0.0,
   "source_post_id_distribution": {
-    "2092424287672311915": 2,
-    "2092972468260774213": 1,
     "2093229163213996215": 1,
-    "2093563849580691551": 3
+    "2093563849580691551": 3,
+    "2094056498305576981": 3
   },
   "observations": [
-    "split発生5件のうち、structure側が的中2件、hook側が的中3件、どちらとも不一致0件",
-    "Step A disclosure contaminationが1件発生した",
-    "fallback source使用率: 14%（1/7件）"
+    "split発生5件のうち、structure側が的中1件、hook側が的中4件、どちらとも不一致0件",
+    "fallback source使用率: 0%（0/7件）",
+    "実投稿済みrunのanalytics取得状況: 1件中 completed=0件・partial=1件（partialはX_USER_ACCESS_TOKEN未設定によるpublic_metricsのみ）"
   ],
   "next_week_research_focus": [
     "Run14: divergence meta-gateのguarded live forward validation（新規source優先、研究専用の厳密プロトコルで）",
-    "non-divergenceのguarded live例をもう1本以上確保する（Run10はcontaminationのため代替が必要）",
-    "gadget teacher supplyの安定化（本線条件とは分離した別issueとして継続。同一source(2093563849580691551)への依存が続いており、新規source開拓が引き続き課題）",
-    "non-divergenceでのmachine-human不一致（mainline-run-2026-08-30-003）を含め、auto_candidate_okの安全性検証を継続"
+    "posted-theme exclusion guardを次回mainline runから実運用に組み込む",
+    "実投稿済みrunのanalytics追跡を継続（現時点でfetch_status=partial 1件、X_USER_ACCESS_TOKEN未設定のためnon-public指標は未取得）",
+    "gadget teacher supplyの新規source開拓（同一source系列への依存緩和）"
   ],
-  "one_line_takeaway": "7件のmainline runはすべて完了。splitは5件（structure的中2件・hook的中3件）、non-divergenceは2件（うち1件はmachine-human不一致）——hook側の的中がやや優勢になってきたが、n=7ではまだ断定できず、divergence・non-divergenceいずれの場合も人間レビュー前提の運用を継続する"
+  "one_line_takeaway": "実際に永続化されたminimal_run_log/enrichment_record（source of truth、7件）を再集計した。mainline_status=completedが7件、splitが5件（structure的中1件・hook的中4件）、non-divergenceが2件、contaminationが0件、fallback使用率0%。実投稿は1件のみでanalyticsはpartial（public_metricsのみ）取得済み。recommendation-only・人間レビュー前提の運用を継続する"
 }
