@@ -1,0 +1,40 @@
+{
+  "entries": [
+    {
+      "run_id": "mainline-run-2026-08-29-001",
+      "published_at": "2026-08-29",
+      "post_url": "https://x.com/ritsu_opt/status/2093850848397033676?s=20",
+      "published_draft_id": "gadget-mainline0829-H",
+      "source_post_id": "2093229163213996215",
+      "target_layer": "gadget",
+      "theme_signature": "ath-pro5mk2-bone-conduction-neckband__gym__call-quality__bone-vs-sealed__split-settled",
+      "theme_key_terms": {
+        "product": [
+          "ath-pro5mk2",
+          "bone-conduction",
+          "neckband"
+        ],
+        "use_case": [
+          "gym",
+          "home"
+        ],
+        "comparison_axis": [
+          "lightness",
+          "call-quality",
+          "split-use"
+        ],
+        "contrast": [
+          "two-device-split",
+          "bone-vs-sealed"
+        ],
+        "conclusion": [
+          "split-settled"
+        ]
+      },
+      "topic_group": "ath-pro5mk2-bone-conduction-neckband__call-quality-lightness-split-use",
+      "exclusion_scope": "mainline_block",
+      "cooldown_active": true,
+      "notes": "backfilled from existing minimal_run_log"
+    }
+  ]
+}

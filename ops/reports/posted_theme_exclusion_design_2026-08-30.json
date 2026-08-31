@@ -1,0 +1,186 @@
+{
+  "document_id": "posted-theme-exclusion-design-2026-08-30",
+  "date": "2026-08-30",
+  "background": "ATH-PRO5MK2 x ジム用骨伝導 x 用途別使い分けテーマはmainline-run-2026-08-29-001として既に実投稿済みだったが、mainline-run-2026-08-29-002〜007で同一/近縁テーマがsource_post_id違いで複数回mainline再生成された。欠陥の本体はscorerではなく、posted-theme exclusion/topic dedupeの欠如だった",
+  "design_principles": [
+    "source_post_idの完全一致だけでは不十分。theme_signatureを主キーにする",
+    "AIの重い意味判定に依存せず、ルールベース+正規化キー+既存ログ活用で止める",
+    "false positiveをある程度許容しても、実投稿済みテーマの再流入防止を優先する",
+    "blockしても研究価値は失わない。route_to_research=Trueで研究側へ回せる"
+  ],
+  "registry_schema": [
+    "run_id",
+    "published_at",
+    "post_url",
+    "published_draft_id",
+    "source_post_id",
+    "target_layer",
+    "theme_signature",
+    "theme_key_terms",
+    "topic_group",
+    "exclusion_scope",
+    "cooldown_active",
+    "notes"
+  ],
+  "theme_signature_dimensions": {
+    "product": [
+      "ath-pro5mk2",
+      "bone-conduction",
+      "neckband",
+      "airpods-pro"
+    ],
+    "use_case": [
+      "gym",
+      "home",
+      "meeting",
+      "commute"
+    ],
+    "comparison_axis": [
+      "lightness",
+      "sound-quality",
+      "call-quality",
+      "fit",
+      "split-use"
+    ],
+    "contrast": [
+      "two-device-split",
+      "bone-vs-sealed",
+      "priority-reversal"
+    ],
+    "conclusion": [
+      "split-settled",
+      "one-device-narrowed"
+    ]
+  },
+  "example_theme_signature": "ath-pro5mk2-bone-conduction-neckband__gym__call-quality__bone-vs-sealed__split-settled",
+  "calibration_finding": "candidate側にdraft本文のみを渡した場合、実測overlap_ratio=0.58で閾値0.6をわずかに下回った（source本文にのみ現れるキーワード'マイク付き'等を拾えないため）。draft本文+source本文の両方をcandidate_textsへ渡すと overlap_ratio=0.92 まで上昇し正しくblockされた。運用ルールとしてcandidate判定は必ず両方を渡すことを明記した",
+  "match_types": {
+    "exact_source_match": {
+      "condition": "source_post_idが過去の実投稿済みrunと完全一致",
+      "mainline_action": "block"
+    },
+    "high_theme_similarity": {
+      "condition": "overlap_ratio>=0.6、または同一topic_group かつ overlap_ratio>=0.3",
+      "mainline_action": "block"
+    },
+    "related_but_not_blocking": {
+      "condition": "overlap_ratio>=0.3だがblock基準未満",
+      "mainline_action": "continue_with_warning"
+    },
+    "none": {
+      "condition": "一致なし",
+      "mainline_action": "continue"
+    }
+  },
+  "thresholds": {
+    "HIGH_SIMILARITY_THRESHOLD": 0.6,
+    "RELATED_THRESHOLD": 0.3,
+    "TOPIC_GROUP_COOLDOWN_DAYS": 21
+  },
+  "hard_guard": [
+    "exact_source_match",
+    "high_theme_similarity"
+  ],
+  "soft_guard": [
+    "related_but_not_blocking"
+  ],
+  "cooldown_policy": "同一topic_groupは実投稿後21日間cooldown対象として記録する。cooldownはtheme block判定の補助情報であり、block判定の主体はtheme_signature照合（3段階）である。cooldown_active=True単独ではmainlineをblockしない",
+  "files_changed": [
+    "scripts/topic_dedupe.py",
+    "scripts/posted_theme_registry.py",
+    "scripts/minimal_run_log.py",
+    "scripts/post_generation_pipeline.py"
+  ],
+  "files_unchanged": [
+    "scripts/external_audit_client.py",
+    "MockExternalAuditClient",
+    "既存のminimal_run_log_*.json/enrichment_record_*.json/weekly_learning_review_*.json（読み取りのみ）"
+  ],
+  "minimal_run_log_new_fields": [
+    "posted_theme_check_status",
+    "posted_theme_match_type",
+    "matched_past_run_id",
+    "matched_post_url",
+    "matched_theme_signature",
+    "block_mainline",
+    "route_to_research",
+    "cooldown_active",
+    "posted_theme_check_reason"
+  ],
+  "mainline_status_unaffected": true,
+  "backfill_result": {
+    "scanned_files": "ops/reports/minimal_run_log_*.json (全件)",
+    "entries_found": 1,
+    "entry": {
+      "run_id": "mainline-run-2026-08-29-001",
+      "theme_signature": "ath-pro5mk2-bone-conduction-neckband__gym__call-quality__bone-vs-sealed__split-settled",
+      "topic_group": "ath-pro5mk2-bone-conduction-neckband__call-quality-lightness-split-use",
+      "post_url": "https://x.com/ritsu_opt/status/2093850848397033676?s=20"
+    },
+    "note": "他のmainline run(002-007)はいずれも未投稿(published_at/post_url/published_draft_idが未設定)のため正しくスキップされた"
+  },
+  "verification_results": [
+    {
+      "id": 1,
+      "item": "実投稿済みテーマの近縁言い換え（別source_post_id、draft+source本文込み）がblockされる",
+      "result": "PASS",
+      "detail": "high_theme_similarity, overlap_ratio=0.92, block_mainline=true"
+    },
+    {
+      "id": 2,
+      "item": "同一source_post_idの再利用がblockされる",
+      "result": "PASS",
+      "detail": "exact_source_match"
+    },
+    {
+      "id": 3,
+      "item": "非投稿の新規テーマ(fashion)がmainlineを通過する",
+      "result": "PASS",
+      "detail": "none, block_mainline=false"
+    },
+    {
+      "id": 4,
+      "item": "非投稿の新規gadgetテーマ(AirPods Pro x 会議)がmainlineを通過する",
+      "result": "PASS",
+      "detail": "none"
+    },
+    {
+      "id": 5,
+      "item": "finalize_minimal_run_log()にposted_theme_checkを渡してもmainline_status判定が変わらない",
+      "result": "PASS",
+      "detail": "block_mainline=trueでもmainline_status=completedのまま"
+    },
+    {
+      "id": 6,
+      "item": "既存のminimal_run_log/enrichment_record/週次集計ファイルが壊れず読み込める",
+      "result": "PASS",
+      "detail": "既存10 runsは無変更、新フィールドはOptionalで後方互換"
+    }
+  ],
+  "integration_instructions": [
+    "source候補選定後・draft生成前後いずれかで run_posted_theme_guard_check(candidate_source_post_id, [draft_text, source_full_text], target_layer) を呼ぶ",
+    "block_mainline=Trueならmainlineでの人間提示から外し、route_to_research=Trueとして研究側の材料として扱う",
+    "block_mainline=False（related_but_not_blockingまたはnone）ならmainlineを通常継続。related_but_not_blockingはwarningとして記録",
+    "実投稿確定時はposted_theme_registry_2026-08-30.jsonへ新しいtheme entryを追記する（現時点は手動/スクリプト実行によるbackfill運用）"
+  ],
+  "known_limitations": [
+    "キーワード辞書はgadget layer（イヤホン/ヘッドホン系）中心の最小セット。fashion/intersectionや他gadgetサブテーマは辞書拡充が必要",
+    "registryへの新規entry自動追記の仕組みは未実装（次のfollow-up）",
+    "related_but_not_blockingのsoft guard情報を人間レビュー画面へどう見せるかの具体的導線は未実装",
+    "cooldown 21日は仮の保守的初期値。実運用データ蓄積後に見直す"
+  ],
+  "frozen_components": [
+    "Gate A",
+    "thresholds(65/75/80)",
+    "shipping decision",
+    "Phase 1 query set",
+    "production _QUALITY_SCORE_SYSTEM_PROMPT",
+    "teacher_reference_score",
+    "既存structure Gate B",
+    "hook_v1",
+    "hook_v2",
+    "divergence meta-gateのscoringロジック"
+  ],
+  "note": "scorer改善とは別問題として扱う。既投稿テーマをmainlineに戻さないことを最優先。research-only routingは維持。自動投稿は行っていない。",
+  "commit_push": "未実施。"
+}
