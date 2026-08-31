@@ -1,0 +1,21 @@
+{
+  "run_id": "mainline-run-2026-08-29-001",
+  "post_url": "https://x.com/ritsu_opt/status/2093850848397033676?s=20",
+  "post_id": "2093850848397033676",
+  "fetched_at": "2026-08-31T06:35:59Z",
+  "analytics_source": "x_api_v2_tweets_lookup_app_only",
+  "public_metrics": {
+    "bookmark_count": 0,
+    "impression_count": 10,
+    "like_count": 0,
+    "quote_count": 0,
+    "reply_count": 0,
+    "retweet_count": 0
+  },
+  "non_public_metrics": null,
+  "organic_metrics": null,
+  "promoted_metrics": null,
+  "fetch_status": "partial",
+  "fetch_error": null,
+  "notes": "non_public_metrics/organic_metricsはuser context（X_USER_ACCESS_TOKEN）が必要。public_metricsのみ取得済み"
+}

@@ -1,0 +1,31 @@
+{
+  "run_id": "mainline-run-2026-08-29-001",
+  "structure_top_candidate_id": "gadget-mainline0829-G",
+  "hook_top_candidate_id": "gadget-mainline0829-H",
+  "structure_hook_divergence": true,
+  "divergence_type": "mutual_disagreement",
+  "divergence_severity": "high",
+  "recommended_review_mode": "human_review_priority_high",
+  "structure_vs_human_match": false,
+  "hook_vs_human_match": true,
+  "meta_gate_takeaway": "structure_top=gadget-mainline0829-G（mapped_gap=9、confident=True）、hook_top=gadget-mainline0829-H（axis_consensus=0.75、confidence=confident）で不一致。divergence_type=mutual_disagreement、severity=high。structureとhookのどちらが正しいかを自動では確定させず、split自体を人間確認の優先度シグナルとして扱う",
+  "human_initial_top": null,
+  "human_final_top": "gadget-mainline0829-H",
+  "recommendation_influence_level": null,
+  "human_confidence_shift": null,
+  "comparative_snapshot_persisted": true,
+  "mapping_version": "tier_bounded_v1",
+  "raw_normalized_scores": {
+    "gadget-mainline0829-G": 100,
+    "gadget-mainline0829-H": 0
+  },
+  "mapped_normalized_scores": {
+    "gadget-mainline0829-G": 81,
+    "gadget-mainline0829-H": 72
+  },
+  "step_a_disclosure_contamination": false,
+  "enrichment_status": "completed",
+  "enrichment_failure_reason": null,
+  "post_analytics_available": true,
+  "post_analytics_file_path": "ops/reports/post_analytics_2026-08-31_mainline-run-2026-08-29-001.json"
+}

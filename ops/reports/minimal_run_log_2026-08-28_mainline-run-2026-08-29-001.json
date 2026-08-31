@@ -1,0 +1,37 @@
+{
+  "run_id": "mainline-run-2026-08-29-001",
+  "source_post_id": "2093229163213996215",
+  "target_layer": "gadget",
+  "draft_ids": [
+    "gadget-mainline0829-G",
+    "gadget-mainline0829-H"
+  ],
+  "gate_a_pass_ids": [
+    "gadget-mainline0829-G",
+    "gadget-mainline0829-H"
+  ],
+  "human_selected_top": "gadget-mainline0829-H",
+  "published_draft_id": "gadget-mainline0829-H",
+  "selection_reason_short": "「ジム用は…自宅では…」で使い分けの対比が最初の一読で明確。Gより構造が締まっていて、用途別の整理も伝わりやすい。",
+  "primary_source_post_id": "2093229163213996215",
+  "fallback_source_post_id": null,
+  "used_fallback_source": false,
+  "mainline_status": "completed",
+  "enrichment_status": "completed",
+  "weekly_aggregation_status": "included",
+  "research_followup_required": true,
+  "published_at": "2026-08-29",
+  "post_url": "https://x.com/ritsu_opt/status/2093850848397033676?s=20",
+  "posted_theme_check_status": null,
+  "posted_theme_match_type": null,
+  "matched_past_run_id": null,
+  "matched_post_url": null,
+  "matched_theme_signature": null,
+  "block_mainline": null,
+  "route_to_research": null,
+  "cooldown_active": null,
+  "posted_theme_check_reason": null,
+  "analytics_status": "partial",
+  "analytics_file_path": "ops/reports/post_analytics_2026-08-31_mainline-run-2026-08-29-001.json",
+  "latest_impression_count": 10
+}

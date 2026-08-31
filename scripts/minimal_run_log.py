@@ -66,6 +66,12 @@ class MinimalRunLog:
     route_to_research: bool | None = None
     cooldown_active: bool | None = None
     posted_theme_check_reason: str | None = None
+    # 2026-08-31 X API実績値（impression/engagement等）の接続用フィールド。
+    # scripts/x_post_analytics.pyが取得した結果を、mark_analytics_status()経由で
+    # 反映する。未取得のrunではすべてNoneのままでよい（既存run・後方互換）。
+    analytics_status: str | None = None
+    analytics_file_path: str | None = None
+    latest_impression_count: int | None = None
 
 
 def build_minimal_run_log(
@@ -163,6 +169,21 @@ def mark_enrichment_status(log: MinimalRunLog, status: str) -> MinimalRunLog:
 def mark_weekly_aggregation_included(log: MinimalRunLog) -> MinimalRunLog:
     """週次集計に組み込まれたことを記録する。"""
     log.weekly_aggregation_status = "included"
+    return log
+
+
+def mark_analytics_status(
+    log: MinimalRunLog,
+    status: str,
+    file_path: str | None = None,
+    latest_impression_count: int | None = None,
+) -> MinimalRunLog:
+    """X API実績値取得（scripts/x_post_analytics.py）の結果をminimal_run_logへ反映する。
+    mainline_statusには一切触れない（analytics取得の成否をmainline失敗へ波及させない）。
+    """
+    log.analytics_status = status
+    log.analytics_file_path = file_path
+    log.latest_impression_count = latest_impression_count
     return log
 
 
