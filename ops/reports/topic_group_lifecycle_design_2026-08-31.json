@@ -1,0 +1,68 @@
+{
+  "design_id": "TOPIC-GROUP-LIFECYCLE-2026-08-31",
+  "date": "2026-08-31",
+  "purpose": "Resolve 3 symptoms (posted-theme reincursion, unsuccessful-theme retry-forever, feedback-disconnected) from their shared root cause: themes have no lifecycle state.",
+  "scope_untouched": [
+    "Gate A scoring/threshold logic body",
+    "shipping-decision judgment conditions",
+    "Phase 1 query set content/generation",
+    "structure/hook/divergence scorer algorithm",
+    "non-blocking property of research/shadow/replay trigger conditions"
+  ],
+  "components": {
+    "theme_signature_normalization": {
+      "file": "scripts/topic_dedupe.py",
+      "change": "added _normalize_for_matching() (NFKC + lowercase + symbol strip) applied to both text and keyword dict entries before substring match; expanded keyword dictionaries with English/katakana/okurigana variants",
+      "public_api_stability": "unchanged signatures/return shapes for extract_theme_components, build_theme_signature, build_topic_group, theme_component_overlap_ratio, build_theme_profile"
+    },
+    "topic_group_state_store": {
+      "file": "scripts/topic_group_state.py",
+      "fields": [
+        "topic_group_id", "theme_signature", "topic_status", "topic_last_published_at",
+        "topic_performance_band", "topic_retry_budget", "topic_cooldown_until",
+        "topic_retired_from_mainline", "route_to_research_only", "source_diversity_tag",
+        "created_at", "updated_at"
+      ],
+      "constants_reused": ["TOPIC_GROUP_COOLDOWN_DAYS (from posted_theme_registry)"],
+      "constants_new": ["TOPIC_GROUP_INITIAL_RETRY_BUDGET=3", "PERFORMANCE_BAND_THRESHOLDS={low:50, medium:200}"]
+    },
+    "mainline_candidate_filter": {
+      "file": "scripts/post_generation_pipeline.py",
+      "function": "evaluate_topic_group_for_mainline()",
+      "note_on_source_discrepancy": "source instructions labeled this '4条件' but enumerated 5 distinct clauses (topic_status=active, posted-theme exclusion, retry_budget>0, cooldown-clear, exploration-quota-within); all 5 were implemented as literally enumerated rather than silently collapsing to 4",
+      "combines": ["posted_theme_registry.check_posted_theme_guard() (primary, authoritative block)", "passes_mainline_candidate_filter() (secondary, topic_group bookkeeping)"]
+    },
+    "minimal_run_log_sync": {
+      "file": "scripts/post_generation_pipeline.py",
+      "function": "record_topic_group_outcome_and_save()",
+      "note": "finalize_minimal_run_log() itself unmodified in this task; caller invokes both alongside each other"
+    },
+    "post_analytics_feedback": {
+      "file": "scripts/post_generation_pipeline.py",
+      "function": "update_topic_performance_from_post_analytics()",
+      "none_handling": "impression_count=None maps to performance_band='unknown', never silently coerced to 0/low"
+    },
+    "backfill": {
+      "file": "scripts/backfill_topic_group_state.py",
+      "read_only": true,
+      "independent_from_mainline_code_path": true,
+      "execution_result": {
+        "processed_run_ids": [
+          "mainline-run-2026-08-29-001", "mainline-run-2026-08-29-002",
+          "mainline-run-2026-08-30-003", "mainline-run-2026-08-30-004",
+          "mainline-run-2026-08-30-005", "mainline-run-2026-08-30-006",
+          "mainline-run-2026-08-30-007"
+        ],
+        "skipped_run_ids": [],
+        "topic_group_ids_produced": 2,
+        "expected_topic_group_ids": 1,
+        "output_file": "ops/reports/topic_group_state_2026-08-31.json"
+      }
+    }
+  },
+  "known_limitation": {
+    "description": "backfill produced 2 distinct topic_group_ids for what is conceptually one real-world theme (ATH-PRO5MK2 x gym bone-conduction), because build_topic_group()'s tag-set grouping is sensitive to whether the 'split-use' comparison-axis keyword is detected in a given draft's specific wording",
+    "safety_impact": "none confirmed — the authoritative mainline-block decision is made by posted_theme_registry.check_posted_theme_guard()'s direct theme_component_overlap_ratio() comparison, not by topic_group-string equality; empirically verified via end-to-end re-test against the real mainline-run-2026-08-31-008 blocked-candidate scenario, which correctly blocked despite this topic_group granularity issue",
+    "follow_up_needed": "harden topic_group tag detection for comparison-axis wording variants, or formalize dual-key comparison (theme_signature + topic_group) as the standard lookup pattern"
+  }
+}
