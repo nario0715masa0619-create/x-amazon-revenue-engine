@@ -72,15 +72,15 @@ FASHION_KEYWORDS = [
 # 違反であり、かつteacher判定は本来エンゲージメント実測値（いいね・リポスト等）で
 # 行うという方針と食い違っていたため。以下の_compute_engagement_tier()に置き換える。
 #
-# 【重要な限界（人間の確認が必要）】GADGET_CORE_KEYWORDS（三層探索方針、下記）は
-# 本タスクでは削除・変更していない。GADGET_CORE_KEYWORDSはlayer_primary（fashion/
-# gadget/intersectionのルーティング）に加え、"gadget_only_but_reusable"という
-# pre_teacher_candidateへの直接昇格パス（_classify()内、gadget_signal_strength=="high"
-# のみで判定、エンゲージメント値を一切参照しない）にも使われている。GADGET_KEYWORDSと
-# 同様「商品カテゴリの先読み」という性質を持つが、本タスクの指示は
-# GADGET_KEYWORDSの削除のみを明示していたため、GADGET_CORE_KEYWORDSは未変更のまま
-# 残した。この昇格パスは今回のエンゲージメント基準化の対象外のまま残っている
-# ことを最終報告に明記する。
+# GADGET_CORE_KEYWORDS（三層探索方針、下記）は辞書自体を削除せず、layer_primary
+# （fashion/gadget/intersectionのルーティング）用のトピック関連性シグナルとして
+# 引き続き使う。2026-09-01追加（GOV-20260901-GADGET-ONLY-REUSABLE-ENGAGEMENT-GATE-01）:
+# 当初は"gadget_only_but_reusable"というpre_teacher_candidateへの直接昇格パスが
+# GADGET_CORE_KEYWORDSのみ（gadget_signal_strength=="high"）で判定されており、
+# エンゲージメント値を一切参照しない抜け道になっていた（impression_count=0の
+# ATH-PRO5MK2×骨伝導RT等が昇格し続ける実例で確認）。この抜け道は当該昇格条件へ
+# obs["observed_engagement_tier"]=="qualifying"を必須条件として追加することで
+# 塞いだ（詳細は_classify()内の該当箇所コメント参照）。
 
 AESTHETIC_KEYWORDS = [
     "ダサい", "ダサくない", "大人っぽい", "清潔感", "自然", "上品", "ミニマル",
@@ -422,6 +422,16 @@ GADGET_CORE_KEYWORDS = [
     "イヤホン", "モバイルバッテリー", "充電器", "ガジェット", "スマホ周辺", "ケーブル",
     "軽量", "完全防水", "骨伝導", "ワイヤレス", "USB-C", "充電", "持ち歩き機器",
 ]
+# 2026-09-01改訂（GOV-20260901-GADGET-ONLY-REUSABLE-ENGAGEMENT-GATE-01）:
+# GADGET_CORE_KEYWORDSの役割を「トピック関連性シグナルのみ」に明確化する。
+# ＝この投稿が「40代ファッション×ガジェット」ジャンルのgadget側に該当しそうか、
+# という話題適合の判定にのみ使ってよい。「この投稿をteacher候補（pre_teacher_candidate）
+# に昇格させてよいか」の可否判定には使わない——昇格の可否は必ず
+# obs["observed_engagement_tier"]（_compute_engagement_tier()の結果）で決まる。
+# この分離により、GADGET_CORE_KEYWORDSに一致するがエンゲージメント実測が
+# insufficient_data/lowの投稿（例: impression_count=0のRT）が、話題適合のみを
+# 理由にteacher候補へ昇格することはない（_classify()の"gadget_only_but_reusable"
+# 昇格条件を参照）。
 INTERSECTION_BRIDGE_KEYWORDS = [
     "持ち歩き", "邪魔しない", "服に合う", "見た目を壊さない", "身につけやすい",
     "バッグに入る", "軽い", "疲れにくい", "街歩き", "旅行より日常", "収納しやすい",
@@ -911,8 +921,23 @@ def _classify(post: dict, obs: dict) -> tuple[str, list[str], str, str | None]:
         if obs["layer_primary"] == "fashion" and obs["fashion_signal_strength"] == "high":
             reasons.append("fashion_only_but_reusable（ファッション単独だが構造・アプローチ再利用価値が高い）")
             return "pre_teacher_candidate", reasons, "medium", None
-        if obs["layer_primary"] == "gadget" and obs["gadget_signal_strength"] == "high":
-            reasons.append("gadget_only_but_reusable（ガジェット単独だが構造・アプローチ再利用価値が高い）")
+        # 2026-09-01変更（GOV-20260901-GADGET-ONLY-REUSABLE-ENGAGEMENT-GATE-01）:
+        # gadget_signal_strength（GADGET_CORE_KEYWORDS由来）はトピック関連性の
+        # シグナルとして引き続き必須条件に使うが、これだけではteacher候補への
+        # 昇格を許可しない。obs["observed_engagement_tier"]=="qualifying"
+        # （実測エンゲージメントが閾値を満たす）も必須とする。insufficient_data/low
+        # の場合はここでは昇格させず、以降のobserve/manual_review判定に委ねる
+        # （既知のATH-PRO5MK2×骨伝導RT等、impression_count=0の投稿がキーワード
+        # 一致のみでteacher候補になり続ける抜け道を塞ぐ）。
+        if (
+            obs["layer_primary"] == "gadget"
+            and obs["gadget_signal_strength"] == "high"
+            and obs["observed_engagement_tier"] == "qualifying"
+        ):
+            reasons.append(
+                "gadget_only_but_reusable（ガジェット単独だが構造・アプローチ再利用価値が高く、"
+                "エンゲージメント実測もqualifying）"
+            )
             return "pre_teacher_candidate", reasons, "medium", None
 
     # --- observe 判定 ---

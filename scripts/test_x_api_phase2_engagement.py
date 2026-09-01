@@ -147,6 +147,64 @@ def test_engagement_replaces_keyword_gating() -> None:
 
 
 # ==============================================================================
+# 検証2b（GOV-20260901-GADGET-ONLY-REUSABLE-ENGAGEMENT-GATE-01）:
+# "gadget_only_but_reusable"昇格パスがengagement_tierでゲートされること
+# ==============================================================================
+def test_gadget_only_but_reusable_requires_qualifying_engagement() -> None:
+    print("\n=== 検証2b: gadget_only_but_reusable昇格パスのengagement_tierゲート ===")
+
+    # fashionキーワードを含まない、純粋なgadget単独文面（GADGET_CORE_KEYWORDS多数一致）。
+    gadget_only_text = (
+        "イヤホンは軽量で完全防水、骨伝導だから耳を塞がない。充電もUSB-Cで持ち歩き機器として"
+        "本当に使いやすい。実際に使ってみて比較すると、この選び方が一番よかった。"
+    )
+
+    # ATH-PRO5MK2×骨伝導RTと同型（impression_count=0）の再現ケース: GADGET_CORE_KEYWORDS
+    # には強く一致するが実測エンゲージメントはゼロ = insufficient_data。
+    zero_engagement_post = _post(gadget_only_text, impression=0, like=0, repost=0)
+    obs_zero = p2._observe(zero_engagement_post)
+    _check(
+        "gadget_only_zero_engagement_tier_is_insufficient_data",
+        obs_zero["observed_engagement_tier"] == "insufficient_data",
+        str(obs_zero["observed_engagement_tier"]),
+    )
+    _check(
+        "gadget_only_zero_engagement_topic_signal_still_high",
+        obs_zero["layer_primary"] == "gadget" and obs_zero["gadget_signal_strength"] == "high",
+        "GADGET_CORE_KEYWORDSによるトピック関連性シグナル自体は健在であるべき",
+    )
+    classification_zero, reasons_zero, _, _ = p2._classify(zero_engagement_post, obs_zero)
+    _check(
+        "gadget_only_zero_engagement_blocked_from_pre_teacher_candidate",
+        classification_zero != "pre_teacher_candidate",
+        f"classification={classification_zero}, reasons={reasons_zero}",
+    )
+    _check(
+        "gadget_only_but_reusable_reason_not_present_when_blocked",
+        not any("gadget_only_but_reusable" in r for r in reasons_zero),
+        str(reasons_zero),
+    )
+
+    # false negative確認: 同じgadget単独文面でもengagement_tier=="qualifying"なら
+    # 引き続き正しくpre_teacher_candidateへ昇格すること（GADGET_CORE_KEYWORDS自体は
+    # トピック関連性シグナルとして生きている）。
+    qualifying_post = _post(gadget_only_text, impression=500, like=10, repost=3, reply=1, bookmark=2)
+    obs_qual = p2._observe(qualifying_post)
+    _check(
+        "gadget_only_qualifying_engagement_tier",
+        obs_qual["observed_engagement_tier"] == "qualifying",
+        str(obs_qual["observed_engagement_tier"]),
+    )
+    classification_qual, reasons_qual, _, _ = p2._classify(qualifying_post, obs_qual)
+    _check(
+        "gadget_only_qualifying_engagement_promotes_via_gadget_only_but_reusable",
+        classification_qual == "pre_teacher_candidate"
+        and any("gadget_only_but_reusable" in r for r in reasons_qual),
+        f"classification={classification_qual}, reasons={reasons_qual}",
+    )
+
+
+# ==============================================================================
 # 検証3: reject側ロジック（広告・煽り・薄い内容の除外）が無影響であること
 # ==============================================================================
 def test_reject_side_logic_unaffected() -> None:
@@ -177,6 +235,46 @@ def test_reject_side_logic_unaffected() -> None:
         "thin_content_still_rejected_despite_high_engagement",
         classification_thin == "reject",
         f"classification={classification_thin}, reasons={reasons_thin}",
+    )
+
+
+# ==============================================================================
+# 検証（GOV-20260901-GADGET-ONLY-REUSABLE-ENGAGEMENT-GATE-01）:
+# 実データのATH-PRO5MK2×骨伝導投稿（impression_count=0）がpre_teacher_candidateから
+# 除外されること
+# ==============================================================================
+def test_real_ath_pro5mk2_post_excluded() -> None:
+    print("\n=== 検証: 実データATH-PRO5MK2×骨伝導投稿（impression=0）の除外確認 ===")
+    if not p2._INPUT_PATH.exists():
+        _check("real_data_file_exists_for_ath_pro5mk2_check", False, f"{p2._INPUT_PATH} が見つからない")
+        return
+    posts = p2._load_input()
+    target = next((p for p in posts if p.get("id") == "2094280166017204415"), None)
+    if target is None:
+        _check(
+            "ath_pro5mk2_post_present_in_current_snapshot",
+            False,
+            "現行merged_deduped.jsonに当該post_idが存在しない（X検索の7日ローリング窓により"
+            "収集対象から外れた可能性がある。この場合は本チェックをskipし、synthetic再現ケース"
+            "（test_gadget_only_but_reusable_requires_qualifying_engagement）で代替確認する）",
+        )
+        return
+    obs = p2._observe(target)
+    classification, reasons, _, _ = p2._classify(target, obs)
+    _check(
+        "ath_pro5mk2_impression_is_zero",
+        target.get("impression_count") == 0,
+        str(target.get("impression_count")),
+    )
+    _check(
+        "ath_pro5mk2_engagement_tier_insufficient",
+        obs["observed_engagement_tier"] == "insufficient_data",
+        str(obs["observed_engagement_tier"]),
+    )
+    _check(
+        "ath_pro5mk2_excluded_from_pre_teacher_candidate",
+        classification != "pre_teacher_candidate",
+        f"classification={classification}, reasons={reasons}",
     )
 
 
@@ -213,7 +311,9 @@ if __name__ == "__main__":
     test_gadget_keywords_removed()
     test_compute_engagement_tier()
     test_engagement_replaces_keyword_gating()
+    test_gadget_only_but_reusable_requires_qualifying_engagement()
     test_reject_side_logic_unaffected()
+    test_real_ath_pro5mk2_post_excluded()
     test_real_data_reclassification()
 
     print("\n" + "=" * 60)
