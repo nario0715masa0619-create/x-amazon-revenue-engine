@@ -39,6 +39,42 @@ TOPIC_GROUP_INITIAL_RETRY_BUDGET = 3
 # 実運用データが蓄積されたら見直す。
 PERFORMANCE_BAND_THRESHOLDS = {"low": 50, "medium": 200}
 
+# ============================================================================
+# 2026-09-01追加（GOV-20260901-POST-OUTCOME-DESIGN-01）: post_outcome.classify_post_outcome()
+# の結果（win/neutral/loss/insufficient_data）をtopic_groupのライフサイクル判断へ
+# 配線するための暫定閾値。すべて暫定値であり、最終決定は人間が行う。
+# 変更する場合はこのブロックの該当定数のみを書き換えればよい（他の計算式は
+# 自動的に追随する）。
+# ============================================================================
+
+# win実績が一度もないtopic_groupがmainline試行に失敗した場合、通常の1に代えて
+# この倍率分だけretry_budgetを消費する（record_mainline_attempt()参照）。
+# 暫定値: 2。根拠: 「不発テーマの延命」をより早く止めるため、実績が未証明の
+# テーマの消費ペースを通常の2倍にするという設計判断。この倍率の妥当性は
+# 実運用データが蓄積されてから人間が再検証する必要がある。
+NEVER_WON_RETRY_BUDGET_PENALTY_MULTIPLIER = 2
+
+# 直近のpost_outcomeが"win"だった場合、cooldown期間を
+# TOPIC_GROUP_COOLDOWN_DAYS // WIN_COOLDOWN_DIVISOR に短縮する（record_publication()参照）。
+# 暫定値: 3（21日 -> 7日）。根拠: winしたテーマは再露出のリスクが相対的に低いと
+# 仮定した暫定判断。実データによる検証はまだ行っていない。人間の確認が必要。
+WIN_COOLDOWN_DIVISOR = 3
+
+# win実績が一度もないまま、mainline_run_countがこの値を超えたtopic_groupは
+# 候補プールから除外する（passes_mainline_candidate_filter()参照）。この判定は
+# topic_group単体のmainline_run_countのみを見る（同一テーマがtheme_signature分裂
+# （前タスクGOV-20260901-TOPIC-GROUP-SPLIT-DETECTION-01で検出可能になった問題）で
+# 複数topic_group_idに割れている場合、この関数は分裂を横断した合算値までは見ない
+# ——分裂の合算判定はweekly_learning_reviewのdetect_theme_signature_splits()側の
+# 責務のままとし、本関数は意図的にシンプルなper-topic_group判定に留める）。
+# 暫定値: 4。根拠: 実データで確認済みのATH-PRO5MK2テーマ系列は、theme_signature分裂
+# により2つのtopic_group_id（mainline_run_count=5および2）に分かれており、win実績は
+# 一度もない（GOV-20260901-INVESTIGATION-01調査より）。この暫定値4は、露出の多い側
+# （5）を確実に検出できる水準として設定したものであり、4が適切な運用値かは
+# 人間の判断が必要（特に、分裂した2つのtopic_group_idを横断した合算値（5+2=7）を
+# 見るべきという設計変更も、次のfollow-upとして人間が検討する余地がある）。
+NEVER_WON_MAX_RUN_COUNT_WITHOUT_WIN = 4
+
 
 class TopicGroupStateError(ValueError):
     pass
@@ -68,6 +104,12 @@ class TopicGroupState:
     # 既存の保存済みJSONにこのキーが無くても、dataclassのdefaultによりロード時エラーにならない
     # （追加のみで既存データを破壊しない）。record_topic_group_run_observed()でのみ増分する。
     mainline_run_count: int = 0
+    # 2026-09-01追加（GOV-20260901-POST-OUTCOME-DESIGN-01）: post_outcome.classify_post_outcome()
+    # の結果を反映するフィールド。record_post_outcome()でのみ更新する。has_ever_wonは
+    # 一度Trueになったら以後Falseへ戻らない（「過去に一度でも勝ったか」の累積フラグ）。
+    # 既存の保存済みJSONにこれらのキーが無くてもdataclassのdefaultでロード可能（追加のみ）。
+    has_ever_won: bool = False
+    latest_post_outcome: str | None = None
 
 
 def _now_iso() -> str:
@@ -102,6 +144,22 @@ def record_topic_group_run_observed(state: TopicGroupState) -> TopicGroupState:
     （theme_signature分裂検出のための実質露出回数カウンタ。状態遷移・budget消費とは独立）。
     """
     state.mainline_run_count += 1
+    state.updated_at = _now_iso()
+    return state
+
+
+def record_post_outcome(state: TopicGroupState, outcome: str) -> TopicGroupState:
+    """post_outcome.classify_post_outcome()の判定結果（"win"/"neutral"/"loss"/
+    "insufficient_data"の文字列）をtopic_group状態へ反映する。
+
+    本モジュールはpost_outcome.pyをimportしない（post_outcome.pyがtopic_group_state.py
+    のPERFORMANCE_BAND_THRESHOLDSをimportしているため、循環importを避けるために
+    outcome文字列のみを受け取る）。has_ever_wonは一度Trueになったら以後Falseへ
+    戻さない（「過去に一度でも勝ったことがあるか」という累積事実のフラグのため）。
+    """
+    state.latest_post_outcome = outcome
+    if outcome == "win":
+        state.has_ever_won = True
     state.updated_at = _now_iso()
     return state
 
@@ -218,9 +276,15 @@ def record_mainline_attempt(state: TopicGroupState, succeeded: bool) -> TopicGro
     フィルタで自動的に除外されるようにする（「不発テーマの延命」への対処）。
 
     succeeded=True（human選定＝mainline_status=completedまで到達）なら消費しない。
+
+    2026-09-01追加（GOV-20260901-POST-OUTCOME-DESIGN-01）: state.has_ever_won（過去に
+    一度でも"win"判定を得たことがあるか、record_post_outcome()で更新）がFalseの場合、
+    通常の1消費ではなくNEVER_WON_RETRY_BUDGET_PENALTY_MULTIPLIER倍を消費する
+    （暫定ロジック、値の妥当性は人間の判断が必要。定数コメント参照）。
     """
     if not succeeded:
-        state.topic_retry_budget = max(0, state.topic_retry_budget - 1)
+        penalty = 1 if state.has_ever_won else NEVER_WON_RETRY_BUDGET_PENALTY_MULTIPLIER
+        state.topic_retry_budget = max(0, state.topic_retry_budget - penalty)
         if state.topic_retry_budget == 0 and state.topic_status == "active":
             state.topic_status = "exhausted"
             state.route_to_research_only = True
@@ -229,20 +293,44 @@ def record_mainline_attempt(state: TopicGroupState, succeeded: bool) -> TopicGro
 
 
 def record_publication(
-    state: TopicGroupState, published_at: str, cooldown_days: int = TOPIC_GROUP_COOLDOWN_DAYS
+    state: TopicGroupState,
+    published_at: str,
+    cooldown_days: int = TOPIC_GROUP_COOLDOWN_DAYS,
+    latest_outcome: str | None = None,
 ) -> TopicGroupState:
     """実投稿確定時にtopic_group状態を更新する。以後このtopic_groupはmainlineの
     候補生成フィルタから外れ、research専用扱いになる——posted_theme_registryの
     exact_source_match/high_theme_similarity判定と目的を揃える（「投稿済みテーマは
     もうmainlineの主対象ではない」というライフサイクル上の帰結を明示的に状態化する）。
+
+    2026-09-01追加（GOV-20260901-POST-OUTCOME-DESIGN-01）: latest_outcome
+    （post_outcome.classify_post_outcome()の結果。この*同じ*投稿の実績値はまだ
+    取得できていない時点で呼ばれるため、通常は直前のサイクルのstate.latest_post_outcome
+    を渡す想定）に応じてcooldown期間・statusを可変にする（暫定ロジック、値の妥当性は
+    人間の判断が必要。WIN_COOLDOWN_DIVISOR等の定数コメント参照）:
+      - "loss": 即座にtopic_status="retired"とし、topic_cooldown_untilは設定しない
+        （cooldown経過による自動復帰の対象から外す＝実質的な卒業）
+      - "win": cooldown期間をcooldown_days // WIN_COOLDOWN_DIVISORへ短縮する
+      - "neutral"／"insufficient_data"／None（デフォルト、既存呼び出し互換）:
+        既存どおりcooldown_daysをそのまま使う
     """
     state.topic_last_published_at = published_at
-    state.topic_status = "published"
     state.topic_retired_from_mainline = True
     state.route_to_research_only = True
+
+    if latest_outcome == "loss":
+        state.topic_status = "retired"
+        state.topic_cooldown_until = None
+        state.updated_at = _now_iso()
+        return state
+
+    state.topic_status = "published"
+    effective_cooldown_days = cooldown_days
+    if latest_outcome == "win":
+        effective_cooldown_days = max(1, cooldown_days // WIN_COOLDOWN_DIVISOR)
     try:
         published_date = datetime.strptime(published_at, "%Y-%m-%d").date()
-        state.topic_cooldown_until = (published_date + timedelta(days=cooldown_days)).strftime("%Y-%m-%d")
+        state.topic_cooldown_until = (published_date + timedelta(days=effective_cooldown_days)).strftime("%Y-%m-%d")
     except ValueError:
         pass
     state.updated_at = _now_iso()
@@ -292,7 +380,12 @@ def passes_mainline_candidate_filter(
     数え違いを黙って解消せず、ここでは列挙された5条件すべてをそのまま実装し、
     この食い違いをドキュメント上明記する（最終報告の「未解決事項」にも記載）。
 
-    5条件すべてを満たす場合のみ`passes=True`（候補プールに残す）:
+    2026-09-01追加（GOV-20260901-POST-OUTCOME-DESIGN-01）: 上記5条件に加え、
+    「win実績が一度もないまま、mainline_run_countがNEVER_WON_MAX_RUN_COUNT_WITHOUT_WIN
+    を超えたtopic_groupを除外する」第6条件を追加した（暫定値、人間の判断が必要。
+    定数コメント参照）。
+
+    6条件すべてを満たす場合のみ`passes=True`（候補プールに残す）:
       1. topic_status == "active"
       2. posted-theme exclusionでblockされていない
          （posted_theme_registry.check_posted_theme_guard()の判定結果を
@@ -300,6 +393,8 @@ def passes_mainline_candidate_filter(
       3. topic_retry_budget > 0
       4. cooldown外
       5. exploration quota内（呼び出し側が計算したbool値をそのまま受け取る）
+      6. win実績が一度もなく、かつmainline_run_countが
+         NEVER_WON_MAX_RUN_COUNT_WITHOUT_WINを超えている、という状態ではない
     """
     reasons: list[str] = []
 
@@ -323,7 +418,23 @@ def passes_mainline_candidate_filter(
     if not quota_ok:
         reasons.append("exploration quota超過")
 
-    passes = status_ok and posted_theme_ok and retry_budget_ok and cooldown_ok and quota_ok
+    never_won_exhausted_ok = not (
+        not state.has_ever_won and state.mainline_run_count > NEVER_WON_MAX_RUN_COUNT_WITHOUT_WIN
+    )
+    if not never_won_exhausted_ok:
+        reasons.append(
+            f"win実績なしのままmainline_run_count={state.mainline_run_count}が"
+            f"NEVER_WON_MAX_RUN_COUNT_WITHOUT_WIN({NEVER_WON_MAX_RUN_COUNT_WITHOUT_WIN})を超過"
+        )
+
+    passes = (
+        status_ok
+        and posted_theme_ok
+        and retry_budget_ok
+        and cooldown_ok
+        and quota_ok
+        and never_won_exhausted_ok
+    )
     return {
         "passes": passes,
         "topic_status_ok": status_ok,
@@ -331,6 +442,7 @@ def passes_mainline_candidate_filter(
         "retry_budget_ok": retry_budget_ok,
         "cooldown_ok": cooldown_ok,
         "exploration_quota_ok": quota_ok,
+        "never_won_exhausted_ok": never_won_exhausted_ok,
         "reasons": reasons,
     }
 
