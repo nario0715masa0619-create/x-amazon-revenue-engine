@@ -11,9 +11,11 @@
       "topic_retired_from_mainline": true,
       "route_to_research_only": true,
       "source_diversity_tag": null,
-      "created_at": "2026-09-01T05:15:34Z",
-      "updated_at": "2026-09-01T05:15:34Z",
-      "mainline_run_count": 5
+      "created_at": "2026-09-01T06:46:09Z",
+      "updated_at": "2026-09-01T06:46:09Z",
+      "mainline_run_count": 5,
+      "has_ever_won": false,
+      "latest_post_outcome": "insufficient_data"
     },
     "ath-pro5mk2-bone-conduction-neckband__call-quality-lightness": {
       "topic_group_id": "ath-pro5mk2-bone-conduction-neckband__call-quality-lightness",
@@ -26,9 +28,11 @@
       "topic_retired_from_mainline": false,
       "route_to_research_only": false,
       "source_diversity_tag": null,
-      "created_at": "2026-09-01T05:15:34Z",
-      "updated_at": "2026-09-01T05:15:34Z",
-      "mainline_run_count": 2
+      "created_at": "2026-09-01T06:46:09Z",
+      "updated_at": "2026-09-01T06:46:09Z",
+      "mainline_run_count": 2,
+      "has_ever_won": false,
+      "latest_post_outcome": null
     }
   }
 }

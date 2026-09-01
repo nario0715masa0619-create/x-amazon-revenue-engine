@@ -32,10 +32,12 @@ from topic_group_state import (
     TopicGroupState,
     get_or_create_topic_group,
     record_publication,
+    record_post_outcome,
     record_topic_group_run_observed,
     update_performance_band,
     save_topic_group_state_store,
 )
+from post_outcome import classify_post_outcome
 
 
 def backfill_topic_group_state_from_reports_dir(
@@ -80,14 +82,24 @@ def backfill_topic_group_state_from_reports_dir(
 
         published_at = log.get("published_at")
         if published_at:
-            record_publication(state, published_at=published_at)
+            # latest_post_outcomeは「直前サイクルまでの」判定結果（このrun自身の
+            # 実績値はこの時点でまだ反映されていない。post_analyticsブロックは
+            # このrecord_publication()呼び出しの後で処理されるため、real-world
+            # での本線の呼び出し順序（先に投稿確定、実績値は後から非同期到着）と揃えている）。
+            record_publication(state, published_at=published_at, latest_outcome=state.latest_post_outcome)
 
-        # post_analyticsが存在すればperformance_bandへ反映（読み取り専用）
+        # post_analyticsが存在すればperformance_bandへ反映（読み取り専用）。
+        # 2026-09-01追加: あわせてpost_outcome.classify_post_outcome()による
+        # 勝敗判定をrecord_post_outcome()で反映する（GOV-20260901-POST-OUTCOME-DESIGN-01）。
         analytics_matches = glob.glob(str(reports_dir / f"post_analytics_*_{run_id}.json"))
         if analytics_matches:
             analytics = json.loads(Path(analytics_matches[0]).read_text(encoding="utf-8"))
-            impression_count = (analytics.get("public_metrics") or {}).get("impression_count")
+            public_metrics = analytics.get("public_metrics")
+            fetch_status = analytics.get("fetch_status")
+            impression_count = (public_metrics or {}).get("impression_count")
             update_performance_band(state, impression_count=impression_count)
+            outcome_result = classify_post_outcome(public_metrics, fetch_status=fetch_status)
+            record_post_outcome(state, outcome_result.outcome)
 
         processed_run_ids.append(run_id)
 
@@ -148,7 +160,10 @@ if __name__ == "__main__":
         print(f"  topic_group={tgid}: status={state.topic_status}, "
               f"performance_band={state.topic_performance_band}, "
               f"retired={state.topic_retired_from_mainline}, "
-              f"cooldown_until={state.topic_cooldown_until}")
+              f"cooldown_until={state.topic_cooldown_until}, "
+              f"mainline_run_count={state.mainline_run_count}, "
+              f"has_ever_won={state.has_ever_won}, "
+              f"latest_post_outcome={state.latest_post_outcome}")
 
     # labelを固定日付でハードコードせず実行日を使う（再実行のたびに新しいスナップショットとして
     # 保存し、過去に保存済みのファイルを無断で上書きしない。2026-09-01: mainline_run_count

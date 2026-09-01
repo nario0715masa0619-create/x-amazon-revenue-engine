@@ -86,11 +86,14 @@ from topic_group_state import (
     get_or_create_topic_group,
     record_mainline_attempt,
     record_publication,
+    record_topic_group_run_observed,
+    record_post_outcome,
     update_performance_band,
     passes_mainline_candidate_filter,
     load_topic_group_state_store,
     save_topic_group_state_store,
 )
+from post_outcome import classify_post_outcome
 from enrichment_record import (
     build_enrichment_record,
     build_failed_enrichment_record,
@@ -1796,41 +1799,71 @@ def record_topic_group_outcome_and_save(
     repo_root: str | Path | None = None,
     label: str | None = None,
 ) -> Path:
-    """[2026-08-31 topic_groupライフサイクル管理] evaluate_topic_group_for_mainline()で
-    取得したin-memory storeへ、mainline試行結果（succeeded）・実投稿確定（published_at）を
-    反映して保存する。「不発テーマの延命」防止（retry_budget消費）と「投稿済みテーマの
-    ライフサイクル退場」（record_publication）をここで確定させる。
+    """[2026-08-31 topic_groupライフサイクル管理、2026-09-01 mainline_run_count/
+    post_outcome配線] evaluate_topic_group_for_mainline()で取得したin-memory storeへ、
+    mainline試行結果（succeeded）・実投稿確定（published_at）を反映して保存する。
+    「不発テーマの延命」防止（retry_budget消費）と「投稿済みテーマのライフサイクル
+    退場」（record_publication）をここで確定させる。
+
+    2026-09-01追加: mainline_run_countをこの呼び出し（＝1回のmainline run）ごとに
+    計上する（前タスクではbackfillスクリプトからのみ計上しライブ経路には未配線
+    だった項目）。record_publication()には、この投稿"自体"の実績値ではなく
+    （まだ取得できていないため）、直前サイクルのstate.latest_post_outcome
+    （post_outcome.classify_post_outcome()の結果、update_topic_performance_from_
+    post_analytics()経由で更新される）を渡し、win/loss継続に応じたcooldown可変
+    ロジックを反映する。
     """
     state = store.get(topic_group_id)
     if state is None:
         raise KeyError(f"topic_group_id={topic_group_id} がstoreに存在しません")
+    record_topic_group_run_observed(state)
     record_mainline_attempt(state, succeeded=succeeded)
     if published_at:
-        record_publication(state, published_at=published_at)
+        record_publication(state, published_at=published_at, latest_outcome=state.latest_post_outcome)
     return save_topic_group_state_store(store, repo_root or _REPO_ROOT, label=label)
 
 
 def update_topic_performance_from_post_analytics(
     topic_group_id: str,
-    impression_count: int | None,
+    public_metrics: dict[str, Any] | None,
+    fetch_status: str | None = None,
+    affiliate_metrics: dict[str, Any] | None = None,
     topic_group_state_path: str | Path | None = None,
     repo_root: str | Path | None = None,
     label: str | None = None,
 ) -> dict[str, Any]:
-    """[2026-08-31 topic_groupライフサイクル管理] post_analytics取得後に、対応する
-    topic_groupのtopic_performance_bandを更新するbatch関数（フィードバック接続）。
+    """[2026-08-31 topic_groupライフサイクル管理、2026-09-01 post_outcome配線]
+    post_analytics取得後に、対応するtopic_groupのtopic_performance_bandを更新し
+    （既存のフィードバック接続、無変更）、あわせてpost_outcome.classify_post_outcome()
+    による「勝ち/引き分け/負け/判定不能」の正本判定をtopic_groupへ反映する
+    （record_post_outcome()、has_ever_won/latest_post_outcomeを更新）。
     mainlineの候補生成とは非同期（enrichment/post_analytics取得と同じnon-blocking
     原則）——本関数の失敗はmainline処理には一切伝播しない設計とし、呼び出し側で
     try/exceptすることを想定する。
+
+    2026-09-01変更: 引数を`impression_count: int | None`から`public_metrics: dict | None`
+    （+`fetch_status`/`affiliate_metrics`）へ変更した。この関数はこれまでコードベース内
+    に呼び出し元がなかったため（GOV-20260901-INVESTIGATION-01調査で確認済み）、
+    後方互換シムは設けていない。
     """
     path = Path(topic_group_state_path) if topic_group_state_path else _DEFAULT_TOPIC_GROUP_STATE_PATH
     store = load_topic_group_state_store(path)
     state = store.get(topic_group_id)
     if state is None:
         return {"updated": False, "reason": f"topic_group_id={topic_group_id} がstoreに存在しません"}
+    impression_count = (public_metrics or {}).get("impression_count")
     update_performance_band(state, impression_count=impression_count)
+    outcome_result = classify_post_outcome(public_metrics, fetch_status=fetch_status, affiliate_metrics=affiliate_metrics)
+    record_post_outcome(state, outcome_result.outcome)
     saved_path = save_topic_group_state_store(store, repo_root or _REPO_ROOT, label=label)
-    return {"updated": True, "topic_performance_band": state.topic_performance_band, "saved_path": str(saved_path)}
+    return {
+        "updated": True,
+        "topic_performance_band": state.topic_performance_band,
+        "post_outcome": outcome_result.outcome,
+        "post_outcome_reason": outcome_result.reason,
+        "has_ever_won": state.has_ever_won,
+        "saved_path": str(saved_path),
+    }
 
 
 def finalize_minimal_run_log(
