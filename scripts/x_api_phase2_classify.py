@@ -66,10 +66,22 @@ FASHION_KEYWORDS = [
     # 誤rejectされていた（例:「白Tとデニム...シルエット＆小物」）。
     "デニム", "シルエット", "カジュアル", "モノトーン",
 ]
-GADGET_KEYWORDS = [
-    "ガジェット", "イヤホン", "スマホ", "スマホケース", "Apple Watch", "腕時計",
-    "モバイルバッテリー", "充電器", "ケーブル", "EDC", "デバイス", "携帯性",
-]
+# 2026-09-01削除（GOV-20260901-ENGAGEMENT-BASED-TEACHER-01）: GADGET_KEYWORDS
+# （"ガジェット"/"イヤホン"/"スマホ"等、人間が事前列挙した商品カテゴリ語辞書）を廃止した。
+# 「ネタは勝ち投稿から拾う（商品カテゴリを人間が先読みしない）」という設計方針への
+# 違反であり、かつteacher判定は本来エンゲージメント実測値（いいね・リポスト等）で
+# 行うという方針と食い違っていたため。以下の_compute_engagement_tier()に置き換える。
+#
+# 【重要な限界（人間の確認が必要）】GADGET_CORE_KEYWORDS（三層探索方針、下記）は
+# 本タスクでは削除・変更していない。GADGET_CORE_KEYWORDSはlayer_primary（fashion/
+# gadget/intersectionのルーティング）に加え、"gadget_only_but_reusable"という
+# pre_teacher_candidateへの直接昇格パス（_classify()内、gadget_signal_strength=="high"
+# のみで判定、エンゲージメント値を一切参照しない）にも使われている。GADGET_KEYWORDSと
+# 同様「商品カテゴリの先読み」という性質を持つが、本タスクの指示は
+# GADGET_KEYWORDSの削除のみを明示していたため、GADGET_CORE_KEYWORDSは未変更のまま
+# 残した。この昇格パスは今回のエンゲージメント基準化の対象外のまま残っている
+# ことを最終報告に明記する。
+
 AESTHETIC_KEYWORDS = [
     "ダサい", "ダサくない", "大人っぽい", "清潔感", "自然", "上品", "ミニマル",
     "邪魔しない", "馴染む", "品がある",
@@ -340,6 +352,187 @@ def _count_hits(text: str, keywords: list[str]) -> int:
     return sum(1 for kw in keywords if kw in text)
 
 
+# ============================================================================
+# 2026-09-01新設（GOV-20260901-ENGAGEMENT-BASED-TEACHER-01）: GADGET_KEYWORDS
+# （商品カテゴリの事前列挙辞書）の代わりに、収集投稿の実測エンゲージメント値から
+# 「サンプル不足で判定不能」「該当なし」「teacher候補として妥当」の3値を判定する。
+# scripts/post_outcome.py（自分の投稿の勝敗判定）と同じ思想（極小サンプルを弱い実績と
+# 誤判定しない）を踏襲するが、対象母集団が異なる（post_outcome.pyは自社の投稿、
+# こちらは外部から収集した投稿）ため、値はimportせずこのファイル内で独立に定義する。
+# 以下2定数はすべて暫定値であり、最終決定は人間が行う。変更する場合はこの2定数の
+# みを書き換えればよい。
+# ============================================================================
+
+# これ未満のimpression_countは母数不足として"insufficient_data"（判定不能）とする。
+# 暫定値: 50。根拠: 現行merged_deduped.json（2026-08-31収集、144件）の実測分布で
+# impression_countの中央値は26、p75は134であり、50は「一定数の目に触れたと言える」
+# 下限としてpost_outcome.MIN_SAMPLE_IMPRESSIONS_THRESHOLD（同じく50、
+# PERFORMANCE_BAND_THRESHOLDS["low"]由来）と揃えた。この値の妥当性は要人間確認。
+TEACHER_MIN_SAMPLE_IMPRESSIONS = 50
+
+# like_count+repost_count+quote_count+bookmark_count+reply_countの合計がこれ以上で
+# "qualifying"（teacher候補として妥当）とする。暫定値: 5。根拠: 同分布でエンゲージメント
+# 合計のp75は3・p90は9であり、5はその中間かつ「反応が明確にある」水準として設定した。
+# この閾値でシミュレーションした結果、144件中18件（12.5%）がqualifying、94件（65%）が
+# insufficient_data、32件（22%）がlow（サンプルは足りるが反応が弱い）となった
+# （旧GADGET_KEYWORDSベースの判定と比べて、実際に運用してみないと歩留まりの
+# 妥当性は分からない。人間の確認が必要）。
+TEACHER_ENGAGEMENT_QUALIFYING_THRESHOLD = 5
+
+_ENGAGEMENT_METRIC_KEYS = ("like_count", "repost_count", "quote_count", "bookmark_count", "reply_count")
+
+
+def _compute_engagement_tier(post: dict) -> str:
+    """収集投稿1件の実測エンゲージメント値から"insufficient_data"/"low"/"qualifying"を
+    判定する。impression_countが無い、またはTEACHER_MIN_SAMPLE_IMPRESSIONS未満の場合は
+    "insufficient_data"とし、エンゲージメント合計が閾値未満の"低反応"（＝実際に見られた
+    上で反応が弱かった）と区別する（極小サンプルを弱い実績と誤判定しないため）。
+    """
+    impression_count = post.get("impression_count")
+    if impression_count is None or impression_count < TEACHER_MIN_SAMPLE_IMPRESSIONS:
+        return "insufficient_data"
+    engagement_total = sum(int(post.get(k) or 0) for k in _ENGAGEMENT_METRIC_KEYS)
+    if engagement_total >= TEACHER_ENGAGEMENT_QUALIFYING_THRESHOLD:
+        return "qualifying"
+    return "low"
+
+
+# --------------------------------------------------------------------------
+# 三層探索方針（2026-08-16）: 「交点投稿を最優先で探す」から「ファッション/ガジェット/交点の
+# 三層をそれぞれ独立に観察し、交点は見つかれば格上げするボーナス枠とする」へ切替。
+# 詳細方針: ops/reports/three_layer_exploration_policy_2026-08-16.md
+#
+# これまでの反復探索バッチ（ops/reports/next_batch_exploration_2026-08-16.md）で、
+# 「40代ファッション×ガジェット」の交点候補（fashion_gadget_intersection_detected）は
+# 数バッチに渡って新規発見がゼロだった一方、ガジェット単体の良質投稿（イヤホン比較等）が
+# 交点条件（topic_fit=="high"、軸3つ以上の共起）を満たせずobserve止まりになる
+# 「ガジェット単体止まり」問題が繰り返し確認された。三層方針はこれを解消するための
+# 探索・分類の再設計であり、既存のfalse positive対策（negation/trend/aggregator等）は
+# 一切変更しない。
+# --------------------------------------------------------------------------
+FASHION_CORE_KEYWORDS = [
+    "40代", "メンズ", "大人", "小物", "バッグ", "財布", "服", "コーデ", "着こなし",
+    "着映え", "清潔感", "上質", "垢抜け", "定番", "スナップ", "デニム", "白T",
+    "ワイドパンツ", "ジャケット", "鞄",
+]
+# false positive抑制: 「40代」「小物」等の_GENERIC_WEAK_WORDSは単独では強いシグナルと
+# 見積もらない（既存のFASHION_KEYWORDS_SPECIFICと同じ考え方）。強度計算にはこちらを使う。
+FASHION_CORE_KEYWORDS_SPECIFIC = [kw for kw in FASHION_CORE_KEYWORDS if kw not in _GENERIC_WEAK_WORDS]
+GADGET_CORE_KEYWORDS = [
+    "イヤホン", "モバイルバッテリー", "充電器", "ガジェット", "スマホ周辺", "ケーブル",
+    "軽量", "完全防水", "骨伝導", "ワイヤレス", "USB-C", "充電", "持ち歩き機器",
+]
+INTERSECTION_BRIDGE_KEYWORDS = [
+    "持ち歩き", "邪魔しない", "服に合う", "見た目を壊さない", "身につけやすい",
+    "バッグに入る", "軽い", "疲れにくい", "街歩き", "旅行より日常", "収納しやすい",
+    "ミニマル", "荷物を減らす", "日傘", "実用品", "機能性", "所有感",
+]
+FASHION_ONLY_SUPPORT_KEYWORDS = [
+    "似合う", "大人っぽい", "上品", "品がある", "着映え", "洗練", "引き算", "定番", "スタイリング",
+]
+GADGET_ONLY_SUPPORT_KEYWORDS = [
+    "音質", "接続", "ノイキャン", "防水", "充電持ち", "バッテリー持ち", "使いやすい", "比較", "実機", "実体験",
+]
+# 「A + B（+ C）」の共起で交点性を強く認めるパターン。各グループはOR、グループ間はAND。
+INTERSECTION_STRONG_PATTERNS: list[list[list[str]]] = [
+    [["バッグ", "鞄"], ["モバイルバッテリー", "充電器", "ケーブル"]],
+    [["服", "小物", "バッグ", "コーデ"], ["イヤホン", "ガジェット"]],
+    [["40代"], ["バッグ", "小物"], ["機能性", "実用品"]],
+    [["着映え"], ["小物"], ["収納しやすい", "持ち歩き"]],
+    [["街歩き"], ["軽い", "バッグ"], ["実用品"]],
+]
+
+
+def _matches_intersection_pattern(text: str) -> bool:
+    return any(all(any(kw in text for kw in group) for group in pattern) for pattern in INTERSECTION_STRONG_PATTERNS)
+
+
+def _strength_level(hits: int, medium_at: int = 1, high_at: int = 3) -> str:
+    if hits >= high_at:
+        return "high"
+    if hits >= medium_at:
+        return "medium"
+    return "low"
+
+
+_LAYER_STRENGTH_RANK = {"low": 0, "medium": 1, "high": 2}
+
+
+def _compute_layer_signals(genre_text: str, age_hits: int) -> dict[str, Any]:
+    """ファッション/ガジェット/交点の三層シグナルを独立に計算する（三層探索方針）。"""
+    fashion_core_hits = _count_hits(genre_text, FASHION_CORE_KEYWORDS_SPECIFIC)
+    fashion_support_hits = _count_hits(genre_text, FASHION_ONLY_SUPPORT_KEYWORDS)
+    fashion_total = fashion_core_hits + fashion_support_hits
+    fashion_signal_strength = _strength_level(fashion_total)
+
+    gadget_core_hits = _count_hits(genre_text, GADGET_CORE_KEYWORDS)
+    gadget_support_hits = _count_hits(genre_text, GADGET_ONLY_SUPPORT_KEYWORDS)
+    gadget_total = gadget_core_hits + gadget_support_hits
+    gadget_signal_strength = _strength_level(gadget_total)
+
+    age_signal_strength = _strength_level(age_hits, medium_at=1, high_at=2)
+
+    bridge_hits = _count_hits(genre_text, INTERSECTION_BRIDGE_KEYWORDS)
+    pattern_match = _matches_intersection_pattern(genre_text)
+    both_present = fashion_signal_strength != "low" and gadget_signal_strength != "low"
+    if both_present and (pattern_match or bridge_hits >= 2):
+        intersection_signal_strength = "high"
+    elif both_present and bridge_hits >= 1:
+        intersection_signal_strength = "medium"
+    elif pattern_match:
+        intersection_signal_strength = "medium"
+    else:
+        intersection_signal_strength = "low"
+
+    fashion_rank = _LAYER_STRENGTH_RANK[fashion_signal_strength]
+    gadget_rank = _LAYER_STRENGTH_RANK[gadget_signal_strength]
+
+    layer_reasons: list[str] = []
+    if fashion_total > 0:
+        layer_reasons.append("fashion_signal_detected")
+    if gadget_total > 0:
+        layer_reasons.append("gadget_signal_detected")
+    if intersection_signal_strength != "low":
+        layer_reasons.append("intersection_signal_detected")
+    if age_signal_strength != "low":
+        layer_reasons.append("fashion_candidate_with_age_anchor" if fashion_rank >= gadget_rank else "gadget_candidate_with_real_use_context")
+    if bridge_hits > 0 and intersection_signal_strength != "high":
+        layer_reasons.append("bridge_signal_present_but_incomplete")
+
+    if intersection_signal_strength == "high":
+        layer_primary = "intersection"
+        layer_secondary = "fashion" if fashion_rank >= gadget_rank else "gadget"
+        layer_confidence = "high"
+    elif fashion_rank == 0 and gadget_rank == 0:
+        layer_primary = "unclear"
+        layer_secondary = "none"
+        layer_confidence = "low"
+    elif fashion_rank > gadget_rank:
+        layer_primary = "fashion"
+        layer_secondary = "intersection" if intersection_signal_strength != "low" else ("gadget" if gadget_rank > 0 else "none")
+        layer_confidence = fashion_signal_strength
+    elif gadget_rank > fashion_rank:
+        layer_primary = "gadget"
+        layer_secondary = "intersection" if intersection_signal_strength != "low" else ("fashion" if fashion_rank > 0 else "none")
+        layer_confidence = gadget_signal_strength
+    else:
+        # fashion_rank == gadget_rank > 0（同点）。アカウント軸がファッション先頭のためfashionを優先。
+        layer_primary = "fashion"
+        layer_secondary = "gadget"
+        layer_confidence = fashion_signal_strength
+
+    return {
+        "fashion_signal_strength": fashion_signal_strength,
+        "gadget_signal_strength": gadget_signal_strength,
+        "intersection_signal_strength": intersection_signal_strength,
+        "age_signal_strength": age_signal_strength,
+        "layer_primary": layer_primary,
+        "layer_secondary": layer_secondary,
+        "layer_confidence": layer_confidence,
+        "layer_reasons": layer_reasons,
+    }
+
+
 def _load_input() -> list[dict]:
     if not _INPUT_PATH.exists():
         print(f"エラー: 入力ファイルが見つかりません: {_INPUT_PATH}", file=sys.stderr)
@@ -358,7 +551,10 @@ def _observe(post: dict) -> dict[str, Any]:
 
     age_hits = _count_hits(genre_text, AGE_KEYWORDS)
     fashion_hits = _count_hits(genre_text, FASHION_KEYWORDS)
-    gadget_hits = _count_hits(genre_text, GADGET_KEYWORDS)
+    # 2026-09-01変更: GADGET_KEYWORDS（キーワード共起）ではなく、実測エンゲージメント値
+    # （_compute_engagement_tier()）でgadget軸の充足を判定する。
+    engagement_tier = _compute_engagement_tier(post)
+    gadget_hits = 1 if engagement_tier == "qualifying" else 0
     aesthetic_hits = _count_hits(genre_text, AESTHETIC_KEYWORDS)
     utility_hits = _count_hits(genre_text, UTILITY_KEYWORDS)
     # Phase 2.3: BROAD_TREND_KEYWORDS（トレンド/ランキング等）は単独では加点せず、
@@ -522,6 +718,22 @@ def _observe(post: dict) -> dict[str, Any]:
         # Phase 2.3: 集約bot/雑多カテゴリ列挙は、他の軸が偶然揃っても観察価値なしとする
         approach_value = "low"
 
+    # 三層探索方針: ファッション/ガジェット/交点シグナルを独立に計算する。
+    # aggregator_dominant（集約bot等）の場合は三層いずれも意味を持たないためunclearに倒す。
+    if aggregator_dominant or is_thin_content:
+        layer_signals = {
+            "fashion_signal_strength": "low",
+            "gadget_signal_strength": "low",
+            "intersection_signal_strength": "low",
+            "age_signal_strength": "low",
+            "layer_primary": "unclear",
+            "layer_secondary": "none",
+            "layer_confidence": "low",
+            "layer_reasons": [],
+        }
+    else:
+        layer_signals = _compute_layer_signals(genre_text, age_hits)
+
     return {
         "observed_format": observed_format,
         "observed_angle": observed_angle,
@@ -531,9 +743,11 @@ def _observe(post: dict) -> dict[str, Any]:
         "observed_personalness": personalness,
         "observed_promotionalness": promotionalness,
         "observed_engagement_bait": engagement_bait,
+        "observed_engagement_tier": engagement_tier,
         "observed_topic_fit": topic_fit,
         "observed_structure_fit": structure_fit,
         "observed_approach_value": approach_value,
+        **layer_signals,
         "_is_likely_creative_writing": is_likely_creative_writing,  # 内部フラグ（CSV/JSON出力の観察フィールドには含めない）
         "_is_thin_content": is_thin_content,
     }
@@ -560,11 +774,16 @@ def _classify(post: dict, obs: dict) -> tuple[str, list[str], str, str | None]:
     # genre_text に対して行う（NEGATIVE_FALSE_MATCH_KEYWORDSは別概念のためtextのまま）。
     genre_text = _mask_negated_genre_context(text)
     negation_ctx = _detect_negation_context(text)
+    # 否定文脈語があるがexceptionで説明されない（＝未解決の曖昧さが残る）状態。
+    # 三層探索方針の追加救済パスは、この場合はmanual_reviewの否定文脈ハンドリングに委ねる。
+    negation_unresolved = bool(negation_ctx["matched_negative_terms"]) and not negation_ctx["matched_exception_terms"]
     negative_hits = _count_hits(text, NEGATIVE_FALSE_MATCH_KEYWORDS)
+    # 2026-09-01変更: gadget軸はGADGET_KEYWORDSではなくobs["observed_engagement_tier"]
+    # （_observe()で算出済み）を参照する。
     specific_genre_signal_count = (
         _count_hits(genre_text, FASHION_KEYWORDS_SPECIFIC)
         + _count_hits(genre_text, AGE_KEYWORDS_SPECIFIC)
-        + _count_hits(genre_text, GADGET_KEYWORDS)
+        + (1 if obs["observed_engagement_tier"] == "qualifying" else 0)
         + _count_hits(genre_text, AESTHETIC_KEYWORDS)
         + _count_hits(genre_text, UTILITY_KEYWORDS)
         + _count_hits(genre_text, DECISION_KEYWORDS)
@@ -664,8 +883,8 @@ def _classify(post: dict, obs: dict) -> tuple[str, list[str], str, str | None]:
         candidate_reasons = []
         if obs["observed_topic_fit"] != "low" and _count_hits(genre_text, AGE_KEYWORDS) > 0 and _count_hits(genre_text, FASHION_KEYWORDS) > 0:
             candidate_reasons.append("age_and_fashion_signal_detected")
-        if _count_hits(genre_text, FASHION_KEYWORDS) > 0 and _count_hits(genre_text, GADGET_KEYWORDS) > 0:
-            candidate_reasons.append("fashion_gadget_intersection_detected")
+        if _count_hits(genre_text, FASHION_KEYWORDS) > 0 and obs["observed_engagement_tier"] == "qualifying":
+            candidate_reasons.append("fashion_gadget_intersection_detected（gadget側はエンゲージメント実測で判定）")
         if _count_hits(genre_text, AESTHETIC_KEYWORDS) > 0 and _count_hits(genre_text, UTILITY_KEYWORDS) > 0:
             candidate_reasons.append("aesthetic_and_utility_both_present")
         if _count_hits(genre_text, DECISION_KEYWORDS) > 0:
@@ -677,7 +896,35 @@ def _classify(post: dict, obs: dict) -> tuple[str, list[str], str, str | None]:
         confidence = "high" if (obs["observed_topic_fit"] == "high" and obs["observed_structure_fit"] == "high") else "medium"
         return "pre_teacher_candidate", reasons, confidence, None
 
+    # --- 三層探索方針: fashion/gadget単独でも高信頼度なら pre_teacher_candidate 化する ---
+    # 既存のtopic_fit=="high"ゲート（軸3つ以上の共起、実質的に交点向け）を満たさない場合でも、
+    # ガジェット単体の良質投稿（例:「イヤホン比較【40代の実体験】」）が交点条件を満たせず
+    # observe止まりになる「ガジェット単体止まり」問題（ops/reports/next_batch_exploration_2026-08-16.md）
+    # に対応するため、fashion/gadget単独の高信頼度シグナル+構造/アプローチ再利用価値がある場合は
+    # 候補化を許可する。交点候補が最優先である点は変えず、あくまで追加の候補化パスとする。
+    if (
+        not is_creative
+        and not negation_unresolved
+        and obs["observed_structure_fit"] in ("high", "medium")
+        and obs["observed_approach_value"] != "low"
+    ):
+        if obs["layer_primary"] == "fashion" and obs["fashion_signal_strength"] == "high":
+            reasons.append("fashion_only_but_reusable（ファッション単独だが構造・アプローチ再利用価値が高い）")
+            return "pre_teacher_candidate", reasons, "medium", None
+        if obs["layer_primary"] == "gadget" and obs["gadget_signal_strength"] == "high":
+            reasons.append("gadget_only_but_reusable（ガジェット単独だが構造・アプローチ再利用価値が高い）")
+            return "pre_teacher_candidate", reasons, "medium", None
+
     # --- observe 判定 ---
+    # 三層探索方針: 交点シグナルはあるが上記のpre_teacher_candidateゲートに届かない場合、
+    # 「交点候補未満だが観察価値あり」として明示する。
+    if (
+        obs["observed_topic_fit"] != "low"
+        and obs["layer_primary"] == "intersection"
+        and obs["intersection_signal_strength"] != "low"
+    ):
+        reasons.append("intersection_candidate_but_weak_metrics（交点シグナルはあるが反応指標/観察価値が弱く主候補には未達）")
+        return "observe", reasons, "medium", None
     # Phase 2.1: 「◯選」「コツ」「着映え」「小物使い」等のジャンル整合的な実用・比較・
     # 選別・見え方改善型を、manual_reviewに落とさずここで拾い上げる。
     has_selection_format = _count_hits(genre_text, DECISION_KEYWORDS) > 0 or bool(_SENTAKU_PATTERN.search(genre_text))
@@ -728,6 +975,20 @@ def _classify(post: dict, obs: dict) -> tuple[str, list[str], str, str | None]:
         reasons.append("useful_fashion_format_detected（実用情報として観察価値がある）")
         return "observe", reasons, "medium", None
 
+    # 三層探索方針: 上記の既存分岐で拾えなかったが、fashion/gadgetいずれかの単独シグナルが
+    # highある場合の追加救済。しきい値はmediumではなくhighに限定する
+    # （「バッグ」等FASHION_CORE1語だけでmedium判定になり、強盗事件ニュース等の
+    # 既知false positiveがmanual_reviewの人間確認から素通りしてobserveへ漏れる自己検証結果を
+    # 確認したため）。また、否定文脈が未解決（matched_negative_termsありexceptionなし）の場合は
+    # ここで確定させず、既存のmanual_reviewの否定文脈ハンドリングに委ねる。
+    if not negation_unresolved:
+        if obs["layer_primary"] == "fashion" and obs["fashion_signal_strength"] == "high":
+            reasons.append("fashion_signal_detected（ファッション単独の観察価値）")
+            return "observe", reasons, "medium", None
+        if obs["layer_primary"] == "gadget" and obs["gadget_signal_strength"] == "high":
+            reasons.append("gadget_signal_detected（ガジェット単独の観察価値）")
+            return "observe", reasons, "medium", None
+
     # --- manual_review（上記のいずれにも明確に該当しない・信号が競合） ---
     # Phase 2.1: 汎用すぎた strong_post_but_boundary_case を、ファッション/ガジェット
     # どちらの軸が弱いかが分かる理由へ分解する。
@@ -756,7 +1017,8 @@ def _classify(post: dict, obs: dict) -> tuple[str, list[str], str, str | None]:
             + "/".join(negation_ctx["matched_exception_terms"])
             + "』等、審美改善フレームの可能性があるため自動確定しない）"
         )
-    has_gadget_signal = _count_hits(genre_text, GADGET_KEYWORDS) > 0
+    # 2026-09-01変更: GADGET_KEYWORDSではなくobs["observed_engagement_tier"]で判定する。
+    has_gadget_signal = obs["observed_engagement_tier"] == "qualifying"
     has_fashion_or_age_signal = (
         _count_hits(genre_text, FASHION_KEYWORDS_SPECIFIC) > 0 or _count_hits(genre_text, AGE_KEYWORDS_SPECIFIC) > 0
     )
@@ -774,6 +1036,9 @@ def _classify(post: dict, obs: dict) -> tuple[str, list[str], str, str | None]:
         )
     elif obs["observed_topic_fit"] == "medium" and obs["observed_structure_fit"] == "low":
         manual_reason_parts.append("possible_genre_fit_but_low_specificity（ジャンル適合の可能性はあるが具体性が弱い）")
+    # 三層探索方針: 橋渡し語はあるが交点として確定しきれない場合を明示する。
+    if "bridge_signal_present_but_incomplete" in obs["layer_reasons"] and obs["intersection_signal_strength"] != "low":
+        manual_reason_parts.append("bridge_signal_present_but_incomplete（橋渡し語はあるが交点として確定しきれない）")
     if obs["observed_promotionalness"] == "medium":
         manual_reason_parts.append("mixed_signals_need_human_review（宣伝性の強さを自動判定しきれない）")
     if is_creative:
@@ -821,9 +1086,18 @@ _CSV_COLUMNS = [
     "observed_personalness",
     "observed_promotionalness",
     "observed_engagement_bait",
+    "observed_engagement_tier",
     "observed_topic_fit",
     "observed_structure_fit",
     "observed_approach_value",
+    "fashion_signal_strength",
+    "gadget_signal_strength",
+    "intersection_signal_strength",
+    "age_signal_strength",
+    "layer_primary",
+    "layer_secondary",
+    "layer_confidence",
+    "layer_reasons",
     "classification_reasons",
 ]
 
@@ -849,6 +1123,7 @@ def _write_csv(path: Path, records: list[dict]) -> None:
                 "query_source": ";".join(r.get("query_source") or []),
                 "classification": r["classification"],
                 "confidence": r["confidence"],
+                "layer_reasons": " | ".join(r.get("layer_reasons") or []),
                 "classification_reasons": " | ".join(r["classification_reasons"]),
             }
             for k in (
@@ -863,6 +1138,13 @@ def _write_csv(path: Path, records: list[dict]) -> None:
                 "observed_topic_fit",
                 "observed_structure_fit",
                 "observed_approach_value",
+                "fashion_signal_strength",
+                "gadget_signal_strength",
+                "intersection_signal_strength",
+                "age_signal_strength",
+                "layer_primary",
+                "layer_secondary",
+                "layer_confidence",
             ):
                 row[k] = r[k]
             writer.writerow(row)
@@ -918,6 +1200,12 @@ def main() -> None:
         reason for r in by_class["pre_teacher_candidate"] for reason in r["classification_reasons"]
     )
 
+    # 三層探索方針: layer_primaryの分布と、4分類×layer_primaryのクロス集計を記録する。
+    layer_primary_dist = Counter(r["layer_primary"] for r in classified)
+    layer_by_classification: dict[str, dict[str, int]] = {}
+    for cls_name in ("reject", "observe", "manual_review", "pre_teacher_candidate"):
+        layer_by_classification[cls_name] = dict(Counter(r["layer_primary"] for r in by_class[cls_name]))
+
     run_summary = {
         "run_at": datetime.now(timezone.utc).isoformat(),
         "input_count": len(posts),
@@ -929,6 +1217,8 @@ def main() -> None:
         "multi_query_hit_count": multi_query_count,
         "top_reject_reasons": reject_reason_counter.most_common(5),
         "top_pre_teacher_candidate_reasons": pre_teacher_reason_counter.most_common(5),
+        "layer_primary_distribution": dict(layer_primary_dist),
+        "layer_primary_by_classification": layer_by_classification,
         "status": "success",
     }
     (_OUTPUT_DIR / "run_summary.json").write_text(
