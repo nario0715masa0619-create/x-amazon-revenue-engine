@@ -28,6 +28,19 @@
 8. **`ops-state`（`.mcp.json`で導入。2026-08-07追加）が投稿ログ・レビュー結果・実測値の唯一の記録経路である。** `record_post_draft`/`set_post_status`/`record_review_result`/`record_metrics_snapshot`等のツール経由でGoogle Sheets（正本）へ書き込む。`ops/logs/*.jsonl`/`*.csv`への直接追記は行わない（凍結済み。[ops/logs/README.md](ops/logs/README.md)参照）。`daily_brief.md`は`render_daily_brief()`が生成するビューであり、手編集しない。**投稿OSの判断ロジック（何を出すか）はこの変更で一切変わっていない**（morning-strategy-council/review layer/self-check/compliance-reviewerの判定基準は不可侵のまま）。
 9. **Context7（`.mcp.json`で導入。2026-08-06追加）は「技術docs専用インフラ」であり、投稿文生成の品質改善ツールではない。** 使ってよいのは、ライブラリ／API／SDK／MCP／設定・実装・移行など**技術実装の検証**が必要なときのみ（例: Google Sheets/Google API/service accountの仕様確認、MCP・subagent連携の設定確認、X API等の外部APIの公式仕様確認）。**朝会（morning-strategy-council）・投稿文生成（x-copywriter）・market-grounded review layer・pre-post-self-check・CTA別強さ判定など、コピー品質・戦略判断・競合比較には一切使わない。** 不要なときは呼ばない。これらのskill/agentファイル自体への機能追加は行っていない（責務は変更なし）。**Context7のAPIキーはリポジトリに保存しない。** `.mcp.json`は`${CONTEXT7_API_KEY}`構文で環境変数を参照する（Claude Code公式の`.mcp.json`環境変数展開機能）。実キー文字列は、シェルの環境変数ではなく**Claude Codeのlocal settings（`.claude/settings.local.json`の`env`キー）**に各自の環境でのみ設定する（同ファイルはgit管理外＝`.gitignore`で除外済み。Claude Code公式のsettings階層における個人用スコープで、`env`に設定した値はMCPサーバーにも渡る）。`.env`ファイルによる直接読込は導入しない（Claude Code公式ドキュメントで確認できるサポート範囲は`.mcp.json`の環境変数展開とsettingsの`env`キーであり、`.env`直読は含まれないため）。実キー文字列自体は、X APIキー等の他の外部認証情報と同様、リポジトリのいかなるファイルにもコミットしない。
 
+## topic_group（テーマのライフサイクル状態管理）について（2026-09-01追加）
+
+mainlineの候補選定で観測されていた3症状——posted-theme再流入・不発テーマの延命・実績フィードバック不接続——が「テーマにライフサイクル状態を持たない」という単一の根本原因から生じていることを踏まえ、`topic_group`という状態管理レイヤーを追加した。既存のGate A・thresholds・shipping decision・Phase 1 query set・scorerアルゴリズムはこの導入で一切変更していない。詳細: [ops/reports/topic_group_lifecycle_design_2026-08-31.md](ops/reports/topic_group_lifecycle_design_2026-08-31.md)、[ops/reports/mainline_redesign_2026-09-01.md](ops/reports/mainline_redesign_2026-09-01.md)。
+
+- mainlineの候補生成は、`topic_status=active` かつ posted-theme exclusion（既存guard）かつ `topic_retry_budget>0` かつ cooldown外 かつ exploration quota内、の5条件をすべて満たす`topic_group`のみを候補プールに通すようになった（[scripts/post_generation_pipeline.py](scripts/post_generation_pipeline.py)の`evaluate_topic_group_for_mainline()`）。
+- **x-researcher**: 調査対象テーマが既に`retired_from_mainline`/`route_to_research_only`のtopic_groupに該当する場合、その材料はmainline向けではなくresearch向けとして扱う。
+- **growth-marketer**: 施策設計時、同一topic_groupの`topic_retry_budget`が枯渇しつつあるテーマへ新規施策を積み増さない。
+- **x-copywriter**: 文案作成の前提テーマがposted-theme exclusion／cooldownで除外対象になっていないか疑わしい場合は、mainlineの候補プール結果を確認する。
+- **affiliate-compliance-reviewer**: topic_groupの状態遷移はコンプライアンス判定の代替ではない。既存レビュー手順（実行ルール1）は無変更のまま維持する。
+- **performance-analyst**: `post_analytics`到達時に`topic_performance_band`が自動更新されることを前提に、テーマ単位の実績推移を扱えるようになった（[scripts/post_generation_pipeline.py](scripts/post_generation_pipeline.py)の`update_topic_performance_from_post_analytics()`）。
+- **logger**: `minimal_run_log`書き込みと同時に`topic_group`の`topic_last_published_at`/`topic_retry_budget`が更新される（[scripts/post_generation_pipeline.py](scripts/post_generation_pipeline.py)の`record_topic_group_outcome_and_save()`）。`post_id`/`experiment_id`の発行ルール自体（[docs/roles/logger.md](docs/roles/logger.md)）は無変更。
+- **既知の制約**: `theme_signature`/`topic_group`のタグ検出ゆれにより、同一テーマが複数の`topic_group_id`に分裂するケースが実データで確認されている（例: ATH-PRO5MK2×ジム用骨伝導）。`build_topic_group()`のグルーピングロジック自体は未修正のまま。週次研究集計（`weekly_learning_review`）にread-only検出チェックを追加済みで、分裂ケースはレポートの「8. topic_group分裂検出」節に出力される（[scripts/topic_group_state.py](scripts/topic_group_state.py)の`detect_theme_signature_splits()`）。実際の改修要否は検出結果を見たうえで人間が判断する。
+
 ## 参照先マップ
 
 | 知りたいこと | 参照先 |
