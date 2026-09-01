@@ -80,6 +80,17 @@ from posted_theme_registry import (
     check_posted_theme_guard,
     load_posted_theme_registry,
 )
+from topic_dedupe import build_theme_profile
+from topic_group_state import (
+    TopicGroupState,
+    get_or_create_topic_group,
+    record_mainline_attempt,
+    record_publication,
+    update_performance_band,
+    passes_mainline_candidate_filter,
+    load_topic_group_state_store,
+    save_topic_group_state_store,
+)
 from enrichment_record import (
     build_enrichment_record,
     build_failed_enrichment_record,
@@ -1728,6 +1739,98 @@ def run_posted_theme_guard_check(
         target_layer=target_layer,
         registry=registry,
     )
+
+
+_DEFAULT_TOPIC_GROUP_STATE_PATH = _REPO_ROOT / "ops" / "reports" / "topic_group_state_2026-08-31.json"
+
+
+def evaluate_topic_group_for_mainline(
+    candidate_source_post_id: str | None,
+    candidate_texts: list[str],
+    target_layer: str | None,
+    exploration_quota_remaining: bool = True,
+    posted_theme_registry_path: str | Path | None = None,
+    topic_group_state_path: str | Path | None = None,
+) -> dict[str, Any]:
+    """[2026-08-31 topic_groupライフサイクル管理] mainline候補生成直前フィルタ本体。
+
+    posted_theme_registry.check_posted_theme_guard()の判定と、topic_group_stateの
+    5条件フィルタ（topic_status=active／posted-theme exclusion／retry_budget>0／
+    cooldown外／exploration quota内）をまとめて評価する。stateストアの永続化(save)は
+    この関数では行わない——in-memory storeを返すので、呼び出し側がfinalize時に
+    まとめて保存する（record_mainline_attempt()等で状態を更新してから保存する想定）。
+
+    外部AI呼び出しは行わない。production scoring/Gate A/thresholds/shipping decision
+    には一切触れない。
+    """
+    guard_result = run_posted_theme_guard_check(
+        candidate_source_post_id=candidate_source_post_id,
+        candidate_texts=candidate_texts,
+        target_layer=target_layer,
+        registry_path=posted_theme_registry_path,
+    )
+    profile = build_theme_profile(candidate_texts)
+    path = Path(topic_group_state_path) if topic_group_state_path else _DEFAULT_TOPIC_GROUP_STATE_PATH
+    store = load_topic_group_state_store(path)
+    state = get_or_create_topic_group(store, profile["topic_group"], profile["theme_signature"])
+    filter_result = passes_mainline_candidate_filter(
+        state,
+        posted_theme_blocked=guard_result["block_mainline"],
+        exploration_quota_remaining=exploration_quota_remaining,
+    )
+    return {
+        "guard_result": guard_result,
+        "topic_group_id": state.topic_group_id,
+        "theme_signature": profile["theme_signature"],
+        "filter_result": filter_result,
+        "store": store,
+        "state_path": str(path),
+    }
+
+
+def record_topic_group_outcome_and_save(
+    store: dict[str, TopicGroupState],
+    topic_group_id: str,
+    succeeded: bool,
+    published_at: str | None = None,
+    repo_root: str | Path | None = None,
+    label: str | None = None,
+) -> Path:
+    """[2026-08-31 topic_groupライフサイクル管理] evaluate_topic_group_for_mainline()で
+    取得したin-memory storeへ、mainline試行結果（succeeded）・実投稿確定（published_at）を
+    反映して保存する。「不発テーマの延命」防止（retry_budget消費）と「投稿済みテーマの
+    ライフサイクル退場」（record_publication）をここで確定させる。
+    """
+    state = store.get(topic_group_id)
+    if state is None:
+        raise KeyError(f"topic_group_id={topic_group_id} がstoreに存在しません")
+    record_mainline_attempt(state, succeeded=succeeded)
+    if published_at:
+        record_publication(state, published_at=published_at)
+    return save_topic_group_state_store(store, repo_root or _REPO_ROOT, label=label)
+
+
+def update_topic_performance_from_post_analytics(
+    topic_group_id: str,
+    impression_count: int | None,
+    topic_group_state_path: str | Path | None = None,
+    repo_root: str | Path | None = None,
+    label: str | None = None,
+) -> dict[str, Any]:
+    """[2026-08-31 topic_groupライフサイクル管理] post_analytics取得後に、対応する
+    topic_groupのtopic_performance_bandを更新するbatch関数（フィードバック接続）。
+    mainlineの候補生成とは非同期（enrichment/post_analytics取得と同じnon-blocking
+    原則）——本関数の失敗はmainline処理には一切伝播しない設計とし、呼び出し側で
+    try/exceptすることを想定する。
+    """
+    path = Path(topic_group_state_path) if topic_group_state_path else _DEFAULT_TOPIC_GROUP_STATE_PATH
+    store = load_topic_group_state_store(path)
+    state = store.get(topic_group_id)
+    if state is None:
+        return {"updated": False, "reason": f"topic_group_id={topic_group_id} がstoreに存在しません"}
+    update_performance_band(state, impression_count=impression_count)
+    saved_path = save_topic_group_state_store(store, repo_root or _REPO_ROOT, label=label)
+    return {"updated": True, "topic_performance_band": state.topic_performance_band, "saved_path": str(saved_path)}
 
 
 def finalize_minimal_run_log(
