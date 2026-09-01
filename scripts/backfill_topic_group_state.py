@@ -32,6 +32,7 @@ from topic_group_state import (
     TopicGroupState,
     get_or_create_topic_group,
     record_publication,
+    record_topic_group_run_observed,
     update_performance_band,
     save_topic_group_state_store,
 )
@@ -75,6 +76,7 @@ def backfill_topic_group_state_from_reports_dir(
 
         profile = build_theme_profile(texts)
         state = get_or_create_topic_group(store, profile["topic_group"], profile["theme_signature"])
+        record_topic_group_run_observed(state)
 
         published_at = log.get("published_at")
         if published_at:
@@ -148,5 +150,8 @@ if __name__ == "__main__":
               f"retired={state.topic_retired_from_mainline}, "
               f"cooldown_until={state.topic_cooldown_until}")
 
-    saved_path = save_topic_group_state_store(result["store"], REPO, label="2026-08-31")
+    # labelを固定日付でハードコードせず実行日を使う（再実行のたびに新しいスナップショットとして
+    # 保存し、過去に保存済みのファイルを無断で上書きしない。2026-09-01: mainline_run_count
+    # 集計対応でrecord_topic_group_run_observed()呼び出しを追加したための再実行分）。
+    saved_path = save_topic_group_state_store(result["store"], REPO)
     print("saved to:", saved_path)

@@ -63,6 +63,11 @@ class TopicGroupState:
     source_diversity_tag: str | None = None
     created_at: str = ""
     updated_at: str = ""
+    # 2026-09-01追加（GOV-20260901-TOPIC-GROUP-SPLIT-DETECTION-01）:
+    # このtopic_group_idがmainline run由来で観測された回数（実質露出回数）。
+    # 既存の保存済みJSONにこのキーが無くても、dataclassのdefaultによりロード時エラーにならない
+    # （追加のみで既存データを破壊しない）。record_topic_group_run_observed()でのみ増分する。
+    mainline_run_count: int = 0
 
 
 def _now_iso() -> str:
@@ -90,6 +95,118 @@ def get_or_create_topic_group(
     )
     store[topic_group_id] = state
     return state
+
+
+def record_topic_group_run_observed(state: TopicGroupState) -> TopicGroupState:
+    """このtopic_group_idにmainline runが1件対応付けられたことを記録する
+    （theme_signature分裂検出のための実質露出回数カウンタ。状態遷移・budget消費とは独立）。
+    """
+    state.mainline_run_count += 1
+    state.updated_at = _now_iso()
+    return state
+
+
+# 分裂検出（near-duplicate側）のしきい値。posted_theme_registry.HIGH_SIMILARITY_THRESHOLD
+# （0.6）と揃え、検出の厳しさに関する語彙をリポジトリ内で一貫させる。
+THEME_SIGNATURE_NEAR_DUPLICATE_THRESHOLD = 0.6
+
+
+def _theme_signature_tag_set(signature: str) -> set[str]:
+    return set(tag for tag in signature.split("__") if tag)
+
+
+def _theme_signature_jaccard(sig_a: str, sig_b: str) -> float:
+    tags_a, tags_b = _theme_signature_tag_set(sig_a), _theme_signature_tag_set(sig_b)
+    if not tags_a or not tags_b:
+        return 0.0
+    return len(tags_a & tags_b) / len(tags_a | tags_b)
+
+
+def _split_entry(signature_label: str, states: list[TopicGroupState], split_type: str, similarity: float | None = None) -> dict[str, Any]:
+    groups = []
+    combined_run_count = 0
+    for s in sorted(states, key=lambda x: x.topic_group_id):
+        combined_run_count += s.mainline_run_count
+        groups.append(
+            {
+                "topic_group_id": s.topic_group_id,
+                "theme_signature": s.theme_signature,
+                "topic_status": s.topic_status,
+                "topic_performance_band": s.topic_performance_band,
+                "topic_last_published_at": s.topic_last_published_at,
+                "mainline_run_count": s.mainline_run_count,
+            }
+        )
+    return {
+        "theme_signature": signature_label,
+        "split_type": split_type,
+        "similarity": similarity,
+        "topic_group_ids": [g["topic_group_id"] for g in groups],
+        "topic_groups": groups,
+        "combined_mainline_run_count": combined_run_count,
+    }
+
+
+def detect_theme_signature_splits(
+    store: dict[str, TopicGroupState],
+    near_duplicate_threshold: float = THEME_SIGNATURE_NEAR_DUPLICATE_THRESHOLD,
+) -> list[dict[str, Any]]:
+    """同一テーマが複数のtopic_group_idに分裂しているケースをread-onlyで検出する。
+
+    storeの内容は一切変更しない（週次集計から呼ばれる想定の純粋な分析関数）。
+    build_topic_group()のグルーピングロジック自体はここでは一切変更・再実装しない——
+    既にstoreへ保存済みのtheme_signature/topic_group_idの組をそのまま集計するのみ。
+
+    **依頼文の原文との整合について**: 依頼文は本チェックを「同一theme_signatureが複数の
+    topic_group_idに分裂するケース」と表現していたが、実際にbackfill済みデータで観測された
+    唯一の実分裂ケース（ATH-PRO5MK2×ジム用骨伝導）を検証したところ、2つのtopic_group_idは
+    theme_signatureも互いに異なっていた（一方が他方に"__split-settled"タグ1つ分だけ
+    長い、というほぼ同一の値）。theme_signatureはtopic_groupより細かい5次元タグを
+    含むため、topic_groupが割れる原因（比較軸タグの検出ゆれ）はtheme_signature自体も
+    ほぼ同時に割ってしまう——「theme_signatureが同一なのにtopic_groupだけ割れる」という
+    狭い意味での検出だけでは、この既知の実ケースを取りこぼす。
+    そのため、文字どおりの厳密一致（exact_signature_match）に加えて、signatureを
+    "__"区切りのタグ集合として比較するJaccard類似度がしきい値（デフォルト0.6、
+    posted_theme_registry.HIGH_SIMILARITY_THRESHOLDと同水準）以上のペアも
+    near_duplicate_signatureとして検出する。数え違いを黙って解消せず、この食い違いは
+    ここと最終報告の両方に明記する。
+    """
+    by_signature: dict[str, list[TopicGroupState]] = {}
+    for state in store.values():
+        by_signature.setdefault(state.theme_signature, []).append(state)
+
+    results: list[dict[str, Any]] = []
+    exact_signatures_used: set[str] = set()
+    for signature, states in by_signature.items():
+        if len(states) < 2:
+            continue
+        results.append(_split_entry(signature, states, split_type="exact_signature_match"))
+        exact_signatures_used.add(signature)
+
+    # near-duplicate側: 異なるtopic_group_idに属する、まだexact matchで報告済みでない
+    # signature同士をペアごとに比較する。
+    distinct_signature_to_states: dict[str, list[TopicGroupState]] = {
+        sig: states for sig, states in by_signature.items() if sig not in exact_signatures_used
+    }
+    signatures = sorted(distinct_signature_to_states.keys())
+    seen_pairs: set[frozenset[str]] = set()
+    for i in range(len(signatures)):
+        for j in range(i + 1, len(signatures)):
+            sig_a, sig_b = signatures[i], signatures[j]
+            similarity = _theme_signature_jaccard(sig_a, sig_b)
+            if similarity < near_duplicate_threshold:
+                continue
+            pair_key = frozenset({sig_a, sig_b})
+            if pair_key in seen_pairs:
+                continue
+            seen_pairs.add(pair_key)
+            combined_states = distinct_signature_to_states[sig_a] + distinct_signature_to_states[sig_b]
+            label = f"{sig_a} ~ {sig_b}"
+            results.append(
+                _split_entry(label, combined_states, split_type="near_duplicate_signature", similarity=round(similarity, 2))
+            )
+
+    return sorted(results, key=lambda r: (r["split_type"], r["theme_signature"]))
 
 
 def record_mainline_attempt(state: TopicGroupState, succeeded: bool) -> TopicGroupState:
