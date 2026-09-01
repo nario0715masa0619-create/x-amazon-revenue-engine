@@ -251,12 +251,17 @@ def test_real_ath_pro5mk2_post_excluded() -> None:
     posts = p2._load_input()
     target = next((p for p in posts if p.get("id") == "2094280166017204415"), None)
     if target is None:
-        _check(
-            "ath_pro5mk2_post_present_in_current_snapshot",
-            False,
-            "現行merged_deduped.jsonに当該post_idが存在しない（X検索の7日ローリング窓により"
-            "収集対象から外れた可能性がある。この場合は本チェックをskipし、synthetic再現ケース"
-            "（test_gadget_only_but_reusable_requires_qualifying_engagement）で代替確認する）",
+        # 2026-09-01（GOV-20260901-BROAD-COLLECTION-01）: Phase 1 QUERIESを
+        # 商品カテゴリ非依存の広域6クエリへ全面置き換えたため、この特定post_id
+        # （イヤホン/骨伝導クエリでのみ収集されていた）は今後の収集で恒久的に
+        # 再取得されなくなった。データ欠落は異常ではなく想定どおりであり、
+        # 本チェックはfailureにせずskipする（synthetic再現ケース
+        # test_gadget_only_but_reusable_requires_qualifying_engagementおよび
+        # test_single_gate_covers_all_known_pathsで恒久的に代替確認する）。
+        print(
+            "[SKIP] ath_pro5mk2_post_present_in_current_snapshot - "
+            "2026-09-01のPhase 1広域クエリ置き換えにより当該post_idは収集対象外になった"
+            "（想定どおり。synthetic再現ケースで代替確認済み）"
         )
         return
     obs = p2._observe(target)
