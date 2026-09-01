@@ -1,0 +1,32 @@
+{
+  "topic_groups": {
+    "ath-pro5mk2-bone-conduction-neckband__call-quality-lightness-split-use": {
+      "topic_group_id": "ath-pro5mk2-bone-conduction-neckband__call-quality-lightness-split-use",
+      "theme_signature": "ath-pro5mk2-bone-conduction-neckband__gym__call-quality__bone-vs-sealed__split-settled",
+      "topic_status": "published",
+      "topic_last_published_at": "2026-08-29",
+      "topic_performance_band": "low",
+      "topic_retry_budget": 3,
+      "topic_cooldown_until": "2026-09-19",
+      "topic_retired_from_mainline": true,
+      "route_to_research_only": true,
+      "source_diversity_tag": null,
+      "created_at": "2026-09-01T04:32:14Z",
+      "updated_at": "2026-09-01T04:32:14Z"
+    },
+    "ath-pro5mk2-bone-conduction-neckband__call-quality-lightness": {
+      "topic_group_id": "ath-pro5mk2-bone-conduction-neckband__call-quality-lightness",
+      "theme_signature": "ath-pro5mk2-bone-conduction-neckband__gym__call-quality__bone-vs-sealed",
+      "topic_status": "active",
+      "topic_last_published_at": null,
+      "topic_performance_band": "unknown",
+      "topic_retry_budget": 3,
+      "topic_cooldown_until": null,
+      "topic_retired_from_mainline": false,
+      "route_to_research_only": false,
+      "source_diversity_tag": null,
+      "created_at": "2026-09-01T04:32:14Z",
+      "updated_at": "2026-09-01T04:32:14Z"
+    }
+  }
+}
