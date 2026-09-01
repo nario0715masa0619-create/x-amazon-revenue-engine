@@ -1,0 +1,57 @@
+name: Phase 1 X収集 → Phase 2分類（日次）
+
+# GOV-20260901-DAILY-PIPELINE-01: Phase 1収集(x_api_phase1_collect.py)→
+# 累積ストア追記(accumulate_phase1_collection.py)→Phase 2分類
+# (x_api_phase2_classify.py)を日次で自動実行する。
+#
+# 触れていない領域: Gate A / thresholds / shipping decision、
+# _apply_engagement_gate()本体、topic_groupライフサイクル管理、
+# teacher投稿からの自動抽出処理、Phase 1クエリ内容（QUERIES定数、Q1-Q6）。
+
+on:
+  schedule:
+    # 毎日UTC 21:00（JST翌06:00相当）に1回実行。暫定値であり、
+    # 運用実態に応じて変更可能（cron式のみ書き換えればよい）。
+    - cron: "0 21 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  collect-and-classify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Phase 1 X API収集
+        env:
+          X_BEARER_TOKEN: ${{ secrets.X_BEARER_TOKEN }}
+        run: python scripts/x_api_phase1_collect.py
+
+      - name: 累積ストアへ追記（post_id基準の重複除外、本文は保存しない）
+        run: python scripts/accumulate_phase1_collection.py
+
+      - name: Phase 2 分類
+        run: python scripts/x_api_phase2_classify.py
+
+      - name: 累積ストアの変更をcommit・push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ops/data/x_api_phase1_cumulative.jsonl
+          if git diff --cached --quiet; then
+            echo "累積ストアに変更なし（新規post_idが無かった）。commitをスキップします。"
+          else
+            git commit -m "chore: Phase 1収集累積ストアを更新（自動実行、$(date -u +%Y-%m-%d)）"
+            git push
+          fi
