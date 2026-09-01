@@ -556,7 +556,26 @@ def _load_input() -> list[dict]:
 
 
 def _observe(post: dict) -> dict[str, Any]:
-    """1投稿を観察し、observed_*フィールドを返す（40代ファッション×ガジェット前提のヒューリスティック）。"""
+    """1投稿を観察し、observed_*フィールドを返す（40代ファッション×ガジェット前提のヒューリスティック）。
+
+    2026-09-01（GOV-20260901-TOPIC-FIT-GADGET-SYMMETRY-01）辞書統一についての判断メモ:
+    topic_fit計算はfashion軸に`FASHION_KEYWORDS`（広い一般辞書）、gadget軸に
+    `GADGET_CORE_KEYWORDS`（`_compute_layer_signals()`のlayer_primary判定と共有する
+    トピック関連性辞書）を使う、非対称な組み合わせのままにしている。`FASHION_KEYWORDS`を
+    `FASHION_CORE_KEYWORDS`へ統一することも検討したが、`FASHION_KEYWORDS`/
+    `FASHION_KEYWORDS_SPECIFIC`は本ファイル内で少なくとも8箇所（topic_fitのhas_fashion、
+    `weak_generic_only`、`specific_genre_signal_count`（_observe()/_classify_core()の
+    両方）、`age_and_fashion_signal_detected`／`fashion_gadget_intersection_detected`の
+    理由ラベル判定、manual_reviewの`has_fashion_or_age_signal`）で使われており、
+    reject/observe/manual_reviewの分岐境界全体に影響する。統一の効果を個別に検証する
+    仕組み（既存テストスイートはこの粒度をカバーしていない）が無いまま変更すると、
+    意図しない広範な挙動変化を招くリスクが高いと判断し、**今回は統一しない**。
+    fashion軸とgadget軸で異なる語彙を使うこと自体は、fashionが本ジャンルの主題軸・
+    gadgetが補助主題軸という位置づけ（[ops/reports/x_exploration_genre_redefinition_
+    2026-08-15.md](../../ops/reports/x_exploration_genre_redefinition_2026-08-15.md)）
+    とも整合するため、直ちに是正すべき不整合とまでは言えない。統一するかどうかの最終判断は
+    別タスクとして人間の指示を仰ぐ。
+    """
     text = post.get("text") or ""
     # Phase 2.2: 否定文脈（「ガジェット...興味ゼロ」等）で使われているジャンル語だけを
     # マスクしたテキスト。ジャンル辞書のカウントにのみ使い、文字数ベースの判定
@@ -565,10 +584,19 @@ def _observe(post: dict) -> dict[str, Any]:
 
     age_hits = _count_hits(genre_text, AGE_KEYWORDS)
     fashion_hits = _count_hits(genre_text, FASHION_KEYWORDS)
-    # 2026-09-01変更: GADGET_KEYWORDS（キーワード共起）ではなく、実測エンゲージメント値
-    # （_compute_engagement_tier()）でgadget軸の充足を判定する。
+    # 2026-09-01再改訂（GOV-20260901-TOPIC-FIT-GADGET-SYMMETRY-01）: topic_fit計算の
+    # gadget軸は、GADGET_CORE_KEYWORDS（トピック関連性のみ）で判定する。
+    # 前回改訂（GOV-20260901-ENGAGEMENT-BASED-TEACHER-01）でengagement_tier==
+    # "qualifying"ベースに置き換えたが、これはfashion軸（fashion_hits、純粋な
+    # トピック関連性）とgadget軸の間に意図しない非対称を生み、実データで
+    # gadget単独投稿がtopic_fit=="high"に一件も到達できなくなっていた（fashion単独は
+    # 5件到達）。エンゲージメントによる足切りは_apply_engagement_gate()（出口の単一
+    # ゲート、本関数の外）が一括で担うため、topic_fit計算自体にエンゲージメント条件を
+    # 混ぜる必要はない——「トピック関連性の判定」と「昇格可否の判定」を分離する。
+    # engagement_tier自体はobserved_engagement_tierフィールド（_apply_engagement_gate()
+    # が参照する）として引き続き算出する。
     engagement_tier = _compute_engagement_tier(post)
-    gadget_hits = 1 if engagement_tier == "qualifying" else 0
+    gadget_hits = _count_hits(genre_text, GADGET_CORE_KEYWORDS)
     aesthetic_hits = _count_hits(genre_text, AESTHETIC_KEYWORDS)
     utility_hits = _count_hits(genre_text, UTILITY_KEYWORDS)
     # Phase 2.3: BROAD_TREND_KEYWORDS（トレンド/ランキング等）は単独では加点せず、
@@ -837,12 +865,13 @@ def _classify_core(post: dict, obs: dict) -> tuple[str, list[str], str, str | No
     # 三層探索方針の追加救済パスは、この場合はmanual_reviewの否定文脈ハンドリングに委ねる。
     negation_unresolved = bool(negation_ctx["matched_negative_terms"]) and not negation_ctx["matched_exception_terms"]
     negative_hits = _count_hits(text, NEGATIVE_FALSE_MATCH_KEYWORDS)
-    # 2026-09-01変更: gadget軸はGADGET_KEYWORDSではなくobs["observed_engagement_tier"]
-    # （_observe()で算出済み）を参照する。
+    # 2026-09-01再改訂（GOV-20260901-TOPIC-FIT-GADGET-SYMMETRY-01）: gadget軸は
+    # GADGET_CORE_KEYWORDS（トピック関連性）で判定する。エンゲージメント足切りは
+    # _apply_engagement_gate()に一本化済みのため、ここでは参照しない。
     specific_genre_signal_count = (
         _count_hits(genre_text, FASHION_KEYWORDS_SPECIFIC)
         + _count_hits(genre_text, AGE_KEYWORDS_SPECIFIC)
-        + (1 if obs["observed_engagement_tier"] == "qualifying" else 0)
+        + _count_hits(genre_text, GADGET_CORE_KEYWORDS)
         + _count_hits(genre_text, AESTHETIC_KEYWORDS)
         + _count_hits(genre_text, UTILITY_KEYWORDS)
         + _count_hits(genre_text, DECISION_KEYWORDS)
@@ -942,8 +971,12 @@ def _classify_core(post: dict, obs: dict) -> tuple[str, list[str], str, str | No
         candidate_reasons = []
         if obs["observed_topic_fit"] != "low" and _count_hits(genre_text, AGE_KEYWORDS) > 0 and _count_hits(genre_text, FASHION_KEYWORDS) > 0:
             candidate_reasons.append("age_and_fashion_signal_detected")
-        if _count_hits(genre_text, FASHION_KEYWORDS) > 0 and obs["observed_engagement_tier"] == "qualifying":
-            candidate_reasons.append("fashion_gadget_intersection_detected（gadget側はエンゲージメント実測で判定）")
+        # 2026-09-01再改訂（GOV-20260901-TOPIC-FIT-GADGET-SYMMETRY-01）: gadget側は
+        # GADGET_CORE_KEYWORDS（トピック関連性）で判定する。この投稿がpre_teacher_
+        # candidateへ実際に昇格できるかどうかは、ここではなく_apply_engagement_gate()
+        # （単一の出口ゲート）が別途engagement_tierで判定する。
+        if _count_hits(genre_text, FASHION_KEYWORDS) > 0 and _count_hits(genre_text, GADGET_CORE_KEYWORDS) > 0:
+            candidate_reasons.append("fashion_gadget_intersection_detected")
         if _count_hits(genre_text, AESTHETIC_KEYWORDS) > 0 and _count_hits(genre_text, UTILITY_KEYWORDS) > 0:
             candidate_reasons.append("aesthetic_and_utility_both_present")
         if _count_hits(genre_text, DECISION_KEYWORDS) > 0:
@@ -1081,8 +1114,10 @@ def _classify_core(post: dict, obs: dict) -> tuple[str, list[str], str, str | No
             + "/".join(negation_ctx["matched_exception_terms"])
             + "』等、審美改善フレームの可能性があるため自動確定しない）"
         )
-    # 2026-09-01変更: GADGET_KEYWORDSではなくobs["observed_engagement_tier"]で判定する。
-    has_gadget_signal = obs["observed_engagement_tier"] == "qualifying"
+    # 2026-09-01再改訂（GOV-20260901-TOPIC-FIT-GADGET-SYMMETRY-01）: GADGET_CORE_KEYWORDS
+    # （トピック関連性）で判定する。エンゲージメント足切りは_apply_engagement_gate()に
+    # 一本化済みのため、ここでは参照しない。
+    has_gadget_signal = _count_hits(genre_text, GADGET_CORE_KEYWORDS) > 0
     has_fashion_or_age_signal = (
         _count_hits(genre_text, FASHION_KEYWORDS_SPECIFIC) > 0 or _count_hits(genre_text, AGE_KEYWORDS_SPECIFIC) > 0
     )

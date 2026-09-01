@@ -179,9 +179,15 @@ def test_gadget_only_but_reusable_requires_qualifying_engagement() -> None:
         classification_zero != "pre_teacher_candidate",
         f"classification={classification_zero}, reasons={reasons_zero}",
     )
+    # 2026-09-01訂正（GOV-20260901-TOPIC-FIT-GADGET-SYMMETRY-01）: 単一ゲート
+    # （_apply_engagement_gate()）は元の理由（"gadget_only_but_reusable"）を消さずに
+    # "engagement_gate_blocked"を追記する設計（トレーサビリティのため、gated_reasons =
+    # reasons + [...]）。「元の理由が消えること」を期待していた本チェックの前提が誤り
+    # だったため、正しい期待値（両方の理由が共存する）へ訂正する。
     _check(
-        "gadget_only_but_reusable_reason_not_present_when_blocked",
-        not any("gadget_only_but_reusable" in r for r in reasons_zero),
+        "gadget_only_but_reusable_reason_present_alongside_gate_block",
+        any("gadget_only_but_reusable" in r for r in reasons_zero)
+        and any("engagement_gate_blocked" in r for r in reasons_zero),
         str(reasons_zero),
     )
 
