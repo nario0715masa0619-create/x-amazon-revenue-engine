@@ -74,13 +74,17 @@ FASHION_KEYWORDS = [
 #
 # GADGET_CORE_KEYWORDS（三層探索方針、下記）は辞書自体を削除せず、layer_primary
 # （fashion/gadget/intersectionのルーティング）用のトピック関連性シグナルとして
-# 引き続き使う。2026-09-01追加（GOV-20260901-GADGET-ONLY-REUSABLE-ENGAGEMENT-GATE-01）:
+# 引き続き使う。2026-09-01（GOV-20260901-GADGET-ONLY-REUSABLE-ENGAGEMENT-GATE-01）:
 # 当初は"gadget_only_but_reusable"というpre_teacher_candidateへの直接昇格パスが
 # GADGET_CORE_KEYWORDSのみ（gadget_signal_strength=="high"）で判定されており、
 # エンゲージメント値を一切参照しない抜け道になっていた（impression_count=0の
-# ATH-PRO5MK2×骨伝導RT等が昇格し続ける実例で確認）。この抜け道は当該昇格条件へ
-# obs["observed_engagement_tier"]=="qualifying"を必須条件として追加することで
-# 塞いだ（詳細は_classify()内の該当箇所コメント参照）。
+# ATH-PRO5MK2×骨伝導RT等が昇格し続ける実例で確認）。当初はこの昇格条件個別に
+# engagement_tier=="qualifying"を追加して塞いだが、その後の調査（GOV-20260901-
+# LOOPHOLE-SURVEY-01）で同型の抜け道（fashion_only_but_reusable等）が他にも
+# 複数存在することが判明したため、2026-09-01（GOV-20260901-SINGLE-ENGAGEMENT-GATE-01）
+# で個別ゲートを撤去し、_classify()の単一出口ゲート（_apply_engagement_gate()）へ
+# 一本化した。GADGET_CORE_KEYWORDSは以後「トピック関連性シグナルのみ」の役割に
+# 純化され、昇格可否判定には一切関与しない。
 
 AESTHETIC_KEYWORDS = [
     "ダサい", "ダサくない", "大人っぽい", "清潔感", "自然", "上品", "ミニマル",
@@ -422,16 +426,16 @@ GADGET_CORE_KEYWORDS = [
     "イヤホン", "モバイルバッテリー", "充電器", "ガジェット", "スマホ周辺", "ケーブル",
     "軽量", "完全防水", "骨伝導", "ワイヤレス", "USB-C", "充電", "持ち歩き機器",
 ]
-# 2026-09-01改訂（GOV-20260901-GADGET-ONLY-REUSABLE-ENGAGEMENT-GATE-01）:
+# 2026-09-01改訂（GOV-20260901-SINGLE-ENGAGEMENT-GATE-01）:
 # GADGET_CORE_KEYWORDSの役割を「トピック関連性シグナルのみ」に明確化する。
 # ＝この投稿が「40代ファッション×ガジェット」ジャンルのgadget側に該当しそうか、
 # という話題適合の判定にのみ使ってよい。「この投稿をteacher候補（pre_teacher_candidate）
-# に昇格させてよいか」の可否判定には使わない——昇格の可否は必ず
-# obs["observed_engagement_tier"]（_compute_engagement_tier()の結果）で決まる。
-# この分離により、GADGET_CORE_KEYWORDSに一致するがエンゲージメント実測が
-# insufficient_data/lowの投稿（例: impression_count=0のRT）が、話題適合のみを
-# 理由にteacher候補へ昇格することはない（_classify()の"gadget_only_but_reusable"
-# 昇格条件を参照）。
+# に昇格させてよいか」の可否判定には使わない——昇格の可否は、_classify_core()内の
+# どの経路を通ったかに関わらず、必ず_classify()の単一出口ゲート
+# （_apply_engagement_gate()、obs["observed_engagement_tier"]=="qualifying"を検査）
+# で最終決定される。この分離により、GADGET_CORE_KEYWORDSに一致するがエンゲージメント
+# 実測がinsufficient_data/lowの投稿（例: impression_count=0のRT）が、話題適合のみを
+# 理由にteacher候補へ昇格することはない。
 INTERSECTION_BRIDGE_KEYWORDS = [
     "持ち歩き", "邪魔しない", "服に合う", "見た目を壊さない", "身につけやすい",
     "バッグに入る", "軽い", "疲れにくい", "街歩き", "旅行より日常", "収納しやすい",
@@ -771,6 +775,51 @@ def _classify(post: dict, obs: dict) -> tuple[str, list[str], str, str | None]:
         observe: 勝ち方の部品観察価値はあるが、ジャンル交点または構造適合が弱い
         manual_review: 自動判定だけでは決めきれない、惜しい候補
         pre_teacher_candidate: 40代ファッション×ガジェット前提でtopic/structure/approachが揃う候補
+
+    2026-09-01追加（GOV-20260901-SINGLE-ENGAGEMENT-GATE-01）: pre_teacher_candidateへの
+    到達経路が_classify_core()内にいくつ存在しようと（現時点で確認済みの経路: メイン交点
+    パス／fashion_only_but_reusable／gadget_only_but_reusable、および将来追加されうる
+    経路すべてを含む）、この関数は最終的に必ず_apply_engagement_gate()という単一の
+    出口ゲートを通過してから結果を返す。個々の経路の内部ロジック（topic_fit計算、
+    各keyword辞書の判定等）には一切手を入れず、「pre_teacher_candidateとして確定した
+    直後、返す直前」の一箇所だけでengagement_tier=="qualifying"を検査する設計とした。
+    経路を1つずつ塞ぐのではなく、出口を一本化することで恒久的に対応する。
+    """
+    classification, reasons, confidence, manual_reason = _classify_core(post, obs)
+    return _apply_engagement_gate(classification, reasons, confidence, manual_reason, obs)
+
+
+def _apply_engagement_gate(
+    classification: str,
+    reasons: list[str],
+    confidence: str,
+    manual_reason: str | None,
+    obs: dict,
+) -> tuple[str, list[str], str, str | None]:
+    """pre_teacher_candidateへの到達経路を問わず適用する単一ゲート
+    （GOV-20260901-SINGLE-ENGAGEMENT-GATE-01）。
+
+    _classify_core()がどの経路（メイン交点パス／fashion_only_but_reusable／
+    gadget_only_but_reusable等）を通ってpre_teacher_candidateへ到達したとしても、
+    obs["observed_engagement_tier"]=="qualifying"でなければobserveへ格下げする。
+    格下げ先はobserve（前タスクのgadget_only_but_reusable修正時の挙動と一貫させる）。
+    pre_teacher_candidate以外の分類（reject/observe/manual_review）はこのゲートの
+    対象外で、そのまま通過する。
+    """
+    if classification == "pre_teacher_candidate" and obs["observed_engagement_tier"] != "qualifying":
+        gated_reasons = reasons + [
+            f"engagement_gate_blocked（engagement_tier={obs['observed_engagement_tier']}のため、"
+            "到達経路によらずpre_teacher_candidateへの昇格をブロックしobserveへ格下げ）"
+        ]
+        return "observe", gated_reasons, "medium", None
+    return classification, reasons, confidence, manual_reason
+
+
+def _classify_core(post: dict, obs: dict) -> tuple[str, list[str], str, str | None]:
+    """_classify()の内部実装。個々の経路のロジック本体はここに置く。
+
+    このプライベート関数を直接呼び出さないこと——engagement_tierによる単一ゲートは
+    _classify()側（_apply_engagement_gate()）で適用される。
     """
     reasons: list[str] = []
     text = post.get("text") or ""
@@ -921,23 +970,13 @@ def _classify(post: dict, obs: dict) -> tuple[str, list[str], str, str | None]:
         if obs["layer_primary"] == "fashion" and obs["fashion_signal_strength"] == "high":
             reasons.append("fashion_only_but_reusable（ファッション単独だが構造・アプローチ再利用価値が高い）")
             return "pre_teacher_candidate", reasons, "medium", None
-        # 2026-09-01変更（GOV-20260901-GADGET-ONLY-REUSABLE-ENGAGEMENT-GATE-01）:
-        # gadget_signal_strength（GADGET_CORE_KEYWORDS由来）はトピック関連性の
-        # シグナルとして引き続き必須条件に使うが、これだけではteacher候補への
-        # 昇格を許可しない。obs["observed_engagement_tier"]=="qualifying"
-        # （実測エンゲージメントが閾値を満たす）も必須とする。insufficient_data/low
-        # の場合はここでは昇格させず、以降のobserve/manual_review判定に委ねる
-        # （既知のATH-PRO5MK2×骨伝導RT等、impression_count=0の投稿がキーワード
-        # 一致のみでteacher候補になり続ける抜け道を塞ぐ）。
-        if (
-            obs["layer_primary"] == "gadget"
-            and obs["gadget_signal_strength"] == "high"
-            and obs["observed_engagement_tier"] == "qualifying"
-        ):
-            reasons.append(
-                "gadget_only_but_reusable（ガジェット単独だが構造・アプローチ再利用価値が高く、"
-                "エンゲージメント実測もqualifying）"
-            )
+        # 2026-09-01改訂（GOV-20260901-SINGLE-ENGAGEMENT-GATE-01）: このブロック内の
+        # engagement_tier個別チェックは撤去した。gadget_signal_strength（トピック関連性
+        # シグナル）のみで昇格させ、engagement_tier=="qualifying"でない場合の格下げは
+        # _classify()の_apply_engagement_gate()（単一の出口ゲート）に一本化する
+        # （二重管理を避けるため）。
+        if obs["layer_primary"] == "gadget" and obs["gadget_signal_strength"] == "high":
+            reasons.append("gadget_only_but_reusable（ガジェット単独だが構造・アプローチ再利用価値が高い）")
             return "pre_teacher_candidate", reasons, "medium", None
 
     # --- observe 判定 ---

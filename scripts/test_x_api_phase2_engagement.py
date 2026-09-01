@@ -307,6 +307,121 @@ def test_real_data_reclassification() -> None:
     )
 
 
+# ==============================================================================
+# 検証（GOV-20260901-SINGLE-ENGAGEMENT-GATE-01）: _classify()出口の単一ゲートが、
+# 洗い出し済みの全6経路（経路1a〜d／経路2 fashion_only_but_reusable／
+# 経路3 gadget_only_but_reusable）を、どの経路が発火したかに関わらず
+# 一律にカバーすることの確認。
+# ==============================================================================
+def test_single_gate_covers_all_known_paths() -> None:
+    print("\n=== 検証: 単一ゲートが全6経路（1a〜d/2/3）を一律カバーすることの確認 ===")
+
+    # _apply_engagement_gate()はclassificationとobs["observed_engagement_tier"]のみを
+    # 見て判定するため（reasonsの中身は判定に使わない）、各経路が実際に付与する理由タグを
+    # そのまま与え、engagement_tierの3値それぞれで挙動を直接検証する。これにより
+    # _classify_core()内のどの分岐経由でpre_teacher_candidateに達したかに関わらず、
+    # ゲートが漏れなく適用されることをアーキテクチャレベルで保証する。
+    reason_tags_by_path = {
+        "1a_age_and_fashion_signal_detected": ["age_and_fashion_signal_detected"],
+        "1b_aesthetic_and_utility_both_present": ["aesthetic_and_utility_both_present"],
+        "1c_comparison_or_selection_structure_detected": ["comparison_or_selection_structure_detected"],
+        "1d_ownership_or_carry_signal_detected": ["ownership_or_carry_signal_detected"],
+        "2_fashion_only_but_reusable": ["fashion_only_but_reusable（ファッション単独だが構造・アプローチ再利用価値が高い）"],
+        "3_gadget_only_but_reusable": ["gadget_only_but_reusable（ガジェット単独だが構造・アプローチ再利用価値が高い）"],
+    }
+    for name, reasons in reason_tags_by_path.items():
+        for tier, expected in (
+            ("insufficient_data", "observe"),
+            ("low", "observe"),
+            ("qualifying", "pre_teacher_candidate"),
+        ):
+            obs = {"observed_engagement_tier": tier}
+            result_cls, result_reasons, result_conf, result_manual = p2._apply_engagement_gate(
+                "pre_teacher_candidate", list(reasons), "medium", None, obs
+            )
+            _check(
+                f"single_gate_{name}_tier_{tier}",
+                result_cls == expected,
+                f"expected={expected}, actual={result_cls}",
+            )
+    # ゲート対象外（reject/observe/manual_review）はそのまま通過することも確認する。
+    for passthrough_cls in ("reject", "observe", "manual_review"):
+        obs = {"observed_engagement_tier": "insufficient_data"}
+        result = p2._apply_engagement_gate(passthrough_cls, ["dummy_reason"], "high", "dummy_manual", obs)
+        _check(
+            f"single_gate_passthrough_{passthrough_cls}",
+            result == (passthrough_cls, ["dummy_reason"], "high", "dummy_manual"),
+            str(result),
+        )
+
+
+def test_single_gate_integration_via_real_classify() -> None:
+    print("\n=== 検証: 単一ゲートの統合テスト（合成テキストで_classify()全体を通す） ===")
+
+    # 経路1a/1c: age+fashion+decision（gadget/engagement軸に一切依存しない文面）
+    text_1a = (
+        "40代になってから服のコーデを見直した。清潔感があって垢抜けるバッグを選ぶのが"
+        "自分にとって一番の正解だった。大人っぽい着こなしを比較しながら選び方を工夫している。"
+    )
+    zero = _post(text_1a, impression=0)
+    obs_zero = p2._observe(zero)
+    cls_zero, reasons_zero, _, _ = p2._classify(zero, obs_zero)
+    _check(
+        "integration_1a_blocked_when_insufficient",
+        cls_zero != "pre_teacher_candidate" and any("engagement_gate_blocked" in r for r in reasons_zero),
+        f"classification={cls_zero}, reasons={reasons_zero}",
+    )
+    qual = _post(text_1a, impression=500, like=10, repost=3)
+    obs_qual = p2._observe(qual)
+    cls_qual, reasons_qual, _, _ = p2._classify(qual, obs_qual)
+    _check(
+        "integration_1a_promotes_when_qualifying",
+        cls_qual == "pre_teacher_candidate",
+        f"classification={cls_qual}, reasons={reasons_qual}",
+    )
+
+    # 経路1b: aesthetic+utility（age/decision語を含まない文面）
+    text_1b = "服のコーデは上品でミニマルなバッグが便利。持ち歩きやすくて快適、軽いから収納にも困らない。"
+    zero_b = _post(text_1b, impression=0)
+    obs_zero_b = p2._observe(zero_b)
+    cls_zero_b, reasons_zero_b, _, _ = p2._classify(zero_b, obs_zero_b)
+    _check(
+        "integration_1b_blocked_when_insufficient",
+        cls_zero_b != "pre_teacher_candidate",
+        f"classification={cls_zero_b}, reasons={reasons_zero_b}",
+    )
+    qual_b = _post(text_1b, impression=500, like=10, repost=3)
+    obs_qual_b = p2._observe(qual_b)
+    cls_qual_b, reasons_qual_b, _, _ = p2._classify(qual_b, obs_qual_b)
+    _check(
+        "integration_1b_promotes_when_qualifying",
+        cls_qual_b == "pre_teacher_candidate",
+        f"classification={cls_qual_b}, reasons={reasons_qual_b}",
+    )
+
+
+def test_path4_observe_fallback_never_reaches_pre_teacher_candidate() -> None:
+    print("\n=== 検証: 経路4（fashion_signal_detected/gadget_signal_detected）は"
+          "そもそもpre_teacher_candidateへ到達しないことの確認 ===")
+    # 経路4はコード上observeを直接返す分岐であり、pre_teacher_candidateへの昇格経路
+    # ではない（単一ゲートの対象外で構造上問題ない）ことをソースから確認する。
+    import inspect
+
+    source = inspect.getsource(p2._classify_core)
+    idx_fashion_fallback = source.find('reasons.append("fashion_signal_detected')
+    idx_gadget_fallback = source.find('reasons.append("gadget_signal_detected')
+    _check("path4_fashion_fallback_reason_present_in_source", idx_fashion_fallback != -1)
+    _check("path4_gadget_fallback_reason_present_in_source", idx_gadget_fallback != -1)
+    # それぞれの直後の行がreturn "observe"であること（pre_teacher_candidateではないこと）を確認する。
+    for idx, label in ((idx_fashion_fallback, "fashion"), (idx_gadget_fallback, "gadget")):
+        following = source[idx: idx + 200]
+        _check(
+            f"path4_{label}_fallback_returns_observe_not_pre_teacher_candidate",
+            'return "observe"' in following and 'return "pre_teacher_candidate"' not in following,
+            following.replace("\n", " "),
+        )
+
+
 if __name__ == "__main__":
     test_gadget_keywords_removed()
     test_compute_engagement_tier()
@@ -314,6 +429,9 @@ if __name__ == "__main__":
     test_gadget_only_but_reusable_requires_qualifying_engagement()
     test_reject_side_logic_unaffected()
     test_real_ath_pro5mk2_post_excluded()
+    test_single_gate_covers_all_known_paths()
+    test_single_gate_integration_via_real_classify()
+    test_path4_observe_fallback_never_reaches_pre_teacher_candidate()
     test_real_data_reclassification()
 
     print("\n" + "=" * 60)
