@@ -39,16 +39,55 @@ _TIMEOUT_SECONDS = 15
 _POST_FIELDS = "created_at,lang,public_metrics,author_id"  # id, text はデフォルト応答に常時含まれる
 
 # クエリ一覧（固定配列。動的生成・最適化ロジックはまだ入れない）
-# 1クエリあたりmax_resultsは10〜20の範囲。合計が50件を超えないようにする。
+# 1クエリあたりmax_resultsは10〜20の範囲。
 #
+# 2026-09-01（広域収集への全面置き換え、GOV-20260901-BROAD-COLLECTION-01）:
+# 商品カテゴリ（イヤホン/骨伝導等）を人間が先読みして列挙する旧クエリ設計
+# （2026-08-15〜08-27の反復改訂、直下の履歴コメント参照）は、収集の入口を
+# 単一カテゴリに閉じ込めてしまう構造的欠陥だったと判明した（詳細:
+# ops/reports/broad_teacher_collection_design_2026-09-01.md）。人間の明示的な
+# 承認により「Phase 1 query setは変えない」制約を今回に限り解除し、同設計文書
+# フェーズ2の6クエリ案（年代語×ジャンル語のOR集約、特定商品名・型番は一切
+# 使用しない）へ全面的に置き換えた。旧18クエリは削除し、並行稼働はしない。
+#
+# 「比較」「実体験」等をAND必須語に含めない方針は維持する（gadget_query_redesign_
+# 2026-08-27.mdで「比較」をAND条件に含めると0件に収束すると実証済みのため）。
+# 比較構造の有無の判定は引き続きPhase 2分類器（下流）に委ねる。
+# OR演算子は大文字`OR`＋`( )`グループ化（X API検索構文）。各クエリは日本語で
+# 30〜40文字程度であり、512文字制限に対して十分な余裕がある。
+#
+# 以下は旧設計（2026-08-15〜08-27）の履歴コメント（参考として保持）:
 # 2026-08-15（3回目改訂）: 3語ANDクエリ（40代 持ち物 更新 等）は3本とも0件だったため、
 # 2語クエリへ緩めて母数確保を優先する。入口は広めにし、絞り込みはPhase 2の
 # 「40代ファッション×ガジェット」分類器（topic_fit/structure_fit/approach_value）に委ねる。
 # 旧事件型クエリ（会議/商談/仕事/ペン/出ない等）は引き続き使わない。
+# 2026-08-16: 三層探索方針（ops/reports/three_layer_exploration_policy_2026-08-16.md）
+# 反映後の初回検証バッチ。「40代 イヤホン」を意図的に再採用し、三層化で追加した
+# gadget-only候補化パス（fashion_only_but_reusable/gadget_only_but_reusable）が
+# 実データで機能するかを確認する（交点不足でも失敗扱いにしない）。
+# 2026-08-27（gadget query再設計）: 「40代 イヤホン」単独クエリはRun1〜7で同一の
+# 既知先生（source_post_id=2086972244987900332）にほぼ依存しており、Run8/Run9の
+# 2run・通算4回の収集試行で0件（教師要件を満たす候補が無い状態）が継続した。
+# manual_review落ちの候補もニュース/愚痴/雑談が中心で、比較構造・実体験・
+# usage_scenes・comparison_axesを欠いていた。このため「対象語（イヤホン）だけの
+# クエリ」から「teacher-post構造を直接クエリへ埋め込む」方針へ切り替えた
+# （詳細: ops/reports/gadget_query_redesign_2026-08-27.md、
+# ops/reports/gadget_query_redesign_round3_2026-08-27.md）。この方針も
+# 「対象語（商品カテゴリ）を人間が先読みする」という同根の構造的限界を持って
+# いたため、2026-09-01の全面置き換えに至った。
 QUERIES: list[dict[str, Any]] = [
-    {"query": "40代 持ち物", "max_results": 15},
-    {"query": "40代 小物", "max_results": 15},
-    {"query": "服 ガジェット", "max_results": 15},
+    # Q1 (gadget): ジャンル語そのもの＋Phase2 GADGET_KEYWORDSと同じ語彙で広く網をかける
+    {"query": "(40代 OR アラフォー) (ガジェット OR デバイス OR EDC OR 携帯性)", "max_results": 20},
+    # Q2 (gadget): 商品名に依存しない「所有・愛用」を表す一般語
+    {"query": "(40代 OR アラフォー) (愛用 OR 手放せない OR 買ってよかった OR 使い分け)", "max_results": 20},
+    # Q3 (gadget): 特定製品名を出さない機能・シーン語（複数カテゴリに横断する）
+    {"query": "(40代 OR アラフォー) (充電 OR バッテリー OR ケーブル OR 持ち歩き)", "max_results": 20},
+    # Q4 (fashion): 既存fashionクエリの延長、商品名は出さない
+    {"query": "(40代 OR アラフォー) (小物 OR コーデ OR 身につける OR 着映え)", "max_results": 20},
+    # Q5 (fashion): 装身具カテゴリの網（個別ブランド名・型番は含まない）
+    {"query": "(40代 OR アラフォー) (バッグ OR 財布 OR 時計 OR ベルト OR メガネ)", "max_results": 20},
+    # Q6 (intersection): 初期コミット時点の`服 ガジェット`クエリの精神を踏襲し、交点を直接狙う
+    {"query": "(ガジェット OR デバイス) (服 OR コーデ OR ファッション)", "max_results": 20},
 ]
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
