@@ -14,8 +14,24 @@
 from __future__ import annotations
 
 import re
+import sys
 import unicodedata
+from pathlib import Path
 from typing import Any
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+# 2026-09-02追加（GOV-20260902-TOPIC-GROUP-IDENTITY-UNIFICATION-01）:
+# teacher_theme_extraction.pyが使う広いジャンル辞書を正本として合流させる
+# （x_api_phase2_classify.py自体への依存はimportのみで、判定ロジック
+# _apply_engagement_gate()/_classify_core()には一切触れない。循環import回避のため
+# teacher_theme_extraction.pyではなくその上流のx_api_phase2_classify.pyから直接importする
+# ——teacher_theme_extraction.py自身がtopic_dedupe.pyをimportしているため）。
+from x_api_phase2_classify import (  # noqa: E402
+    DECISION_KEYWORDS,
+    FASHION_CORE_KEYWORDS_SPECIFIC,
+    GADGET_CORE_KEYWORDS,
+    _mask_negated_genre_context,
+)
 
 # ==============================================================================
 # 2026-08-31 EXP-20260831-TOPIC-GROUP-LIFECYCLE-01: 表記ゆれ吸収の強化。
@@ -95,11 +111,50 @@ _DIMENSIONS: tuple[tuple[str, dict[str, list[str]]], ...] = (
 )
 
 
+def _all_existing_keywords_normalized(term_map: dict[str, list[str]]) -> set[str]:
+    result: set[str] = set()
+    for keywords in term_map.values():
+        result.update(_normalize_for_matching(kw) for kw in keywords)
+    return result
+
+
+# 2026-09-02追加（GOV-20260902-TOPIC-GROUP-IDENTITY-UNIFICATION-01）: 広いジャンル辞書
+# （GADGET_CORE_KEYWORDS/FASHION_CORE_KEYWORDS_SPECIFIC/DECISION_KEYWORDS）由来の語が、
+# 既存のPRODUCT_TERMS/COMPARISON_AXIS_TERMSと意味的に重複する場合に新規タグ追加を
+# スキップするための参照集合（extract_theme_components()のdocstring参照）。
+_EXISTING_PRODUCT_KEYWORDS_NORMALIZED = _all_existing_keywords_normalized(PRODUCT_TERMS)
+_EXISTING_AXIS_KEYWORDS_NORMALIZED = _all_existing_keywords_normalized(COMPARISON_AXIS_TERMS)
+
+
 def extract_theme_components(text: str) -> dict[str, list[str]]:
     """textから、次元別（product/use_case/comparison_axis/contrast/conclusion）に
     マッチしたタグのリストを抽出する。マッチが無い次元は空リストのまま返す。
     大文字小文字・全角半角・ハイフン/スペース/アンダースコアの有無は区別しない
     （_normalize_for_matching()による表記ゆれ吸収）。
+
+    2026-09-02追加（GOV-20260902-TOPIC-GROUP-IDENTITY-UNIFICATION-01）: PRODUCT_TERMS/
+    COMPARISON_AXIS_TERMS（ATH-PRO5MK2等、既知の特定型番のみを対象にした狭い辞書）に加え、
+    x_api_phase2_classify.pyのGADGET_CORE_KEYWORDS/FASHION_CORE_KEYWORDS_SPECIFIC
+    （product次元）・DECISION_KEYWORDS（comparison_axis次元）による広いジャンル語彙も
+    productとcomparison_axisへ合流させる。これにより、teacher_theme_extraction.pyが
+    生成するtopic_group_idと、evaluate_topic_group_for_mainline()（本関数経由）が
+    生成するtopic_group_idが同一の語彙体系に統一される
+    （旧: 広いfashion/gadgetジャンルの投稿はここで全て"unclassified"になっていた）。
+
+    **既存のATH-PRO5MK2関連タグとの重複防止（重要な安全策）**: 広い辞書の語が、既存の
+    PRODUCT_TERMS/COMPARISON_AXIS_TERMSの語彙と意味的に重複する場合（例:
+    GADGET_CORE_KEYWORDSの「骨伝導」は既にPRODUCT_TERMS["bone-conduction"]の同義語として
+    登録済み）、新規タグとしては追加しない（_existing_narrow_keywords()で判定）。これにより、
+    ATH-PRO5MK2×ジム用骨伝導系の投稿から抽出されるtheme_signature/topic_groupは、本変更の
+    前後で完全に同一の文字列のまま変化しない（既存のposted_theme_registry照合・分裂検出の
+    既知ケースを壊さない）。真に新しい語彙（fashion系のコーデ/デニム等）のみが新規タグとして
+    追加される。
+
+    否定文脈（「ガジェットには興味ゼロ」等）の扱いは、既存のGADGET_CORE_KEYWORDS/
+    FASHION_CORE_KEYWORDS_SPECIFIC/DECISION_KEYWORDS判定と同じく
+    x_api_phase2_classify._mask_negated_genre_context()でマスクしたテキストに対して行う
+    （既存のPRODUCT_TERMS等の狭い辞書側はこれまでどおり否定文脈マスクなしのまま、
+    挙動を変更しない）。
     """
     normalized_text = _normalize_for_matching(text)
     components: dict[str, list[str]] = {}
@@ -109,6 +164,17 @@ def extract_theme_components(text: str) -> dict[str, list[str]]:
             if any(_normalize_for_matching(kw) in normalized_text for kw in keywords):
                 matched.append(tag)
         components[dim_name] = matched
+
+    genre_text = _mask_negated_genre_context(text)
+    for kw in GADGET_CORE_KEYWORDS + FASHION_CORE_KEYWORDS_SPECIFIC:
+        if kw in genre_text and _normalize_for_matching(kw) not in _EXISTING_PRODUCT_KEYWORDS_NORMALIZED:
+            if kw not in components["product"]:
+                components["product"].append(kw)
+    for kw in DECISION_KEYWORDS:
+        if kw in genre_text and _normalize_for_matching(kw) not in _EXISTING_AXIS_KEYWORDS_NORMALIZED:
+            if kw not in components["comparison_axis"]:
+                components["comparison_axis"].append(kw)
+
     return components
 
 

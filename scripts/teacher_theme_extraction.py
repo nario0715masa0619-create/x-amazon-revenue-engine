@@ -1,21 +1,26 @@
 """teacher投稿（pre_teacher_candidate）本文から、topic_group自動登録用のテーマ要素を
 機械的に抽出するpure function層。
 
-**再利用方針**: theme_signature/topic_group_idの組み立て自体は
-topic_dedupe.build_theme_signature()/build_topic_group()（既存、正本）をそのまま使う。
-本モジュールが新設するのは、その入力となる`components`辞書（product/use_case/
-comparison_axis/contrast/conclusionの5次元）を、teacher投稿本文からルールベースで
-組み立てる部分のみ。
+**再利用方針（2026-09-02改訂、GOV-20260902-TOPIC-GROUP-IDENTITY-UNIFICATION-01）**:
+componentsの抽出・theme_signature/topic_group_idの組み立てのいずれも、
+topic_dedupe.extract_theme_components()/build_theme_signature()/build_topic_group()
+（既存、正本）をそのまま使う。
 
-- 商品名・カテゴリ語: x_api_phase2_classify.GADGET_CORE_KEYWORDS/FASHION_CORE_
-  KEYWORDS_SPECIFIC（既存、broaderなジャンル辞書）を再利用する。topic_dedupe.
-  PRODUCT_TERMS（ATH-PRO5MK2等、既知の特定型番のみを対象にした狭い辞書）はそのままでは
-  一般的なteacher投稿の商品抽出には狭すぎるため使わない——ただし
-  use_case/comparison_axis/contrast/conclusionの4次元はtopic_dedupe.
-  extract_theme_components()の結果をそのまま流用する（既存の正規化・表記ゆれ吸収
-  ロジックを再実装しない）。
-- 訴求切り口: x_api_phase2_classify.DECISION_KEYWORDS（既存、比較・選び方等の語彙）を
-  再利用し、topic_dedupe側のcomparison_axis抽出結果へ合流させる。
+従来、本モジュールは独自に「商品名・カテゴリ語（GADGET_CORE_KEYWORDS/FASHION_CORE_
+KEYWORDS_SPECIFIC）・訴求切り口（DECISION_KEYWORDS）をproduct/comparison_axisへ合流
+させる」処理を複製実装していたが、これは`evaluate_topic_group_for_mainline()`が使う
+topic_dedupe.build_theme_profile()側には反映されておらず、同じteacher投稿本文から
+本モジュール経由（"proposed"登録時）とmainline候補判定経由（昇格後の再評価時）とで
+**別々のtopic_group_idが計算されてしまう**という実データで確認された不整合の原因になって
+いた（詳細: ops/reports/以下のtopic_group identity統合タスクの報告参照）。
+
+この不整合を解消するため、広いジャンル辞書によるproduct/comparison_axis拡張ロジック
+自体をtopic_dedupe.extract_theme_components()側へ統合し（同モジュールが
+x_api_phase2_classify.GADGET_CORE_KEYWORDS/FASHION_CORE_KEYWORDS_SPECIFIC/
+DECISION_KEYWORDSを直接importして合流させるようになった）、本モジュールは
+topic_dedupe.extract_theme_components()をそのまま呼ぶだけの薄いラッパーへ変更した。
+これにより、"proposed"登録時と昇格後のmainline候補判定時とで、常に同一の
+topic_group_id計算経路を通ることが保証される（実装が2箇所に分かれていた状態を解消）。
 
 抽出されたタグは、辞書に登場する日本語キーワードそのものを使う（英語スラッグへの
 変換・翻訳は行わない——存在しない対応関係を捏造しないため）。
@@ -35,19 +40,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from topic_dedupe import build_theme_signature, build_topic_group, extract_theme_components
 from topic_group_state import TopicGroupState, get_or_create_topic_group
-from x_api_phase2_classify import (
-    DECISION_KEYWORDS,
-    FASHION_CORE_KEYWORDS_SPECIFIC,
-    GADGET_CORE_KEYWORDS,
-    _mask_negated_genre_context,
-)
 
 _COMPONENT_DIMENSIONS = ("product", "use_case", "comparison_axis", "contrast", "conclusion")
-
-
-def _matched_tags(text: str, keywords: list[str]) -> list[str]:
-    """textに含まれるkeywords内の語を、辞書の表記そのままタグとして返す（重複除去・整列済み）。"""
-    return sorted({kw for kw in keywords if kw in text})
 
 
 def extract_teacher_theme_components(text: str) -> dict[str, list[str]]:
@@ -55,34 +49,12 @@ def extract_teacher_theme_components(text: str) -> dict[str, list[str]]:
     渡せる形のcomponents辞書（product/use_case/comparison_axis/contrast/conclusion）を
     組み立てる。
 
-    product: GADGET_CORE_KEYWORDS/FASHION_CORE_KEYWORDS_SPECIFIC（ジャンル全体の広い辞書）
-    use_case/contrast/conclusion: topic_dedupe.extract_theme_components()の抽出結果を
-        そのまま使う（既存の正規化ロジックを再実装しない）
-    comparison_axis: topic_dedupe側の抽出結果 + DECISION_KEYWORDS由来のタグを合流
+    2026-09-02改訂: topic_dedupe.extract_theme_components()（既に広いジャンル辞書との
+    合流ロジックを含む、正本）をそのまま呼び出すだけの薄いラッパー。以前ここにあった
+    独自の合流ロジックは削除し、evaluate_topic_group_for_mainline()側と完全に同一の
+    抽出結果を返すことを保証する。
     """
-    genre_text = _mask_negated_genre_context(text)
-    base_components = extract_theme_components(text)
-
-    product_tags = sorted(
-        set(_matched_tags(genre_text, GADGET_CORE_KEYWORDS))
-        | set(_matched_tags(genre_text, FASHION_CORE_KEYWORDS_SPECIFIC))
-    )
-    if not product_tags:
-        # ジャンル辞書で何も検出できない場合のみ、topic_dedupe側の狭い既知商品名
-        # マッチ（ATH-PRO5MK2等）にフォールバックする。
-        product_tags = sorted(base_components.get("product", []))
-
-    comparison_axis_tags = sorted(
-        set(base_components.get("comparison_axis", [])) | set(_matched_tags(genre_text, DECISION_KEYWORDS))
-    )
-
-    return {
-        "product": product_tags,
-        "use_case": sorted(base_components.get("use_case", [])),
-        "comparison_axis": comparison_axis_tags,
-        "contrast": sorted(base_components.get("contrast", [])),
-        "conclusion": sorted(base_components.get("conclusion", [])),
-    }
+    return extract_theme_components(text)
 
 
 def build_teacher_theme_profile(text: str) -> dict[str, Any]:
