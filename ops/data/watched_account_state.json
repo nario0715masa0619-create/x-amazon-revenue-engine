@@ -1,3 +1,64 @@
 {
-  "watched_accounts": {}
+  "watched_accounts": {
+    "765724766502170624": {
+      "author_id": "765724766502170624",
+      "watch_status": "active",
+      "teacher_count": 1,
+      "first_registered_at": "2026-09-02T00:57:35Z",
+      "last_teacher_at": "2026-09-02T00:57:35Z",
+      "last_deepdive_checked_at": null,
+      "consecutive_unproductive_deepdive_runs": 0,
+      "last_deepdive_since_id": null,
+      "created_at": "2026-09-02T00:57:35Z",
+      "updated_at": "2026-09-02T00:57:35Z"
+    },
+    "812466877184126977": {
+      "author_id": "812466877184126977",
+      "watch_status": "active",
+      "teacher_count": 1,
+      "first_registered_at": "2026-09-02T00:57:35Z",
+      "last_teacher_at": "2026-09-02T00:57:35Z",
+      "last_deepdive_checked_at": null,
+      "consecutive_unproductive_deepdive_runs": 0,
+      "last_deepdive_since_id": null,
+      "created_at": "2026-09-02T00:57:35Z",
+      "updated_at": "2026-09-02T00:57:35Z"
+    },
+    "720220197668278273": {
+      "author_id": "720220197668278273",
+      "watch_status": "active",
+      "teacher_count": 1,
+      "first_registered_at": "2026-09-02T00:57:35Z",
+      "last_teacher_at": "2026-09-02T00:57:35Z",
+      "last_deepdive_checked_at": null,
+      "consecutive_unproductive_deepdive_runs": 0,
+      "last_deepdive_since_id": null,
+      "created_at": "2026-09-02T00:57:35Z",
+      "updated_at": "2026-09-02T00:57:35Z"
+    },
+    "756768794513584128": {
+      "author_id": "756768794513584128",
+      "watch_status": "active",
+      "teacher_count": 1,
+      "first_registered_at": "2026-09-02T00:57:35Z",
+      "last_teacher_at": "2026-09-02T00:57:35Z",
+      "last_deepdive_checked_at": null,
+      "consecutive_unproductive_deepdive_runs": 0,
+      "last_deepdive_since_id": null,
+      "created_at": "2026-09-02T00:57:35Z",
+      "updated_at": "2026-09-02T00:57:35Z"
+    },
+    "55126678": {
+      "author_id": "55126678",
+      "watch_status": "active",
+      "teacher_count": 1,
+      "first_registered_at": "2026-09-02T00:57:35Z",
+      "last_teacher_at": "2026-09-02T00:57:35Z",
+      "last_deepdive_checked_at": null,
+      "consecutive_unproductive_deepdive_runs": 0,
+      "last_deepdive_since_id": null,
+      "created_at": "2026-09-02T00:57:35Z",
+      "updated_at": "2026-09-02T00:57:35Z"
+    }
+  }
 }
