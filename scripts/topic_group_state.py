@@ -176,6 +176,39 @@ def promote_proposed_topic_group(store: dict[str, TopicGroupState], topic_group_
     return state
 
 
+def reject_proposed_topic_group(store: dict[str, TopicGroupState], topic_group_id: str) -> TopicGroupState:
+    """"proposed"状態のtopic_groupを、人間の確認後に却下する（2026-09-02追加、
+    GOV-20260902-TEACHER-THEME-PROMOTE-CLI-01）。promote_proposed_topic_group()と対になる
+    もう一方の遷移で、以後mainlineの候補プールに一切現れないようにする。
+
+    遷移先はtopic_status="retired"（TOPIC_STATUSESの既存値。"retired_from_mainline"という
+    文字列はTOPIC_STATUSESに存在しない——これは`topic_retired_from_mainline`という別の
+    真偽値フィールド名であり、ステータス文字列ではない。依頼文はこれを「既存ステータス」と
+    表現していたが、実際に候補フィルタの除外条件として機能するのは`topic_status`文字列の
+    方であるため、正しい既存値である"retired"を使う。record_publication()のloss分岐が
+    同じ"retired"ステータスを使っている既存の意味づけとも整合する）。あわせて
+    `topic_retired_from_mainline=True`も設定し、record_publication()と同じ意味づけの
+    フィールドとして整合させる。
+    """
+    if topic_group_id not in store:
+        raise TopicGroupStateError(f"topic_group_id={topic_group_id!r} がstoreに存在しない")
+    state = store[topic_group_id]
+    if state.topic_status != "proposed":
+        raise TopicGroupStateError(
+            f"topic_group_id={topic_group_id!r} はtopic_status={state.topic_status!r}であり、"
+            "'proposed'ではないため却下できない"
+        )
+    state.topic_status = "retired"
+    state.topic_retired_from_mainline = True
+    state.updated_at = _now_iso()
+    return state
+
+
+def list_proposed_topic_groups(store: dict[str, TopicGroupState]) -> list[TopicGroupState]:
+    """storeのうち"proposed"状態のtopic_groupのみを、登録日時の古い順で返す（read-only）。"""
+    return sorted((s for s in store.values() if s.topic_status == "proposed"), key=lambda s: s.created_at)
+
+
 def record_topic_group_run_observed(state: TopicGroupState) -> TopicGroupState:
     """このtopic_group_idにmainline runが1件対応付けられたことを記録する
     （theme_signature分裂検出のための実質露出回数カウンタ。状態遷移・budget消費とは独立）。

@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from topic_group_state import load_topic_group_state_store
+from topic_group_state import list_proposed_topic_groups, load_topic_group_state_store
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 _TOPIC_GROUP_STATE_PATH = _REPO_ROOT / "ops" / "reports" / "topic_group_state_2026-08-31.json"
@@ -24,10 +24,7 @@ _TOPIC_GROUP_STATE_PATH = _REPO_ROOT / "ops" / "reports" / "topic_group_state_20
 
 def main() -> None:
     store = load_topic_group_state_store(_TOPIC_GROUP_STATE_PATH)
-    proposed = sorted(
-        (s for s in store.values() if s.topic_status == "proposed"),
-        key=lambda s: s.created_at,
-    )
+    proposed = list_proposed_topic_groups(store)
 
     if not proposed:
         print("proposed状態のtopic_groupはありません。")
