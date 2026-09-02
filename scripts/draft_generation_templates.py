@@ -300,6 +300,30 @@ def render_single_claim(slots: GenerationSlots) -> str:
     return f"{slots.hook}。{items}。{slots.age_angle}"
 
 
+def render_essay_reflection(slots: GenerationSlots) -> str:
+    """essay_like（既存6テンプレートのいずれの検出条件にも該当しない、感想・所感型の
+    元投稿）向けテンプレート（2026-09-02追加、GOV-20260902-ESSAY-LIKE-TEMPLATE-01）。
+
+    背景: 広域収集（fashion）経由のteacher投稿を実際に`classify_source_structure_type()`
+    へ通したところ、複数件が`essay_like`（列挙・比較・優先順位逆転・実体験・how_toの
+    いずれの検出語にも一致しない、フォールバックラベル）に分類され、既存の
+    `_TEMPLATE_DISPATCH`に対応するテンプレートが無いため`render_draft()`が
+    `GenerationSlotsError`で下書き生成を一切ブロックしていた。
+
+    骨格: 観察・結論の起点（hook）+ 具体物での裏付け（concrete_items）+
+    任意の一段の含み（reusable_elementsの先頭1件、あれば）+ 年代視点の結び
+    （age_angleまたはbenefit）。他の全テンプレートと同じく、Claude Codeが埋めるのは
+    スロットの中身のみで、骨格の組み立てロジック自体はこの関数が決定的に行う
+    （自由作文はしない）。
+    """
+    items = "、".join(slots.concrete_items)
+    nuance = slots.reusable_elements[0] if slots.reusable_elements else None
+    closing = slots.age_angle or slots.benefit
+    if nuance:
+        return f"{slots.hook}。{items}。\n{nuance}。\n{closing}"
+    return f"{slots.hook}。{items}。\n{closing}"
+
+
 _TEMPLATE_DISPATCH = {
     "priority_reversal": render_priority_reversal,
     "listicle": render_listicle,
@@ -307,10 +331,13 @@ _TEMPLATE_DISPATCH = {
     "experience_review": render_experience_review,
     "how_to": render_how_to,
     "single_claim": render_single_claim,
+    "essay_like": render_essay_reflection,
 }
 
 # 複数ラベルがある場合にどれを優先してテンプレート選択するか
-# （intersection候補で優先順位逆転+列挙が両方立つ場合、逆転構造を骨格の主軸にする等）
+# （intersection候補で優先順位逆転+列挙が両方立つ場合、逆転構造を骨格の主軸にする等）。
+# essay_likeは他の全ラベルが不一致だった場合のフォールバックラベルのため最後尾に置く
+# （2026-09-02追加）。
 _TEMPLATE_PRIORITY_ORDER = [
     "priority_reversal",
     "listicle",
@@ -318,6 +345,7 @@ _TEMPLATE_PRIORITY_ORDER = [
     "experience_review",
     "how_to",
     "single_claim",
+    "essay_like",
 ]
 
 
