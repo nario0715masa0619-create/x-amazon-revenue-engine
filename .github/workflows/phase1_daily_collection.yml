@@ -60,7 +60,15 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add ops/data/x_api_phase1_cumulative.jsonl ops/data/watched_accounts.jsonl ops/data/watched_account_state.json
+          # watched_accounts.jsonlは新規登録が1件も無い実行では作成されない
+          # （追記専用ログのため）。存在しないpathspecを渡すとgit add自体が
+          # 失敗する（他の存在するファイルも道連れでcommitされなくなる）ため、
+          # 実際に存在するファイルのみを対象に加える。
+          for f in ops/data/x_api_phase1_cumulative.jsonl ops/data/watched_accounts.jsonl ops/data/watched_account_state.json; do
+            if [ -f "$f" ]; then
+              git add "$f"
+            fi
+          done
           if git diff --cached --quiet; then
             echo "変更なし（新規post_id・新規登録対象が無かった）。commitをスキップします。"
           else
