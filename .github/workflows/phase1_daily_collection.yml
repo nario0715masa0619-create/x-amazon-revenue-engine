@@ -4,9 +4,18 @@ name: Phase 1 X収集 → Phase 2分類（日次）
 # 累積ストア追記(accumulate_phase1_collection.py)→Phase 2分類
 # (x_api_phase2_classify.py)を日次で自動実行する。
 #
+# GOV-20260902-DEEPDIVE-AUTO-REGISTER-WIRING-01: Phase 2分類の直後に
+# register_watched_accounts.pyを追加（同一job・同一runner内で連続実行する
+# ことで、.gitignore対象のoutputs/x_api_phase2/pre_teacher_candidate.jsonが
+# ジョブをまたがず参照できることを利用。ワークフロー構造自体は変えていない）。
+# これにより、深掘り収集（phase1_deepdive_collection.yml）の監視対象アカウント
+# 登録・graduatedからの自動復帰が実際に起動するようになった。人間の明示的な
+# 承認により「既存の日次ワークフロー本体は変更しない」制約を今回に限り解除した。
+#
 # 触れていない領域: Gate A / thresholds / shipping decision、
 # _apply_engagement_gate()本体、topic_groupライフサイクル管理、
-# teacher投稿からの自動抽出処理、Phase 1クエリ内容（QUERIES定数、Q1-Q6）。
+# teacher投稿からの自動抽出処理、Phase 1クエリ内容（QUERIES定数、Q1-Q6）、
+# Phase 1収集・Phase 2分類ステップ自体のコマンド内容（無変更）。
 
 on:
   schedule:
@@ -44,14 +53,17 @@ jobs:
       - name: Phase 2 分類
         run: python scripts/x_api_phase2_classify.py
 
-      - name: 累積ストアの変更をcommit・push
+      - name: 深掘り監視対象アカウントの自動登録（pre_teacher_candidateの投稿者、読み取り専用後段ステップ）
+        run: python scripts/register_watched_accounts.py
+
+      - name: 累積ストア・監視対象アカウント状態の変更をcommit・push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add ops/data/x_api_phase1_cumulative.jsonl
+          git add ops/data/x_api_phase1_cumulative.jsonl ops/data/watched_accounts.jsonl ops/data/watched_account_state.json
           if git diff --cached --quiet; then
-            echo "累積ストアに変更なし（新規post_idが無かった）。commitをスキップします。"
+            echo "変更なし（新規post_id・新規登録対象が無かった）。commitをスキップします。"
           else
-            git commit -m "chore: Phase 1収集累積ストアを更新（自動実行、$(date -u +%Y-%m-%d)）"
+            git commit -m "chore: Phase 1収集累積ストア・監視対象アカウント状態を更新（自動実行、$(date -u +%Y-%m-%d)）"
             git push
           fi
