@@ -30,7 +30,14 @@ from typing import Any
 
 from posted_theme_registry import TOPIC_GROUP_COOLDOWN_DAYS
 
-TOPIC_STATUSES = ("active", "cooldown", "exhausted", "published", "retired")
+# 2026-09-02追加（GOV-20260902-TEACHER-THEME-AUTOEXTRACT-01）: teacher投稿からの
+# 自動抽出結果を、人間が確認するまで候補プールへ一切現れさせないための安全弁として
+# "proposed"を追加した。既存のactive/cooldown/exhausted/published/retiredの意味・
+# 遷移条件はこの追加で一切変更していない——"proposed"はpasses_mainline_candidate_filter()
+# の`topic_status == "active"`チェックに単に該当しない（「activeでない」の一種）ため、
+# フィルタ関数自体を変更する必要はなかった。promote_proposed_topic_group()でのみ
+# "active"へ遷移させる（それ以外の自動遷移経路は持たない）。
+TOPIC_STATUSES = ("active", "cooldown", "exhausted", "published", "retired", "proposed")
 PERFORMANCE_BANDS = ("unknown", "low", "medium", "high")
 
 # 初期値（保守的、設計文書に明記のうえコード上で定数化）。
@@ -121,21 +128,51 @@ def get_or_create_topic_group(
     topic_group_id: str,
     theme_signature: str,
     source_diversity_tag: str | None = None,
+    initial_status: str = "active",
 ) -> TopicGroupState:
     """storeにtopic_group_idが無ければ新規作成し、あれば既存のものを返す
     （既存のtheme_signature/statusを上書きしない）。
+
+    2026-09-02追加（GOV-20260902-TEACHER-THEME-AUTOEXTRACT-01）: `initial_status`は
+    キーワード専用の追加引数（デフォルト"active"、既存の全呼び出し箇所は無変更のまま
+    従来どおり動作する）。teacher投稿からの自動抽出結果を"proposed"として登録する際に
+    のみ、呼び出し側が明示的に渡す。
     """
     if topic_group_id in store:
         return store[topic_group_id]
+    if initial_status not in TOPIC_STATUSES:
+        raise TopicGroupStateError(f"initial_status={initial_status!r} はTOPIC_STATUSESに含まれない")
     now = _now_iso()
     state = TopicGroupState(
         topic_group_id=topic_group_id,
         theme_signature=theme_signature,
+        topic_status=initial_status,
         source_diversity_tag=source_diversity_tag,
         created_at=now,
         updated_at=now,
     )
     store[topic_group_id] = state
+    return state
+
+
+def promote_proposed_topic_group(store: dict[str, TopicGroupState], topic_group_id: str) -> TopicGroupState:
+    """"proposed"状態のtopic_groupを、人間の確認後に"active"へ昇格させる
+    （2026-09-02追加、GOV-20260902-TEACHER-THEME-AUTOEXTRACT-01）。
+
+    "proposed"からの唯一の自動遷移経路。他のライフサイクル関数（record_mainline_attempt等）
+    には一切手を入れていない——昇格後のtopic_groupは、既存のactive状態と全く同じ扱いを
+    受ける（retry_budget等は初期値のまま、特別扱いしない）。
+    """
+    if topic_group_id not in store:
+        raise TopicGroupStateError(f"topic_group_id={topic_group_id!r} がstoreに存在しない")
+    state = store[topic_group_id]
+    if state.topic_status != "proposed":
+        raise TopicGroupStateError(
+            f"topic_group_id={topic_group_id!r} はtopic_status={state.topic_status!r}であり、"
+            "'proposed'ではないため昇格できない"
+        )
+    state.topic_status = "active"
+    state.updated_at = _now_iso()
     return state
 
 
