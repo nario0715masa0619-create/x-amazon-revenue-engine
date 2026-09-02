@@ -10,3 +10,10 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+
+# X API疎通確認・Phase1収集・Phase2分類スクリプトの取得結果（実データ・投稿本文を含みうるためコミット対象外）
+outputs/x_api_smoke_test/
+outputs/x_api_phase1/
+outputs/x_api_phase2/
+outputs/ab_test_query_swap/
+outputs/x_api_deepdive/
