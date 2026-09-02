@@ -1,0 +1,63 @@
+name: teacher輩出アカウント深掘り収集（日次）
+
+# GOV-20260902-DEEPDIVE-ACCOUNT-COLLECTION-01: watched_account_state.jsonの
+# watch_status=activeなアカウントに対しGET /2/users/:id/tweetsで過去投稿を深掘りし、
+# 既存の累積ストア(ops/data/x_api_phase1_cumulative.jsonl)へ合流させる。
+#
+# 既存の日次キーワード収集ワークフロー（phase1_daily_collection.yml）本体には
+# 一切触れていない（別ワークフローとして追加、実行時刻を1時間ずらす）。
+#
+# 触れていない領域: Gate A / thresholds / shipping decision、
+# _apply_engagement_gate()本体（x_api_deepdive_collect.pyはx_api_phase2_classify.pyの
+# _observe()/_classify()をimportして呼び出すのみで、これらの関数自体は変更していない）、
+# 既存の日次キーワード収集ワークフロー本体、Phase 1 query set。
+#
+# 既知の制約（実装時に判明、詳細はops/reports/teacher_account_deepdive_design_2026-09-01.md
+# 実装報告参照）: 新規teacher観測に基づくwatched_accountsへの自動登録・graduatedからの
+# 自動復帰（scripts/register_watched_accounts.py）は、本ワークフローには含まれていない
+# （phase1_daily_collection.yml本体を変更しない制約と、outputs/x_api_phase2/が
+# ジョブをまたいで永続化されないことの両方により、現時点では自動起動する経路が無い。
+# 当面は手動実行を想定）。本ワークフローはwatched_account_state.jsonに既に登録済みの
+# activeアカウントの深掘りのみを行う。
+
+on:
+  schedule:
+    # 毎日UTC 22:00（JST翌07:00相当）に1回実行。日次キーワード収集
+    # （phase1_daily_collection.yml、UTC 21:00）と競合しないよう1時間ずらす。
+    - cron: "0 22 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  deepdive-collect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: 深掘り収集（監視対象アカウントのGET /2/users/:id/tweets → 累積ストアへ合流）
+        env:
+          X_BEARER_TOKEN: ${{ secrets.X_BEARER_TOKEN }}
+        run: python scripts/x_api_deepdive_collect.py
+
+      - name: watched_account_state・累積ストアの変更をcommit・push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ops/data/x_api_phase1_cumulative.jsonl ops/data/watched_account_state.json
+          if git diff --cached --quiet; then
+            echo "変更なし（新規post_id・状態更新が無かった）。commitをスキップします。"
+          else
+            git commit -m "chore: 深掘り収集で監視状態・累積ストアを更新（自動実行、$(date -u +%Y-%m-%d)）"
+            git push
+          fi
