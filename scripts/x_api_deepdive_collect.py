@@ -42,6 +42,8 @@ import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from cumulative_post_store import append_new_posts
+from teacher_theme_extraction import register_proposed_topic_group_from_teacher_post
+from topic_group_state import load_topic_group_state_store, save_topic_group_state_store
 from watched_account_state import (
     active_author_ids,
     load_watched_account_state_store,
@@ -59,6 +61,10 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 _OUTPUT_DIR = _REPO_ROOT / "outputs" / "x_api_deepdive"
 _CUMULATIVE_STORE_PATH = _REPO_ROOT / "ops" / "data" / "x_api_phase1_cumulative.jsonl"
 _WATCHED_ACCOUNT_STATE_PATH = _REPO_ROOT / "ops" / "data" / "watched_account_state.json"
+# post_generation_pipeline.py の _DEFAULT_TOPIC_GROUP_STATE_PATH と同一パス
+# （変更する場合は両方を同時に更新すること。理由はextract_topic_groups_from_teachers.py
+# のコメント参照）。
+_TOPIC_GROUP_STATE_PATH = _REPO_ROOT / "ops" / "reports" / "topic_group_state_2026-08-31.json"
 
 
 def _load_bearer_token() -> str:
@@ -148,6 +154,8 @@ def main() -> None:
 
     state_store = load_watched_account_state_store(_WATCHED_ACCOUNT_STATE_PATH)
     targets = active_author_ids(state_store)
+    topic_group_store = load_topic_group_state_store(_TOPIC_GROUP_STATE_PATH)
+    newly_proposed_topic_groups: list[str] = []
 
     run_started_at = datetime.now(timezone.utc).isoformat()
     all_collected_posts: list[dict] = []
@@ -185,13 +193,27 @@ def main() -> None:
         # 既存の_observe()/_classify()（x_api_phase2_classify.py、変更なし・importのみ）を
         # そのまま呼び出し、pre_teacher_candidateが新規に見つかったかを判定する
         # （卒業/継続条件の入力信号。分類ロジック自体はここでは一切実装し直さない）。
+        #
+        # 2026-09-02追加（GOV-20260902-TEACHER-THEME-AUTOEXTRACT-01）: 深掘り収集経路は
+        # 本文（text）をcumulative_post_storeへ合流させる際に除外する設計のため、
+        # topic_group自動抽出（本文が必要）はこの時点、本文がまだメモリ上にある間に
+        # 行う必要がある。pre_teacher_candidateとなった投稿全件についてtopic_group抽出を
+        # 試み、"proposed"状態でtopic_group_stateストアへ登録する
+        # （register_proposed_topic_group_from_teacher_post()、既存のGate A/thresholds/
+        # shipping decision/_apply_engagement_gate()/_classify_core()には一切触れない）。
         found_new_pre_teacher_candidate = False
         for post in flattened:
             obs = _observe(post)
             classification, _reasons, _confidence, _manual_reason = _classify(post, obs)
-            if classification == "pre_teacher_candidate":
-                found_new_pre_teacher_candidate = True
-                break
+            if classification != "pre_teacher_candidate":
+                continue
+            found_new_pre_teacher_candidate = True
+            extraction_result = register_proposed_topic_group_from_teacher_post(
+                topic_group_store, post["text"], source_diversity_tag=post["id"]
+            )
+            if extraction_result is not None:
+                extracted_state, _profile = extraction_result
+                newly_proposed_topic_groups.append(extracted_state.topic_group_id)
 
         newest_id = payload.get("meta", {}).get("newest_id")
         record_deepdive_run_result(
@@ -214,6 +236,8 @@ def main() -> None:
         )
 
     save_watched_account_state_store(state_store, _WATCHED_ACCOUNT_STATE_PATH)
+    if newly_proposed_topic_groups:
+        save_topic_group_state_store(topic_group_store, _REPO_ROOT, label="2026-08-31")
 
     # 既存のcumulative_post_store.append_new_posts()をそのまま使い、日次キーワード収集分と
     # 同じ累積ストアへ合流させる（post_id基準の重複排除は関数側で自動的に効く。text本文は
@@ -229,6 +253,7 @@ def main() -> None:
         "failures": failures,
         "total_collected_posts": len(all_collected_posts),
         "cumulative_store_merge": merge_result,
+        "newly_proposed_topic_groups": sorted(set(newly_proposed_topic_groups)),
     }
     (_OUTPUT_DIR / "run_summary.json").write_text(
         json.dumps(run_summary, ensure_ascii=False, indent=2), encoding="utf-8"
@@ -238,6 +263,7 @@ def main() -> None:
     print(f"収集投稿総数: {len(all_collected_posts)}")
     print(f"累積ストアへの新規追加: {merge_result['appended_count']}件")
     print(f"失敗アカウント数: {len(failures)} / {len(targets)}")
+    print(f"新規proposed topic_group: {len(set(newly_proposed_topic_groups))}件")
     print(f"保存先: {_OUTPUT_DIR}")
 
 
