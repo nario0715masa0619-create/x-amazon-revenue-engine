@@ -481,7 +481,28 @@ def _compute_layer_signals(genre_text: str, age_hits: int) -> dict[str, Any]:
 
     gadget_core_hits = _count_hits(genre_text, GADGET_CORE_KEYWORDS)
     gadget_support_hits = _count_hits(genre_text, GADGET_ONLY_SUPPORT_KEYWORDS)
-    gadget_total = gadget_core_hits + gadget_support_hits
+    # 2026-09-02追加（GOV-20260902-GADGET-HIGH-UNLOCK-01）: 実データ（13アカウント、
+    # 投稿1,285件）で、layer_primary=="gadget"かつengagement_tier=="qualifying"の投稿が
+    # gadget_signal_strength=="medium"止まりで一度も"high"に到達せず、gadget軸単独の
+    # pre_teacher_candidateが一貫して0件だったことが判明した（詳細:
+    # ops/reports/candidate_accounts_screening_2026-09-01.md「重要シグナルの確認」節）。
+    # GADGET_CORE_KEYWORDS(13語)+GADGET_ONLY_SUPPORT_KEYWORDS(10語)のみでは
+    # medium_at=1/high_at=3（_strength_level()）に対して語彙が狭すぎ、3ヒットへ届きにくい。
+    # fashion側はこの制約を受けていない（fashion_totalは元々この語彙の狭さの問題に
+    # 直面していなかった）ため、gadget側だけを是正する。
+    #
+    # 是正: gadgetらしさが最低限検出されている投稿（gadget_core_hits>0）に限り、
+    # DECISION_KEYWORDS（比較・選び方・おすすめ等、既存の有用性/決定シグナル語彙）と
+    # UTILITY_KEYWORDS（便利・軽い・コンパクト等、genre非依存の実用性語彙）の共起も
+    # gadgetの内容的充実度としてカウントする。**gadget_core_hits>0を条件にすることで、
+    # fashion単独投稿がDECISION_KEYWORDS経由で誤ってgadget高強度化しない安全弁とする**
+    # （DECISION_KEYWORDSには"着映え"/"似合う"等fashion寄りの語も混在しているため、
+    # 無条件にgadget_totalへ加算するとfashion単独投稿までgadget高強度と誤判定しうる）。
+    # fashion_total・fashion_signal_strengthの計算式自体は一切変更していない。
+    gadget_richness_bonus = 0
+    if gadget_core_hits > 0:
+        gadget_richness_bonus = _count_hits(genre_text, DECISION_KEYWORDS) + _count_hits(genre_text, UTILITY_KEYWORDS)
+    gadget_total = gadget_core_hits + gadget_support_hits + gadget_richness_bonus
     gadget_signal_strength = _strength_level(gadget_total)
 
     age_signal_strength = _strength_level(age_hits, medium_at=1, high_at=2)
@@ -900,6 +921,26 @@ def _classify_core(post: dict, obs: dict) -> tuple[str, list[str], str, str | No
         and obs["observed_structure_fit"] == "low"
         and obs["observed_approach_value"] == "low"
     )
+    # 2026-09-02追加（GOV-20260902-GADGET-HIGH-UNLOCK-01）: topic_fitの共起ペア
+    # （topic_pairs_hit）はfashion側に3ペア（age+fashion／fashion+gadget／fashion+utility）
+    # 対しgadget側は1ペア（gadget+aesthetic）のみという既存の非対称構造があり、fashion/
+    # aesthetic/age語を伴わない純粋なgadget投稿はtopic_fitが常に"low"に留まる
+    # （このペア構造自体はtopic_fit全体で共有される既存ロジックであり、fashion側の
+    # ペア定義には一切手を加えていない）。この結果、gadget_signal_strength=="high"
+    # （上記GADGET_HIGH_UNLOCK-01の是正で到達可能になった投稿を含む）であっても、
+    # low_allによる即rejectがgadget_only_but_reusable判定（下記）へ到達する前に
+    # 発火してしまっていた（実データ13アカウント・1,285投稿で実証済み、詳細は
+    # ops/reports/candidate_accounts_screening_2026-09-01.md参照）。
+    # layer_primary=="gadget"かつgadget_signal_strength=="high"（トピック関連性が
+    # gadget自身の語彙で十分に強いことが既に確認されている投稿）に限り、low_allによる
+    # 即rejectを免除する——ただし構造適合・アプローチ価値の各条件（structure_fit/
+    # approach_value）はこの後も一切変更せず適用される（gadget_only_but_reusable自体が
+    # 別途structure_fit in (high,medium)・approach_value!=lowを要求するため、この免除だけで
+    # 無条件にpre_teacher_candidateへ進めるわけではない）。fashion_signal_strengthや
+    # intersection判定には一切関与しないため、fashion/intersection側の挙動には影響しない。
+    gadget_strong_topic_signal = obs["layer_primary"] == "gadget" and obs["gadget_signal_strength"] == "high"
+    if low_all and gadget_strong_topic_signal:
+        low_all = False
     if low_all:
         # Phase 2.3: 集約bot/雑多カテゴリ列挙/broad trendのみが理由になっている場合、
         # まずそれを明示する（トレンド系のfalse positiveを可視化する）。

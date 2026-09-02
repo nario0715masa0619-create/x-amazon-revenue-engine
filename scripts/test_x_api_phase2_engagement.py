@@ -211,6 +211,92 @@ def test_gadget_only_but_reusable_requires_qualifying_engagement() -> None:
 
 
 # ==============================================================================
+# 検証2c（GOV-20260902-GADGET-HIGH-UNLOCK-01）: gadget_signal_strengthがfashion語なしで
+# "high"へ到達できること、およびlow_all即reject免除がfashion/intersection側へ波及しないこと
+# ==============================================================================
+def test_gadget_signal_strength_reaches_high_without_fashion_connection() -> None:
+    print("\n=== 検証2c: gadget単体投稿がfashion接点なしでgadget_signal_strength=='high'へ到達すること ===")
+
+    # fashion/aesthetic/age語を一切含まない、genre-neutralな有用性語彙
+    # （UTILITY_KEYWORDS）のみでgadget_core_hits(2語)と共起する文面。
+    # GADGET_CORE_KEYWORDS単独では2ヒット（medium止まり）だが、GOV-20260902-
+    # GADGET-HIGH-UNLOCK-01の是正によりUTILITY_KEYWORDSとの共起が加算され"high"に到達する。
+    gadget_utility_text = "モバイルバッテリーとケーブルは軽い上にコンパクト。"
+    post = _post(gadget_utility_text, impression=500, like=10, repost=2, reply=1)
+    obs = p2._observe(post)
+
+    _check(
+        "gadget_signal_strength_reaches_high_via_utility_cooccurrence",
+        obs["gadget_signal_strength"] == "high",
+        str(obs["gadget_signal_strength"]),
+    )
+    _check("layer_primary_is_gadget", obs["layer_primary"] == "gadget", obs["layer_primary"])
+    _check(
+        "fashion_signal_strength_unaffected_stays_low",
+        obs["fashion_signal_strength"] == "low",
+        obs["fashion_signal_strength"],
+    )
+    # topic_fit/structure_fit/approach_valueの計算式自体はこの是正で一切変更していない
+    # ——このテキストはfashion/aesthetic/age/decision語を含まないため、いずれも
+    # "low"のままであるはず（是正の影響範囲がgadget_total/low_all免除に限られることの確認）。
+    _check("topic_fit_still_low", obs["observed_topic_fit"] == "low", obs["observed_topic_fit"])
+    _check("structure_fit_still_low", obs["observed_structure_fit"] == "low", obs["observed_structure_fit"])
+    _check("approach_value_still_low", obs["observed_approach_value"] == "low", obs["observed_approach_value"])
+
+    classification, reasons, confidence, manual_reason = p2._classify(post, obs)
+    # low_all（topic/structure/approach全てlow）による即rejectは、layer_primary=="gadget"
+    # かつgadget_signal_strength=="high"の場合に限り免除される（本テストのケースに該当）。
+    # ただしstructure_fit/approach_valueは変更していないため、gadget_only_but_reusable
+    # 自身のゲート（structure_fit in (high,medium)・approach_value!=low）は満たせず、
+    # pre_teacher_candidateへは到達しない——観察価値のある投稿として後続の判定
+    # （observe/manual_review）へ回ることを確認する（無条件昇格ではないことの確認）。
+    _check(
+        "low_all_reject_no_longer_fires_for_strong_gadget_signal",
+        classification != "reject",
+        f"classification={classification}, reasons={reasons}",
+    )
+    _check(
+        "not_force_promoted_to_pre_teacher_candidate",
+        classification != "pre_teacher_candidate",
+        f"classification={classification}（structure_fit/approach_valueが低いままのため、"
+        "is_signal_strength単体では昇格しないはず）",
+    )
+
+
+def test_gadget_signal_strength_unlock_does_not_change_fashion_or_intersection_axis() -> None:
+    print("\n=== 検証2d: fashion単独・intersection投稿の判定がGOV-20260902是正で変化しないこと ===")
+
+    # fashion単独の高信頼度文面（GOV-20260901の既存fashion_only_but_reusable検証と同型）。
+    fashion_only_text = (
+        "40代の小物選びは着映えと上品さが大事。バッグや財布は定番でスナップも様になる、"
+        "この選び方が一番よかった。"
+    )
+    post_fashion = _post(fashion_only_text, impression=500, like=10, repost=3, reply=1, bookmark=2)
+    obs_fashion = p2._observe(post_fashion)
+    _check(
+        "fashion_only_layer_primary_unaffected",
+        obs_fashion["layer_primary"] == "fashion",
+        obs_fashion["layer_primary"],
+    )
+    classification_fashion, reasons_fashion, _, _ = p2._classify(post_fashion, obs_fashion)
+    _check(
+        "fashion_only_still_reaches_pre_teacher_candidate",
+        classification_fashion == "pre_teacher_candidate",
+        f"classification={classification_fashion}, reasons={reasons_fashion}",
+    )
+
+    # fashion×gadget交点の文面（既存のINTERSECTION_STRONG_PATTERNS該当）。
+    intersection_text = "バッグにモバイルバッテリーと充電器を入れて持ち歩いている。"
+    post_intersection = _post(intersection_text, impression=500, like=10, repost=3, reply=1, bookmark=2)
+    obs_intersection = p2._observe(post_intersection)
+    _check(
+        "intersection_layer_primary_unaffected",
+        obs_intersection["layer_primary"] == "intersection",
+        obs_intersection["layer_primary"],
+    )
+
+
+# ==============================================================================
 # 検証3: reject側ロジック（広告・煽り・薄い内容の除外）が無影響であること
 # ==============================================================================
 def test_reject_side_logic_unaffected() -> None:
@@ -438,6 +524,8 @@ if __name__ == "__main__":
     test_compute_engagement_tier()
     test_engagement_replaces_keyword_gating()
     test_gadget_only_but_reusable_requires_qualifying_engagement()
+    test_gadget_signal_strength_reaches_high_without_fashion_connection()
+    test_gadget_signal_strength_unlock_does_not_change_fashion_or_intersection_axis()
     test_reject_side_logic_unaffected()
     test_real_ath_pro5mk2_post_excluded()
     test_single_gate_covers_all_known_paths()
