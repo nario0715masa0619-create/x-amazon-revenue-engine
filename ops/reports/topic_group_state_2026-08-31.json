@@ -37,7 +37,7 @@
     "コーデ-デニム-白T": {
       "topic_group_id": "コーデ-デニム-白T",
       "theme_signature": "コーデ-デニム-白T",
-      "topic_status": "proposed",
+      "topic_status": "active",
       "topic_last_published_at": null,
       "topic_performance_band": "unknown",
       "topic_retry_budget": 3,
@@ -46,7 +46,7 @@
       "route_to_research_only": false,
       "source_diversity_tag": "2075099443200991643",
       "created_at": "2026-09-02T06:27:09Z",
-      "updated_at": "2026-09-02T06:27:09Z",
+      "updated_at": "2026-09-02T06:47:41Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
       "latest_post_outcome": null
@@ -54,7 +54,7 @@
     "垢抜け-服": {
       "topic_group_id": "垢抜け-服",
       "theme_signature": "垢抜け-服",
-      "topic_status": "proposed",
+      "topic_status": "active",
       "topic_last_published_at": null,
       "topic_performance_band": "unknown",
       "topic_retry_budget": 3,
@@ -63,7 +63,7 @@
       "route_to_research_only": false,
       "source_diversity_tag": "2071186861377077643",
       "created_at": "2026-09-02T06:27:09Z",
-      "updated_at": "2026-09-02T06:27:09Z",
+      "updated_at": "2026-09-02T06:47:46Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
       "latest_post_outcome": null
@@ -71,16 +71,16 @@
     "定番__定番": {
       "topic_group_id": "定番__定番",
       "theme_signature": "定番__定番",
-      "topic_status": "proposed",
+      "topic_status": "retired",
       "topic_last_published_at": null,
       "topic_performance_band": "unknown",
       "topic_retry_budget": 3,
       "topic_cooldown_until": null,
-      "topic_retired_from_mainline": false,
+      "topic_retired_from_mainline": true,
       "route_to_research_only": false,
       "source_diversity_tag": "2049081203400294821",
       "created_at": "2026-09-02T06:27:09Z",
-      "updated_at": "2026-09-02T06:27:09Z",
+      "updated_at": "2026-09-02T06:48:50Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
       "latest_post_outcome": null
@@ -88,7 +88,7 @@
     "デニム-定番-服__定番": {
       "topic_group_id": "デニム-定番-服__定番",
       "theme_signature": "デニム-定番-服__定番",
-      "topic_status": "proposed",
+      "topic_status": "active",
       "topic_last_published_at": null,
       "topic_performance_band": "unknown",
       "topic_retry_budget": 3,
@@ -97,7 +97,7 @@
       "route_to_research_only": false,
       "source_diversity_tag": "2088777767747735983",
       "created_at": "2026-09-02T06:27:09Z",
-      "updated_at": "2026-09-02T06:27:09Z",
+      "updated_at": "2026-09-02T06:48:34Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
       "latest_post_outcome": null
@@ -105,7 +105,7 @@
     "コーデ-デニム-服__テク": {
       "topic_group_id": "コーデ-デニム-服__テク",
       "theme_signature": "コーデ-デニム-服__テク",
-      "topic_status": "proposed",
+      "topic_status": "active",
       "topic_last_published_at": null,
       "topic_performance_band": "unknown",
       "topic_retry_budget": 3,
@@ -114,7 +114,7 @@
       "route_to_research_only": false,
       "source_diversity_tag": "2082035837789716650",
       "created_at": "2026-09-02T06:27:09Z",
-      "updated_at": "2026-09-02T06:27:09Z",
+      "updated_at": "2026-09-02T06:48:40Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
       "latest_post_outcome": null
@@ -122,16 +122,16 @@
     "大人__似合う-合う": {
       "topic_group_id": "大人__似合う-合う",
       "theme_signature": "大人__似合う",
-      "topic_status": "proposed",
+      "topic_status": "retired",
       "topic_last_published_at": null,
       "topic_performance_band": "unknown",
       "topic_retry_budget": 3,
       "topic_cooldown_until": null,
-      "topic_retired_from_mainline": false,
+      "topic_retired_from_mainline": true,
       "route_to_research_only": false,
       "source_diversity_tag": "2026848313962803294",
       "created_at": "2026-09-02T06:27:10Z",
-      "updated_at": "2026-09-02T06:27:10Z",
+      "updated_at": "2026-09-02T06:48:55Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
       "latest_post_outcome": null
@@ -139,7 +139,7 @@
     "メンズ-大人-服__おすすめ": {
       "topic_group_id": "メンズ-大人-服__おすすめ",
       "theme_signature": "メンズ-大人-服__おすすめ",
-      "topic_status": "proposed",
+      "topic_status": "active",
       "topic_last_published_at": null,
       "topic_performance_band": "unknown",
       "topic_retry_budget": 3,
@@ -148,7 +148,7 @@
       "route_to_research_only": false,
       "source_diversity_tag": "1920279945374245275",
       "created_at": "2026-09-02T06:27:10Z",
-      "updated_at": "2026-09-02T06:27:10Z",
+      "updated_at": "2026-09-02T06:48:45Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
       "latest_post_outcome": null
