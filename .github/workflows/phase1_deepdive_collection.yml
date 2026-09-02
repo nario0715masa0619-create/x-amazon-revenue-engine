@@ -19,6 +19,13 @@ name: teacher輩出アカウント深掘り収集（日次）
 # ジョブをまたいで永続化されないことの両方により、現時点では自動起動する経路が無い。
 # 当面は手動実行を想定）。本ワークフローはwatched_account_state.jsonに既に登録済みの
 # activeアカウントの深掘りのみを行う。
+#
+# GOV-20260902-DEEPDIVE-COMMIT-GAP-FIX-01: x_api_deepdive_collect.pyがpre_teacher_candidate
+# 到達投稿からtopic_groupを"proposed"状態で抽出・保存するようになった
+# （GOV-20260902-TEACHER-THEME-AUTOEXTRACT-01）にもかかわらず、commitステップの対象に
+# 保存先（ops/reports/topic_group_state_2026-08-31.json）が含まれておらず、実行終了と
+# 同時に抽出結果が失われる不具合があった（実測: 手動実行で7件生成されたが1件も
+# commitされなかった）。本修正でcommit対象へ追加する。
 
 on:
   schedule:
@@ -50,14 +57,21 @@ jobs:
           X_BEARER_TOKEN: ${{ secrets.X_BEARER_TOKEN }}
         run: python scripts/x_api_deepdive_collect.py
 
-      - name: watched_account_state・累積ストアの変更をcommit・push
+      - name: watched_account_state・累積ストア・topic_group状態の変更をcommit・push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add ops/data/x_api_phase1_cumulative.jsonl ops/data/watched_account_state.json
+          # 存在しないpathspecを渡すとgit add自体が失敗する（他の存在するファイルも
+          # 道連れでcommitされなくなる）ため、実際に存在するファイルのみを対象に加える
+          # （phase1_daily_collection.yml側と同じ安全策）。
+          for f in ops/data/x_api_phase1_cumulative.jsonl ops/data/watched_account_state.json ops/reports/topic_group_state_2026-08-31.json; do
+            if [ -f "$f" ]; then
+              git add "$f"
+            fi
+          done
           if git diff --cached --quiet; then
-            echo "変更なし（新規post_id・状態更新が無かった）。commitをスキップします。"
+            echo "変更なし（新規post_id・状態更新・新規proposed topic_groupが無かった）。commitをスキップします。"
           else
-            git commit -m "chore: 深掘り収集で監視状態・累積ストアを更新（自動実行、$(date -u +%Y-%m-%d)）"
+            git commit -m "chore: 深掘り収集で監視状態・累積ストア・topic_group状態を更新（自動実行、$(date -u +%Y-%m-%d)）"
             git push
           fi
