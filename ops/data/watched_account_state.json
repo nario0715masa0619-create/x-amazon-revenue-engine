@@ -6,11 +6,11 @@
       "teacher_count": 1,
       "first_registered_at": "2026-09-02T00:57:35Z",
       "last_teacher_at": "2026-09-02T00:57:35Z",
-      "last_deepdive_checked_at": "2026-09-02T23:49:06.253120+00:00",
-      "consecutive_unproductive_deepdive_runs": 1,
+      "last_deepdive_checked_at": "2026-09-03T23:45:16.593822+00:00",
+      "consecutive_unproductive_deepdive_runs": 2,
       "last_deepdive_since_id": "2093646779174863190",
       "created_at": "2026-09-02T00:57:35Z",
-      "updated_at": "2026-09-02T23:49:06.253120+00:00"
+      "updated_at": "2026-09-03T23:45:16.593822+00:00"
     },
     "812466877184126977": {
       "author_id": "812466877184126977",
@@ -18,11 +18,11 @@
       "teacher_count": 1,
       "first_registered_at": "2026-09-02T00:57:35Z",
       "last_teacher_at": "2026-09-02T00:57:35Z",
-      "last_deepdive_checked_at": "2026-09-02T23:49:06.253120+00:00",
-      "consecutive_unproductive_deepdive_runs": 1,
-      "last_deepdive_since_id": "2095104454609764493",
+      "last_deepdive_checked_at": "2026-09-03T23:45:16.593822+00:00",
+      "consecutive_unproductive_deepdive_runs": 2,
+      "last_deepdive_since_id": "2095520852314042812",
       "created_at": "2026-09-02T00:57:35Z",
-      "updated_at": "2026-09-02T23:49:06.253120+00:00"
+      "updated_at": "2026-09-03T23:45:16.593822+00:00"
     },
     "720220197668278273": {
       "author_id": "720220197668278273",
@@ -30,11 +30,11 @@
       "teacher_count": 1,
       "first_registered_at": "2026-09-02T00:57:35Z",
       "last_teacher_at": "2026-09-02T00:57:35Z",
-      "last_deepdive_checked_at": "2026-09-02T23:49:06.253120+00:00",
-      "consecutive_unproductive_deepdive_runs": 1,
-      "last_deepdive_since_id": "2095109229610672553",
+      "last_deepdive_checked_at": "2026-09-03T23:45:16.593822+00:00",
+      "consecutive_unproductive_deepdive_runs": 2,
+      "last_deepdive_since_id": "2095472875692306686",
       "created_at": "2026-09-02T00:57:35Z",
-      "updated_at": "2026-09-02T23:49:06.253120+00:00"
+      "updated_at": "2026-09-03T23:45:16.593822+00:00"
     },
     "756768794513584128": {
       "author_id": "756768794513584128",
@@ -42,11 +42,11 @@
       "teacher_count": 1,
       "first_registered_at": "2026-09-02T00:57:35Z",
       "last_teacher_at": "2026-09-02T00:57:35Z",
-      "last_deepdive_checked_at": "2026-09-02T23:49:06.253120+00:00",
-      "consecutive_unproductive_deepdive_runs": 1,
+      "last_deepdive_checked_at": "2026-09-03T23:45:16.593822+00:00",
+      "consecutive_unproductive_deepdive_runs": 2,
       "last_deepdive_since_id": "2088921033625792939",
       "created_at": "2026-09-02T00:57:35Z",
-      "updated_at": "2026-09-02T23:49:06.253120+00:00"
+      "updated_at": "2026-09-03T23:45:16.593822+00:00"
     },
     "55126678": {
       "author_id": "55126678",
@@ -54,11 +54,11 @@
       "teacher_count": 1,
       "first_registered_at": "2026-09-02T00:57:35Z",
       "last_teacher_at": "2026-09-02T00:57:35Z",
-      "last_deepdive_checked_at": "2026-09-02T23:49:06.253120+00:00",
-      "consecutive_unproductive_deepdive_runs": 1,
+      "last_deepdive_checked_at": "2026-09-03T23:45:16.593822+00:00",
+      "consecutive_unproductive_deepdive_runs": 2,
       "last_deepdive_since_id": "2026848313962803294",
       "created_at": "2026-09-02T00:57:35Z",
-      "updated_at": "2026-09-02T23:49:06.253120+00:00"
+      "updated_at": "2026-09-03T23:45:16.593822+00:00"
     },
     "4068452893": {
       "author_id": "4068452893",
@@ -66,11 +66,11 @@
       "teacher_count": 1,
       "first_registered_at": "2026-09-02T01:09:05Z",
       "last_teacher_at": "2026-09-02T01:09:05Z",
-      "last_deepdive_checked_at": "2026-09-02T23:49:06.253120+00:00",
-      "consecutive_unproductive_deepdive_runs": 1,
+      "last_deepdive_checked_at": "2026-09-03T23:45:16.593822+00:00",
+      "consecutive_unproductive_deepdive_runs": 2,
       "last_deepdive_since_id": "2080190489844949266",
       "created_at": "2026-09-02T01:09:05Z",
-      "updated_at": "2026-09-02T23:49:06.253120+00:00"
+      "updated_at": "2026-09-03T23:45:16.593822+00:00"
     },
     "551019339": {
       "author_id": "551019339",
@@ -78,11 +78,11 @@
       "teacher_count": 1,
       "first_registered_at": "2026-09-03T23:05:40Z",
       "last_teacher_at": "2026-09-03T23:05:40Z",
-      "last_deepdive_checked_at": null,
+      "last_deepdive_checked_at": "2026-09-03T23:45:16.593822+00:00",
       "consecutive_unproductive_deepdive_runs": 0,
-      "last_deepdive_since_id": null,
+      "last_deepdive_since_id": "2095631684121342000",
       "created_at": "2026-09-03T23:05:40Z",
-      "updated_at": "2026-09-03T23:05:40Z"
+      "updated_at": "2026-09-03T23:45:16.593822+00:00"
     }
   }
 }
