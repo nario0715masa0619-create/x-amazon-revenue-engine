@@ -152,6 +152,23 @@
       "mainline_run_count": 0,
       "has_ever_won": false,
       "latest_post_outcome": null
+    },
+    "大人-定番__定番": {
+      "topic_group_id": "大人-定番__定番",
+      "theme_signature": "大人-定番__定番",
+      "topic_status": "proposed",
+      "topic_last_published_at": null,
+      "topic_performance_band": "unknown",
+      "topic_retry_budget": 3,
+      "topic_cooldown_until": null,
+      "topic_retired_from_mainline": false,
+      "route_to_research_only": false,
+      "source_diversity_tag": "2095437644230529153",
+      "created_at": "2026-09-03T23:05:40Z",
+      "updated_at": "2026-09-03T23:05:40Z",
+      "mainline_run_count": 0,
+      "has_ever_won": false,
+      "latest_post_outcome": null
     }
   }
 }
