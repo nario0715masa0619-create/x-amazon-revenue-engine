@@ -37,9 +37,12 @@ from topic_group_state import (
     reject_proposed_topic_group,
     save_topic_group_state_store,
 )
+from topic_group_source_account_review import get_account_review_warning_for_topic_group
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 _TOPIC_GROUP_STATE_PATH = _REPO_ROOT / "ops" / "reports" / "topic_group_state_2026-08-31.json"
+_CUMULATIVE_JSONL_PATH = _REPO_ROOT / "ops" / "data" / "x_api_phase1_cumulative.jsonl"
+_WATCHED_ACCOUNT_STATE_PATH = _REPO_ROOT / "ops" / "data" / "watched_account_state.json"
 
 
 def print_numbered_proposed_list(proposed: list[TopicGroupState]) -> None:
@@ -52,6 +55,11 @@ def print_numbered_proposed_list(proposed: list[TopicGroupState]) -> None:
         print(f"    theme_signature={s.theme_signature!r}")
         print(f"    元になったteacher投稿のpost_id(source_diversity_tag)={s.source_diversity_tag!r}")
         print(f"    登録日時={s.created_at}")
+        warning = get_account_review_warning_for_topic_group(
+            s.source_diversity_tag, _CUMULATIVE_JSONL_PATH, _WATCHED_ACCOUNT_STATE_PATH
+        )
+        if warning:
+            print(f"    {warning}")
 
 
 def resolve_proposed_target(store: dict[str, TopicGroupState], topic_group_id: str) -> TopicGroupState:
@@ -109,6 +117,11 @@ def main() -> None:
     print(f"対象: topic_group_id={state.topic_group_id!r}")
     print(f"theme_signature={state.theme_signature!r}")
     print(f"元になったteacher投稿のpost_id(source_diversity_tag)={state.source_diversity_tag!r}")
+    warning = get_account_review_warning_for_topic_group(
+        state.source_diversity_tag, _CUMULATIVE_JSONL_PATH, _WATCHED_ACCOUNT_STATE_PATH
+    )
+    if warning:
+        print(warning)
     print(f"実施する操作: {action_label}")
 
     if not args.yes:
