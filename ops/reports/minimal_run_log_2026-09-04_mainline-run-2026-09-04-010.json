@@ -1,0 +1,35 @@
+{
+  "run_id": "mainline-run-2026-09-04-010",
+  "source_post_id": "1920279945374245275",
+  "target_layer": "fashion",
+  "draft_ids": [
+    "fashion-mens-osusume-2026-09-04-001"
+  ],
+  "gate_a_pass_ids": [
+    "fashion-mens-osusume-2026-09-04-001"
+  ],
+  "human_selected_top": "fashion-mens-osusume-2026-09-04-001",
+  "published_draft_id": null,
+  "selection_reason_short": "唯一の生成候補。Gate A pass、Gate B score=85（strong_ship_candidate）。",
+  "primary_source_post_id": "1920279945374245275",
+  "fallback_source_post_id": null,
+  "used_fallback_source": false,
+  "mainline_status": "completed",
+  "enrichment_status": "not_started",
+  "weekly_aggregation_status": "pending",
+  "research_followup_required": false,
+  "published_at": null,
+  "post_url": null,
+  "posted_theme_check_status": "checked",
+  "posted_theme_match_type": "none",
+  "matched_past_run_id": null,
+  "matched_post_url": null,
+  "matched_theme_signature": null,
+  "block_mainline": false,
+  "route_to_research": false,
+  "cooldown_active": false,
+  "posted_theme_check_reason": "posted theme registryと一致する候補は見つからなかった。mainline候補として継続可能",
+  "analytics_status": null,
+  "analytics_file_path": null,
+  "latest_impression_count": null
+}
