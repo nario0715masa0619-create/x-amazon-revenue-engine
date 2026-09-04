@@ -1870,6 +1870,7 @@ def finalize_minimal_run_log(
     run_id: str,
     source_post_id: str | None,
     target_layer: str | None,
+    pre_publish_checklist: dict[str, Any],
     draft_ids: list[str] | None = None,
     gate_a_pass_ids: list[str] | None = None,
     human_selected_top: str | None = None,
@@ -1882,6 +1883,8 @@ def finalize_minimal_run_log(
     published_at: str | None = None,
     post_url: str | None = None,
     posted_theme_check: dict[str, Any] | None = None,
+    compliance_review_result: str | None = None,
+    factual_verification_result: str | None = None,
     persist: bool = True,
 ) -> dict[str, Any]:
     """[学習モードLayer1: 投稿時最小ログ/2026-08-28 GOV-20260828-ASYNC-ENRICHMENT-REDESIGN-01]
@@ -1899,11 +1902,18 @@ def finalize_minimal_run_log(
     の戻り値を渡すと、そのblock/routing判定結果がログへ格納される（渡さなくても動作する）。
     渡した場合でも、本関数自体はmainline_statusを書き換えない——block_mainline=Trueのcandidate
     をhuman selectionへ進めるかどうかの運用判断は呼び出し側（このセッションの操作者）の責務。
+
+    2026-09-04追加: pre_publish_checklist（scripts/pre_publish_checklist.
+    run_pre_publish_checklist(draft_text)の戻り値）を必須引数とした。
+    build_minimal_run_log()側のvalidate_checklist_before_recording()により、
+    フラグが立っているのに対応するcompliance_review_result/factual_verification_result
+    が未記入の場合は記録がブロックされる。
     """
     log = build_minimal_run_log(
         run_id=run_id,
         source_post_id=source_post_id,
         target_layer=target_layer,
+        pre_publish_checklist=pre_publish_checklist,
         draft_ids=draft_ids,
         gate_a_pass_ids=gate_a_pass_ids,
         human_selected_top=human_selected_top,
@@ -1916,6 +1926,8 @@ def finalize_minimal_run_log(
         published_at=published_at,
         post_url=post_url,
         posted_theme_check=posted_theme_check,
+        compliance_review_result=compliance_review_result,
+        factual_verification_result=factual_verification_result,
     )
     out: dict[str, Any] = {"minimal_run_log": minimal_run_log_to_dict(log)}
     if persist:

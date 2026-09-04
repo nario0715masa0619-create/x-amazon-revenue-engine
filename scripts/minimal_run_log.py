@@ -19,10 +19,14 @@ comparative Gate B・first-line hook evaluator・divergence meta-gate等のresea
 from __future__ import annotations
 
 import json
+import sys
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from pre_publish_checklist import validate_checklist_before_recording
 
 MAINLINE_STATUSES = ("completed", "closed_incomplete", "failed")
 ENRICHMENT_STATUSES = ("not_started", "partial", "completed", "failed_non_blocking")
@@ -72,12 +76,23 @@ class MinimalRunLog:
     analytics_status: str | None = None
     analytics_file_path: str | None = None
     latest_impression_count: int | None = None
+    # 2026-09-04 pre_publish_checklist（投稿前チェックリスト）の結果。
+    # scripts/pre_publish_checklist.run_pre_publish_checklist()の出力を
+    # build_minimal_run_log()経由でそのまま格納する。フラグが立っているのに
+    # 対応する結果が未記入のままでは記録自体がブロックされる
+    # （validate_checklist_before_recording()参照）ため、この4項目は
+    # 「フラグが立っている場合は必ず結果も埋まっている」という状態が保証される。
+    compliance_review_required: bool | None = None
+    compliance_review_result: str | None = None
+    factual_verification_required: bool | None = None
+    factual_verification_result: str | None = None
 
 
 def build_minimal_run_log(
     run_id: str,
     source_post_id: str | None,
     target_layer: str | None,
+    pre_publish_checklist: dict[str, Any],
     draft_ids: list[str] | None = None,
     gate_a_pass_ids: list[str] | None = None,
     human_selected_top: str | None = None,
@@ -90,8 +105,20 @@ def build_minimal_run_log(
     published_at: str | None = None,
     post_url: str | None = None,
     posted_theme_check: dict[str, Any] | None = None,
+    compliance_review_result: str | None = None,
+    factual_verification_result: str | None = None,
 ) -> MinimalRunLog:
     """Gate A結果とhuman selectionからminimal_run_logを組み立てる唯一の入口。
+
+    2026-09-04追加: pre_publish_checklist（scripts/pre_publish_checklist.
+    run_pre_publish_checklist()の戻り値）を必須引数とした。
+    mainline-run-2026-09-04-010で、下書きに実店舗名を含む状態のままコンプライアンス
+    該当性確認・事実確認のいずれも未実施で記録してしまった反省を踏まえ、
+    「チェックを実行し忘れたまま記録できてしまう」経路そのものを塞ぐための変更。
+    validate_checklist_before_recording()により、pre_publish_checklistでフラグが
+    立っているのに対応するcompliance_review_result/factual_verification_resultが
+    未記入の場合はPrePublishChecklistErrorで記録をブロックする（本関数のみの責務であり、
+    実際のレビュー・web検索実施そのものはこの関数の外で行う）。
 
     mainline完了ルール: human_selected_topが与えられていれば
     （＝人間が1本選べた時点で）mainline_status="completed"とする。
@@ -112,6 +139,12 @@ def build_minimal_run_log(
     """
     if not run_id:
         raise MinimalRunLogError("run_idは必須です")
+
+    validate_checklist_before_recording(
+        pre_publish_checklist,
+        compliance_review_result=compliance_review_result,
+        factual_verification_result=factual_verification_result,
+    )
 
     mainline_status = "completed" if human_selected_top else "closed_incomplete"
 
@@ -144,6 +177,10 @@ def build_minimal_run_log(
         route_to_research=posted_theme_check.get("route_to_research"),
         cooldown_active=posted_theme_check.get("cooldown_active"),
         posted_theme_check_reason=posted_theme_check.get("posted_theme_check_reason"),
+        compliance_review_required=pre_publish_checklist.get("compliance_review_required"),
+        compliance_review_result=compliance_review_result,
+        factual_verification_required=pre_publish_checklist.get("factual_verification_required"),
+        factual_verification_result=factual_verification_result,
     )
 
 
