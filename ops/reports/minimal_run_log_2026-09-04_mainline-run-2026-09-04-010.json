@@ -31,5 +31,9 @@
   "posted_theme_check_reason": "posted theme registryと一致する候補は見つからなかった。mainline候補として継続可能",
   "analytics_status": null,
   "analytics_file_path": null,
-  "latest_impression_count": null
+  "latest_impression_count": null,
+  "compliance_review_required": false,
+  "compliance_review_result": "affiliate-compliance-reviewerの必須レビュー対象外と判定（2026-09-04実施）。下書き本文にAmazon商品への言及・購入CTA・アフィリエイトリンクのいずれも含まれず、funnel-definition.mdの販売モード定義に非該当のため。x-posting-policy.mdの一般基準（誇大表現・断定的表現・競合の不当な貶め等）も確認し懸念なし。実店舗7軒の列挙は指示的な商標使用であり、提携・後援の示唆もないため法的懸念も低いと判断した。",
+  "factual_verification_required": true,
+  "factual_verification_result": "新宿エリアの実店舗7軒（ビューティ&ユース/UA、トゥモローランド、アーバンリサーチ、スティーブン・アラン、グリーンレーベル、エディフィス、伊勢丹メンズ館）すべて、web検索により2026-09-04時点で営業中であることを確認した。閉店・移転は0件。伊勢丹メンズ館のみ2026-09-04当日はイベントのため一時休業だが、通常営業（10:00-20:00）は継続しており恒常的な閉店ではない。除外を要する店舗はなし。"
 }
