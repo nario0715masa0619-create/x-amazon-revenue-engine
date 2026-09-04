@@ -21,7 +21,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-WATCH_STATUSES = ("active", "graduated")
+WATCH_STATUSES = ("active", "graduated", "excluded", "pending_review")
 
 # 深掘りチェックで新規pre_teacher_candidateが0件だった連続回数がこの値に達したら
 # graduated（休止）へ遷移する。暫定値: 10。根拠: 設計文書2-3節の提案値（N=10回、
@@ -50,6 +50,10 @@ class WatchedAccountState:
     last_deepdive_since_id: str | None = None
     created_at: str = ""
     updated_at: str = ""
+    excluded_reason: str | None = None
+    excluded_at: str | None = None
+    pending_review_reason: str | None = None
+    pending_review_detected_at: str | None = None
 
 
 def _now_iso() -> str:
@@ -71,6 +75,14 @@ def register_or_reactivate_watched_account(
         consecutive_unproductive_deepdive_runsを0にリセットする
         （設計文書「日次キーワード収集で再度teacher観測時に自動復帰」）。
     いずれの場合もteacher_countを1加算する。
+
+    2026-09-04追加（企業公式アカウント除外方針）: 既存watch_status=="excluded"
+    （人間判断による恒久除外。exclude_watched_account()参照）または
+    "pending_review"（企業アカウントの可能性で要人間確認、
+    create_pending_review_watched_account()参照）の場合は、無条件には
+    復帰・更新しない——状態を一切変更せずそのまま返す。呼び出し側
+    （register_watched_accounts.py）で事前にスキップすることを推奨するが、
+    防御的にここでも復帰を止める。
     """
     observed_at = observed_at or _now_iso()
 
@@ -88,12 +100,67 @@ def register_or_reactivate_watched_account(
         return state
 
     state = store[author_id]
+    if state.watch_status in ("excluded", "pending_review"):
+        return state
     state.teacher_count += 1
     state.last_teacher_at = observed_at
     if state.watch_status == "graduated":
         state.watch_status = "active"
         state.consecutive_unproductive_deepdive_runs = 0
     state.updated_at = observed_at
+    return state
+
+
+def exclude_watched_account(
+    state: WatchedAccountState,
+    reason: str,
+    excluded_at: str | None = None,
+) -> WatchedAccountState:
+    """人間判断による恒久除外を記録する（2026-09-04追加）。graduatedと異なり、深掘りの
+    不発による自動遷移ではなく、人間が明示的に「監視対象として不適切」と判断した
+    ケース専用（例: 企業公式アカウントの誤登録）。単純な削除ではなく除外理由・日時を
+    残すことで、将来同じアカウントが再度teacherとして観測されても
+    register_or_reactivate_watched_account()が無条件には復帰させないようにする。
+    """
+    excluded_at = excluded_at or _now_iso()
+    state.watch_status = "excluded"
+    state.excluded_reason = reason
+    state.excluded_at = excluded_at
+    state.updated_at = excluded_at
+    return state
+
+
+def create_pending_review_watched_account(
+    store: dict[str, WatchedAccountState],
+    author_id: str,
+    reason: str,
+    detected_at: str | None = None,
+) -> WatchedAccountState:
+    """企業アカウントらしいシグナルが検出された、未登録のauthor_idを
+    watch_status="pending_review"で新規作成する（2026-09-04追加）。
+
+    active_author_ids()の対象外のため深掘り収集は行われず、人間が確認するまで
+    "active"へは昇格しない。author_idが既にstoreに存在する場合は
+    WatchedAccountStateErrorを送出する（新規作成専用。既存アカウントの状態変更は
+    exclude_watched_account()等、別の関数の責務とする）。
+    """
+    if author_id in store:
+        raise WatchedAccountStateError(
+            f"author_id={author_id!r} は既にstoreに存在するため、pending_reviewとして新規作成できません。"
+        )
+    detected_at = detected_at or _now_iso()
+    state = WatchedAccountState(
+        author_id=author_id,
+        watch_status="pending_review",
+        teacher_count=1,
+        first_registered_at=detected_at,
+        last_teacher_at=detected_at,
+        created_at=detected_at,
+        updated_at=detected_at,
+        pending_review_reason=reason,
+        pending_review_detected_at=detected_at,
+    )
+    store[author_id] = state
     return state
 
 

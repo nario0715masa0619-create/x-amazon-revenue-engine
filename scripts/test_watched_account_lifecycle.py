@@ -23,6 +23,8 @@ from watched_account_state import (
     GRADUATION_THRESHOLD_CONSECUTIVE_UNPRODUCTIVE_RUNS,
     WatchedAccountState,
     active_author_ids,
+    create_pending_review_watched_account,
+    exclude_watched_account,
     load_watched_account_state_store,
     record_deepdive_run_result,
     register_or_reactivate_watched_account,
@@ -196,6 +198,29 @@ def test_watched_accounts_log_dedup_across_runs() -> None:
         _check("second_run_skipped_duplicate", result2["skipped_duplicate_count"] == 1, str(result2))
 
 
+def test_excluded_and_pending_review_state_store_roundtrip() -> None:
+    print("\n=== 検証13: excluded/pending_review状態が保存・再読込で正しく往復すること（2026-09-04追加） ===")
+    with tempfile.TemporaryDirectory() as tmpdir:
+        state_path = Path(tmpdir) / "watched_account_state.json"
+        store: dict[str, WatchedAccountState] = {}
+        state = register_or_reactivate_watched_account(store, "author-excluded", observed_at="2026-09-01T00:00:00Z")
+        exclude_watched_account(state, reason="企業公式アカウントのため", excluded_at="2026-09-04T00:00:00Z")
+        create_pending_review_watched_account(
+            store, "author-pending", reason="verified_type=business", detected_at="2026-09-04T00:00:00Z"
+        )
+        save_watched_account_state_store(store, state_path)
+
+        reloaded = load_watched_account_state_store(state_path)
+        _check("excluded_status_preserved", reloaded["author-excluded"].watch_status == "excluded")
+        _check("excluded_reason_preserved", reloaded["author-excluded"].excluded_reason == "企業公式アカウントのため")
+        _check("pending_review_status_preserved", reloaded["author-pending"].watch_status == "pending_review")
+        _check(
+            "pending_review_reason_preserved",
+            reloaded["author-pending"].pending_review_reason == "verified_type=business",
+        )
+        _check("active_author_ids_excludes_both", active_author_ids(reloaded) == [])
+
+
 def test_watched_accounts_log_schema_excludes_text() -> None:
     print("\n=== 検証12: 登録イベントログのレコードにtext相当のフィールドが一切含まれないこと ===")
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -224,6 +249,7 @@ if __name__ == "__main__":
     test_missing_state_store_returns_empty_dict()
     test_watched_accounts_log_new_only_appended()
     test_watched_accounts_log_dedup_across_runs()
+    test_excluded_and_pending_review_state_store_roundtrip()
     test_watched_accounts_log_schema_excludes_text()
 
     print("\n" + "=" * 60)
