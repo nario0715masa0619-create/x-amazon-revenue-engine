@@ -30,6 +30,10 @@
   "cooldown_active": false,
   "posted_theme_check_reason": "posted theme registryと一致する候補は見つからなかった。mainline候補として継続可能",
   "analytics_status": "partial",
-  "analytics_file_path": "ops/reports/post_analytics_2026-09-04_mainline-run-2026-09-02-009.json",
-  "latest_impression_count": 17
+  "analytics_file_path": "ops/reports/post_analytics_2026-09-05_mainline-run-2026-09-02-009.json",
+  "latest_impression_count": 27,
+  "compliance_review_required": null,
+  "compliance_review_result": null,
+  "factual_verification_required": null,
+  "factual_verification_result": null
 }
