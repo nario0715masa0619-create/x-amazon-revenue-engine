@@ -1,0 +1,39 @@
+{
+  "run_id": "mainline-run-2026-09-05-012",
+  "source_post_id": "2071186861377077643",
+  "target_layer": "fashion",
+  "draft_ids": [
+    "fashion-akanuke-2026-09-05-002"
+  ],
+  "gate_a_pass_ids": [
+    "fashion-akanuke-2026-09-05-002"
+  ],
+  "human_selected_top": "fashion-akanuke-2026-09-05-002",
+  "published_draft_id": null,
+  "selection_reason_short": "原文準拠の再生成版（1回目の要約版はGate A却下）。Gate A pass、Gate B score=83（strong_ship_candidate）。",
+  "primary_source_post_id": "2071186861377077643",
+  "fallback_source_post_id": null,
+  "used_fallback_source": false,
+  "mainline_status": "completed",
+  "enrichment_status": "not_started",
+  "weekly_aggregation_status": "pending",
+  "research_followup_required": false,
+  "published_at": null,
+  "post_url": null,
+  "posted_theme_check_status": "checked",
+  "posted_theme_match_type": "none",
+  "matched_past_run_id": null,
+  "matched_post_url": null,
+  "matched_theme_signature": null,
+  "block_mainline": false,
+  "route_to_research": false,
+  "cooldown_active": false,
+  "posted_theme_check_reason": "posted theme registryと一致する候補は見つからなかった。mainline候補として継続可能",
+  "analytics_status": null,
+  "analytics_file_path": null,
+  "latest_impression_count": null,
+  "compliance_review_required": false,
+  "compliance_review_result": "affiliate-compliance-reviewerの必須レビュー対象外と判定。下書き本文にAmazon商品への言及・購入CTA・アフィリエイトリンクのいずれも含まれず、funnel-definition.mdの販売モード定義に非該当のため。",
+  "factual_verification_required": true,
+  "factual_verification_result": "pre_publish_checklistが検出した固有名詞候補4件（['リュック', '恋愛アプリ', '手帳型スマホケース', '筋トレ']）を人間（Claude Code）が個別に確認した結果、いずれも実在の店舗・企業・製品を指す固有名詞ではなく、一般的な物品・行動カテゴリ語（リュック/手帳型スマホケース=一般的な持ち物、恋愛アプリ=アプリカテゴリの総称、筋トレ=一般的な行動）であることを確認した。実在確認（営業状況等）を要する対象は無いと判断し、web検索による事実確認は実施しなかった。前回（コーデ-デニム-服__テク）と同種の既知のヒューリスティック誤検出パターンが今回も確認された。"
+}
