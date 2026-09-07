@@ -111,6 +111,22 @@
       "excluded_at": "2026-09-04T00:52:26Z",
       "pending_review_reason": null,
       "pending_review_detected_at": null
+    },
+    "1761017269612871680": {
+      "author_id": "1761017269612871680",
+      "watch_status": "active",
+      "teacher_count": 1,
+      "first_registered_at": "2026-09-07T23:21:01Z",
+      "last_teacher_at": "2026-09-07T23:21:01Z",
+      "last_deepdive_checked_at": null,
+      "consecutive_unproductive_deepdive_runs": 0,
+      "last_deepdive_since_id": null,
+      "created_at": "2026-09-07T23:21:01Z",
+      "updated_at": "2026-09-07T23:21:01Z",
+      "excluded_reason": null,
+      "excluded_at": null,
+      "pending_review_reason": null,
+      "pending_review_detected_at": null
     }
   }
 }

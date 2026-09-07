@@ -186,6 +186,23 @@
       "mainline_run_count": 0,
       "has_ever_won": false,
       "latest_post_outcome": null
+    },
+    "コーデ-ジャケット-メンズ-大人__40代におすすめ-おすすめ": {
+      "topic_group_id": "コーデ-ジャケット-メンズ-大人__40代におすすめ-おすすめ",
+      "theme_signature": "コーデ-ジャケット-メンズ-大人__40代におすすめ",
+      "topic_status": "proposed",
+      "topic_last_published_at": null,
+      "topic_performance_band": "unknown",
+      "topic_retry_budget": 3,
+      "topic_cooldown_until": null,
+      "topic_retired_from_mainline": false,
+      "route_to_research_only": false,
+      "source_diversity_tag": "2096840892296384762",
+      "created_at": "2026-09-07T23:21:01Z",
+      "updated_at": "2026-09-07T23:21:01Z",
+      "mainline_run_count": 0,
+      "has_ever_won": false,
+      "latest_post_outcome": null
     }
   }
 }
