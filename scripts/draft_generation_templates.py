@@ -91,6 +91,19 @@ class GenerationSlots:
     where_to_look: str | None = None  # 具体的に見る/選ぶ場所
     judgment_axis: str | None = None  # 読後に使える判断軸
 
+    # --- エンゲージメント要素（2026-09-08追加、GOV-20260908-ENGAGEMENT-ELEMENTS-01） ---
+    # 原文への忠実性という既存の設計思想とは別の、SNS運用上の付加要素として扱う
+    # （本文の主張内容ではないため、teacher原文からの抽出ではなくtopic_groupの
+    # メタデータから機械的に構成する）。デフォルトはいずれもNone/空リストで、
+    # 指定しない既存の全呼び出しはこれまでと完全に同じ出力になる（後方互換）。
+    # 重要な注意点: この文字列は各render_*関数の返り値にそのまま連結されるため、
+    # Gate A/Bの監査対象からは除外されない——engagement_questionを含む本文は
+    # Gate Aの既存ルール「禁止文体: CTA混入」により却下されることが実測で
+    # 確認されている（意図的にバイパスしていない。詳細はops/reports/
+    # engagement_elements_investigation_2026-09-08.md参照）。
+    hashtags: list[str] | None = None
+    engagement_question: str | None = None
+
     def __post_init__(self) -> None:
         if self.layer_primary not in ("fashion", "gadget", "intersection"):
             raise GenerationSlotsError(f"layer_primaryが不正です: {self.layer_primary}")
@@ -147,10 +160,30 @@ def _bullets(items: list[str], limit: int = 5) -> str:
     return "\n".join(f"・{item}" for item in items[:limit])
 
 
+def _append_engagement_elements(text: str, slots: GenerationSlots) -> str:
+    """テンプレート本体（text）の末尾に、slots.hashtags/engagement_questionが
+    設定されていれば追記する（2026-09-08追加）。いずれも未指定（None/空）の場合は
+    textをそのまま返す——既存の全呼び出しはこれまでと完全に同じ出力になる
+    （後方互換）。
+
+    この関数が追記する内容は、他の骨格要素と同じくGate A/Bの監査対象に
+    そのまま含まれる（意図的な除外・迂回は行わない）。engagement_questionを
+    含む本文はGate Aの既存ルール「禁止文体: CTA混入」により却下されることが
+    実測で確認されている（詳細はops/reports/engagement_elements_investigation_
+    2026-09-08.md参照）。
+    """
+    result = text
+    if slots.hashtags:
+        result = f"{result}\n{' '.join(f'#{h}' for h in slots.hashtags)}"
+    if slots.engagement_question:
+        result = f"{result}\n{slots.engagement_question}"
+    return result
+
+
 def render_listicle(slots: GenerationSlots) -> str:
     """導入1文 + 具体物列挙(2個以上) + 締め1文。"""
     body = _bullets(slots.concrete_items)
-    return f"{slots.hook}\n{body}\n{slots.benefit}"
+    return _append_engagement_elements(f"{slots.hook}\n{body}\n{slots.benefit}", slots)
 
 
 def render_comparison(slots: GenerationSlots) -> str:
@@ -206,7 +239,7 @@ def render_comparison(slots: GenerationSlots) -> str:
         first_line = f"{targets_text}。{axis_intro}"
 
     conclusion = slots.conclusion_or_choice or slots.benefit
-    return f"{first_line}\n{conclusion}"
+    return _append_engagement_elements(f"{first_line}\n{conclusion}", slots)
 
 
 def render_priority_reversal(slots: GenerationSlots) -> str:
@@ -236,7 +269,7 @@ def render_priority_reversal(slots: GenerationSlots) -> str:
     else:
         closing = slots.now_reason or slots.age_angle
 
-    return f"{opening}\n{items_block}\n{closing}"
+    return _append_engagement_elements(f"{opening}\n{items_block}\n{closing}", slots)
 
 
 def render_experience_review(slots: GenerationSlots) -> str:
@@ -245,7 +278,7 @@ def render_experience_review(slots: GenerationSlots) -> str:
         "、".join(slots.concrete_items) + "を実際に使って比べた"
     )
     criterion = slots.selection_criterion or slots.benefit
-    return f"{slots.hook}。{trial}。\n{criterion}"
+    return _append_engagement_elements(f"{slots.hook}。{trial}。\n{criterion}", slots)
 
 
 def render_how_to(slots: GenerationSlots) -> str:
@@ -253,7 +286,7 @@ def render_how_to(slots: GenerationSlots) -> str:
     claim = slots.key_difference_claim or slots.hook
     where = slots.where_to_look or "、".join(slots.concrete_items)
     axis = slots.judgment_axis or slots.benefit
-    return f"{claim}\n{where}。\n{axis}"
+    return _append_engagement_elements(f"{claim}\n{where}。\n{axis}", slots)
 
 
 def render_headline_assertion_fashion(slots: GenerationSlots) -> str:
@@ -291,13 +324,14 @@ def render_headline_assertion_fashion(slots: GenerationSlots) -> str:
     if slots.accessory_categories:
         cats = "、".join(slots.accessory_categories[:4])
         accessory_fragment = f"{cats}みたいな小さい部分で印象が整う。"
-    return f"{anchor}。{age_fragment}{contrast_fragment}差がつくのは{axis}。{accessory_fragment}".rstrip()
+    core = f"{anchor}。{age_fragment}{contrast_fragment}差がつくのは{axis}。{accessory_fragment}".rstrip()
+    return _append_engagement_elements(core, slots)
 
 
 def render_single_claim(slots: GenerationSlots) -> str:
     """主張を先に置く + 具体物で補う根拠 + 40代視点で納得感。"""
     items = "、".join(slots.concrete_items)
-    return f"{slots.hook}。{items}。{slots.age_angle}"
+    return _append_engagement_elements(f"{slots.hook}。{items}。{slots.age_angle}", slots)
 
 
 def render_essay_reflection(slots: GenerationSlots) -> str:
@@ -320,8 +354,8 @@ def render_essay_reflection(slots: GenerationSlots) -> str:
     nuance = slots.reusable_elements[0] if slots.reusable_elements else None
     closing = slots.age_angle or slots.benefit
     if nuance:
-        return f"{slots.hook}。{items}。\n{nuance}。\n{closing}"
-    return f"{slots.hook}。{items}。\n{closing}"
+        return _append_engagement_elements(f"{slots.hook}。{items}。\n{nuance}。\n{closing}", slots)
+    return _append_engagement_elements(f"{slots.hook}。{items}。\n{closing}", slots)
 
 
 _TEMPLATE_DISPATCH = {
