@@ -191,12 +191,28 @@ def build_theme_signature(components: dict[str, list[str]]) -> str:
     return "__".join(parts) if parts else "unclassified"
 
 
+# 2026-09-08修正（分裂バグ対応）: comparison_axis次元のうち、CONTRAST_TERMSと同じ
+# キーワードを共有するタグは、build_topic_group()の粗いグルーピングキーからは除外する。
+# "split-use"（キーワード"使い分け"）はCONTRAST_TERMS["two-device-split"]と同一の
+# キーワードを持つため、"使い分け"という一言一句の有無だけでcomparison_axisタグ集合が
+# 変わり、本来同一のはずのATH-PRO5MK2×ジム用骨伝導テーマが2つのtopic_group_idに分裂する
+# 実害が出ていた（ops/reports/topic_group_lifecycle_design_2026-08-31.md「既知の限界」に
+# 記載済みの実ケース）。COMPARISON_AXIS_TERMS自体からは削除しない
+# （x_api_phase2_classify.DECISION_KEYWORDSの広い語彙が同じキーワードで重複タグ追加
+# するのを抑止する役割を持っているため、辞書から消すと別経路で同じ分裂が再発する）。
+# theme_signature/overlap判定では引き続き"split-use"タグを使う
+# （build_theme_signature()・theme_component_overlap_ratio()は本関数を経由しないため無変更）。
+_TOPIC_GROUP_EXCLUDED_AXIS_TAGS: frozenset[str] = frozenset({"split-use"})
+
+
 def build_topic_group(components: dict[str, list[str]]) -> str:
     """cooldown判定用の粗いグルーピングキー。product + comparison_axisの主要タグのみで構成し、
     theme_signatureより粗い粒度にする（wording差やconclusion差では別グループにしない）。
     """
     product_tags = sorted(components.get("product", []))
-    axis_tags = sorted(components.get("comparison_axis", []))
+    axis_tags = sorted(
+        t for t in components.get("comparison_axis", []) if t not in _TOPIC_GROUP_EXCLUDED_AXIS_TAGS
+    )
     parts = []
     if product_tags:
         parts.append("-".join(product_tags))
