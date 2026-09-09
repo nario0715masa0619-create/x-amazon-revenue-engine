@@ -1,0 +1,39 @@
+{
+  "run_id": "mainline-run-2026-09-08-013",
+  "source_post_id": "2075099443200991643",
+  "target_layer": "fashion",
+  "draft_ids": [
+    "fashion-denim-shirot-2026-09-08-002"
+  ],
+  "gate_a_pass_ids": [
+    "fashion-denim-shirot-2026-09-08-002"
+  ],
+  "human_selected_top": "fashion-denim-shirot-2026-09-08-002",
+  "published_draft_id": "fashion-denim-shirot-2026-09-08-002",
+  "selection_reason_short": "唯一の生成候補。Gate A pass、Gate B normalized_score=83（strong_ship_candidate）。ハッシュタグ例外実装後、初のハッシュタグ付き公開投稿。",
+  "primary_source_post_id": "2075099443200991643",
+  "fallback_source_post_id": null,
+  "used_fallback_source": false,
+  "mainline_status": "completed",
+  "enrichment_status": "not_started",
+  "weekly_aggregation_status": "pending",
+  "research_followup_required": false,
+  "published_at": "2026-09-09T01:25:49Z",
+  "post_url": "https://x.com/ritsu_opt/status/2097328181833609430",
+  "posted_theme_check_status": "checked",
+  "posted_theme_match_type": "none",
+  "matched_past_run_id": null,
+  "matched_post_url": null,
+  "matched_theme_signature": null,
+  "block_mainline": false,
+  "route_to_research": false,
+  "cooldown_active": false,
+  "posted_theme_check_reason": "posted theme registryと一致する候補は見つからなかった。mainline候補として継続可能",
+  "analytics_status": null,
+  "analytics_file_path": null,
+  "latest_impression_count": null,
+  "compliance_review_required": false,
+  "compliance_review_result": "affiliate-compliance-reviewerの必須レビュー対象外と判定。下書き本文にAmazon商品への言及・購入CTA・アフィリエイトリンクのいずれも含まれず、funnel-definition.mdの販売モード定義に非該当のため。",
+  "factual_verification_required": true,
+  "factual_verification_result": "pre_publish_checklistが検出した固有名詞候補7件（['ゴールドアクセ', 'ジャスト', 'メンズファッション', 'ワイドデニム', '今シーズン', '王道コーデ', '黒ブーツ']）を人間（Claude Code）が個別に確認した結果、いずれも実在の店舗・企業・製品を指す固有名詞ではなく、一般的な衣類カテゴリ語・スタイリング表現（ゴールドアクセ/ジャスト/ワイドデニム/王道コーデ/黒ブーツ）および付与したハッシュタグ文言（メンズファッション）・一般的な時期表現（今シーズン）であることを確認した。実在確認（営業状況等）を要する対象は無いと判断し、web検索による事実確認は実施しなかった。これまでのタスクと同種の、本ヒューリスティックの既知の誤検出パターンが今回も確認された。"
+}
