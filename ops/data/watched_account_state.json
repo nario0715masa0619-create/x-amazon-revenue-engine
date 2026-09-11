@@ -114,7 +114,7 @@
     },
     "1761017269612871680": {
       "author_id": "1761017269612871680",
-      "watch_status": "active",
+      "watch_status": "excluded",
       "teacher_count": 1,
       "first_registered_at": "2026-09-07T23:21:01Z",
       "last_teacher_at": "2026-09-07T23:21:01Z",
@@ -122,9 +122,9 @@
       "consecutive_unproductive_deepdive_runs": 3,
       "last_deepdive_since_id": "2098177033868280047",
       "created_at": "2026-09-07T23:21:01Z",
-      "updated_at": "2026-09-10T23:39:52.384955+00:00",
-      "excluded_reason": null,
-      "excluded_at": null,
+      "updated_at": "2026-09-11T04:30:56Z",
+      "excluded_reason": "商用ECショップアカウント（BASEストア「MONO VINTAGE」）。verified_typeベースの自動企業アカウント検出をすり抜けていたが、本文中に店名「MONO VINTAGE」の明記、BASE公式ECタグ#BASEecおよび@BASEecメンション、商品購入リンク（t.co短縮URL）、「ぜひ、１度チェックしてみてください」等の定型CTAの反復使用が確認され、人間判断により2026-09-11付けで除外。由来topic_group 5件（コーデ-ジャケット-メンズ-大人__40代におすすめ-おすすめ／コーデ-大人__似合う-合う／コーデ-清潔感／コーデ-大人-着こなし／清潔感__おすすめ）も却下済み。",
+      "excluded_at": "2026-09-11T04:30:56Z",
       "pending_review_reason": null,
       "pending_review_detected_at": null
     }
