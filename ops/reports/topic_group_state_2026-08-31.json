@@ -292,7 +292,7 @@
     "メンズ-垢抜け-清潔感__似合う-合う": {
       "topic_group_id": "メンズ-垢抜け-清潔感__似合う-合う",
       "theme_signature": "メンズ-垢抜け-清潔感__似合う",
-      "topic_status": "proposed",
+      "topic_status": "active",
       "topic_last_published_at": null,
       "topic_performance_band": "unknown",
       "topic_retry_budget": 3,
@@ -301,7 +301,7 @@
       "route_to_research_only": false,
       "source_diversity_tag": "2026975545351909617",
       "created_at": "2026-09-11T04:44:54Z",
-      "updated_at": "2026-09-11T04:44:54Z",
+      "updated_at": "2026-09-11T05:39:25Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
       "latest_post_outcome": null
@@ -309,7 +309,7 @@
     "垢抜け-服__正解": {
       "topic_group_id": "垢抜け-服__正解",
       "theme_signature": "垢抜け-服__正解",
-      "topic_status": "proposed",
+      "topic_status": "active",
       "topic_last_published_at": null,
       "topic_performance_band": "unknown",
       "topic_retry_budget": 3,
@@ -318,7 +318,7 @@
       "route_to_research_only": false,
       "source_diversity_tag": "2016828680195231975",
       "created_at": "2026-09-11T04:44:54Z",
-      "updated_at": "2026-09-11T04:44:54Z",
+      "updated_at": "2026-09-11T05:39:26Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
       "latest_post_outcome": null
@@ -343,7 +343,7 @@
     "デニム-定番__lightness-定番": {
       "topic_group_id": "デニム-定番__lightness-定番",
       "theme_signature": "デニム-定番__home__lightness",
-      "topic_status": "proposed",
+      "topic_status": "active",
       "topic_last_published_at": null,
       "topic_performance_band": "unknown",
       "topic_retry_budget": 3,
@@ -352,7 +352,7 @@
       "route_to_research_only": false,
       "source_diversity_tag": "2085690920046035092",
       "created_at": "2026-09-11T04:44:56Z",
-      "updated_at": "2026-09-11T04:44:56Z",
+      "updated_at": "2026-09-11T05:39:25Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
       "latest_post_outcome": null
@@ -360,7 +360,7 @@
     "メンズ-服__似合う-合う": {
       "topic_group_id": "メンズ-服__似合う-合う",
       "theme_signature": "メンズ-服__gym__似合う",
-      "topic_status": "proposed",
+      "topic_status": "active",
       "topic_last_published_at": null,
       "topic_performance_band": "unknown",
       "topic_retry_budget": 3,
@@ -369,7 +369,7 @@
       "route_to_research_only": false,
       "source_diversity_tag": "2077324796355129730",
       "created_at": "2026-09-11T04:44:57Z",
-      "updated_at": "2026-09-11T04:44:57Z",
+      "updated_at": "2026-09-11T05:39:25Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
       "latest_post_outcome": null
@@ -377,7 +377,7 @@
     "コーデ-大人-清潔感-着こなし__正解": {
       "topic_group_id": "コーデ-大人-清潔感-着こなし__正解",
       "theme_signature": "コーデ-大人-清潔感-着こなし__正解",
-      "topic_status": "proposed",
+      "topic_status": "active",
       "topic_last_published_at": null,
       "topic_performance_band": "unknown",
       "topic_retry_budget": 3,
@@ -386,7 +386,7 @@
       "route_to_research_only": false,
       "source_diversity_tag": "2065396193551679942",
       "created_at": "2026-09-11T04:44:57Z",
-      "updated_at": "2026-09-11T04:44:57Z",
+      "updated_at": "2026-09-11T05:39:25Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
       "latest_post_outcome": null
@@ -394,7 +394,7 @@
     "コーデ-デニム-白T__正解": {
       "topic_group_id": "コーデ-デニム-白T__正解",
       "theme_signature": "コーデ-デニム-白T__正解",
-      "topic_status": "proposed",
+      "topic_status": "active",
       "topic_last_published_at": null,
       "topic_performance_band": "unknown",
       "topic_retry_budget": 3,
@@ -403,7 +403,7 @@
       "route_to_research_only": false,
       "source_diversity_tag": "2064309029883564340",
       "created_at": "2026-09-11T04:44:57Z",
-      "updated_at": "2026-09-11T04:44:57Z",
+      "updated_at": "2026-09-11T05:39:25Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
       "latest_post_outcome": null
@@ -411,7 +411,7 @@
     "大人-着こなし__おすすめ": {
       "topic_group_id": "大人-着こなし__おすすめ",
       "theme_signature": "大人-着こなし__おすすめ",
-      "topic_status": "proposed",
+      "topic_status": "active",
       "topic_last_published_at": null,
       "topic_performance_band": "unknown",
       "topic_retry_budget": 3,
@@ -420,7 +420,7 @@
       "route_to_research_only": false,
       "source_diversity_tag": "2061409928041091175",
       "created_at": "2026-09-11T04:44:57Z",
-      "updated_at": "2026-09-11T04:44:57Z",
+      "updated_at": "2026-09-11T05:39:26Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
       "latest_post_outcome": null
