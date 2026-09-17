@@ -1,0 +1,39 @@
+{
+  "run_id": "mainline-run-2026-09-17-014",
+  "source_post_id": "2077324796355129730",
+  "target_layer": "fashion",
+  "draft_ids": [
+    "fashion-menzu-gaikenkaizen-2026-09-17-001"
+  ],
+  "gate_a_pass_ids": [
+    "fashion-menzu-gaikenkaizen-2026-09-17-001"
+  ],
+  "human_selected_top": "fashion-menzu-gaikenkaizen-2026-09-17-001",
+  "published_draft_id": null,
+  "selection_reason_short": "唯一の生成候補。Gate A pass、Gate B normalized_score=85（strong_ship_candidate）。STEP1〜4の番号構造・ZARA/UNIQLOの具体的ブランド名を含む、具体性の高い原文からの生成。「整形は必須ではない」という原文の否定文脈をそのまま保持。",
+  "primary_source_post_id": "2077324796355129730",
+  "fallback_source_post_id": null,
+  "used_fallback_source": false,
+  "mainline_status": "completed",
+  "enrichment_status": "not_started",
+  "weekly_aggregation_status": "pending",
+  "research_followup_required": false,
+  "published_at": null,
+  "post_url": null,
+  "posted_theme_check_status": "checked",
+  "posted_theme_match_type": "none",
+  "matched_past_run_id": null,
+  "matched_post_url": null,
+  "matched_theme_signature": null,
+  "block_mainline": false,
+  "route_to_research": false,
+  "cooldown_active": false,
+  "posted_theme_check_reason": "posted theme registryと一致する候補は見つからなかった。mainline候補として継続可能",
+  "analytics_status": null,
+  "analytics_file_path": null,
+  "latest_impression_count": null,
+  "compliance_review_required": false,
+  "compliance_review_result": "affiliate-compliance-reviewerの必須レビュー対象外と判定。下書き本文にAmazon商品への言及・購入CTA・アフィリエイトリンクのいずれも含まれず、funnel-definition.mdの販売モード定義に非該当のため。",
+  "factual_verification_required": true,
+  "factual_verification_result": "pre_publish_checklistが検出した固有名詞候補10件（['UNIQLO', 'ZARA', 'カジュアル', 'シンプル', 'ジム通', 'スキンケア', 'ステップ', 'フォーマル', 'メンズファッション', 'メンズメイク']）を人間（Claude Code）が個別に確認した。このうち'UNIQLO'・'ZARA'は実在する大手アパレルチェーンであり、いずれも世界規模で多数の実店舗・オンラインストアを運営する主要企業として広く周知の事実であるため、個別店舗の営業状況確認（新宿の実店舗紹介ケースのような）を要する文脈ではなく、web検索による追加の実在確認は不要と判断した。'カジュアル''シンプル''ジム通''スキンケア''ステップ''フォーマル''メンズファッション''メンズメイク'は一般的な衣類・美容カテゴリ語であり、これまでのタスクと同種の本ヒューリスティックの既知の誤検出パターンに該当する。"
+}
