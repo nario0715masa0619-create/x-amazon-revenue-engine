@@ -39,17 +39,17 @@
       "theme_signature": "コーデ-デニム-白T",
       "topic_status": "published",
       "topic_last_published_at": "2026-09-08",
-      "topic_performance_band": "low",
+      "topic_performance_band": "medium",
       "topic_retry_budget": 3,
       "topic_cooldown_until": "2026-09-29",
       "topic_retired_from_mainline": true,
       "route_to_research_only": true,
       "source_diversity_tag": "2075099443200991643",
       "created_at": "2026-09-02T06:27:09Z",
-      "updated_at": "2026-09-10T23:40:40Z",
+      "updated_at": "2026-09-20T02:36:04Z",
       "mainline_run_count": 1,
       "has_ever_won": false,
-      "latest_post_outcome": "insufficient_data"
+      "latest_post_outcome": "neutral"
     },
     "垢抜け-服": {
       "topic_group_id": "垢抜け-服",
@@ -63,7 +63,7 @@
       "route_to_research_only": true,
       "source_diversity_tag": "2071186861377077643",
       "created_at": "2026-09-02T06:27:09Z",
-      "updated_at": "2026-09-07T22:53:11Z",
+      "updated_at": "2026-09-20T02:36:04Z",
       "mainline_run_count": 1,
       "has_ever_won": false,
       "latest_post_outcome": "loss"
@@ -97,7 +97,7 @@
       "route_to_research_only": true,
       "source_diversity_tag": "2088777767747735983",
       "created_at": "2026-09-02T06:27:09Z",
-      "updated_at": "2026-09-07T22:53:10Z",
+      "updated_at": "2026-09-20T02:36:04Z",
       "mainline_run_count": 1,
       "has_ever_won": false,
       "latest_post_outcome": "insufficient_data"
@@ -114,7 +114,7 @@
       "route_to_research_only": true,
       "source_diversity_tag": "2082035837789716650",
       "created_at": "2026-09-02T06:27:09Z",
-      "updated_at": "2026-09-07T22:53:10Z",
+      "updated_at": "2026-09-20T02:36:04Z",
       "mainline_run_count": 1,
       "has_ever_won": false,
       "latest_post_outcome": "loss"
@@ -141,17 +141,17 @@
       "theme_signature": "メンズ-大人-服__おすすめ",
       "topic_status": "published",
       "topic_last_published_at": "2026-09-04",
-      "topic_performance_band": "medium",
+      "topic_performance_band": "high",
       "topic_retry_budget": 3,
       "topic_cooldown_until": "2026-09-25",
       "topic_retired_from_mainline": true,
       "route_to_research_only": true,
       "source_diversity_tag": "1920279945374245275",
       "created_at": "2026-09-02T06:27:10Z",
-      "updated_at": "2026-09-05T22:54:09Z",
+      "updated_at": "2026-09-20T02:36:04Z",
       "mainline_run_count": 1,
-      "has_ever_won": false,
-      "latest_post_outcome": "loss"
+      "has_ever_won": true,
+      "latest_post_outcome": "win"
     },
     "大人-定番__定番": {
       "topic_group_id": "大人-定番__定番",
@@ -362,17 +362,17 @@
       "theme_signature": "メンズ-服__gym__似合う",
       "topic_status": "published",
       "topic_last_published_at": "2026-09-17",
-      "topic_performance_band": "unknown",
+      "topic_performance_band": "medium",
       "topic_retry_budget": 3,
       "topic_cooldown_until": "2026-10-08",
       "topic_retired_from_mainline": true,
       "route_to_research_only": true,
       "source_diversity_tag": "2077324796355129730",
       "created_at": "2026-09-11T04:44:57Z",
-      "updated_at": "2026-09-20T01:30:04Z",
+      "updated_at": "2026-09-20T02:36:04Z",
       "mainline_run_count": 1,
       "has_ever_won": false,
-      "latest_post_outcome": null
+      "latest_post_outcome": "loss"
     },
     "コーデ-大人-清潔感-着こなし__正解": {
       "topic_group_id": "コーデ-大人-清潔感-着こなし__正解",
