@@ -15,7 +15,11 @@
       "updated_at": "2026-09-01T04:32:14Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
-      "latest_post_outcome": null
+      "latest_post_outcome": null,
+      "velocity_impression_rate": null,
+      "velocity_assessment": "unknown",
+      "velocity_assessed_at_hours": null,
+      "outcome_confirmed": false
     },
     "ath-pro5mk2-bone-conduction-neckband__call-quality-lightness": {
       "topic_group_id": "ath-pro5mk2-bone-conduction-neckband__call-quality-lightness",
@@ -32,7 +36,11 @@
       "updated_at": "2026-09-11T08:23:26Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
-      "latest_post_outcome": null
+      "latest_post_outcome": null,
+      "velocity_impression_rate": null,
+      "velocity_assessment": "unknown",
+      "velocity_assessed_at_hours": null,
+      "outcome_confirmed": false
     },
     "コーデ-デニム-白T": {
       "topic_group_id": "コーデ-デニム-白T",
@@ -46,10 +54,14 @@
       "route_to_research_only": true,
       "source_diversity_tag": "2075099443200991643",
       "created_at": "2026-09-02T06:27:09Z",
-      "updated_at": "2026-09-20T02:36:04Z",
+      "updated_at": "2026-09-23T08:31:19Z",
       "mainline_run_count": 1,
       "has_ever_won": false,
-      "latest_post_outcome": "neutral"
+      "latest_post_outcome": "neutral",
+      "velocity_impression_rate": 0.5574912891986062,
+      "velocity_assessment": "low_velocity",
+      "velocity_assessed_at_hours": 57.4,
+      "outcome_confirmed": false
     },
     "垢抜け-服": {
       "topic_group_id": "垢抜け-服",
@@ -63,10 +75,14 @@
       "route_to_research_only": true,
       "source_diversity_tag": "2071186861377077643",
       "created_at": "2026-09-02T06:27:09Z",
-      "updated_at": "2026-09-20T02:36:04Z",
+      "updated_at": "2026-09-23T08:31:19Z",
       "mainline_run_count": 1,
       "has_ever_won": false,
-      "latest_post_outcome": "loss"
+      "latest_post_outcome": "loss",
+      "velocity_impression_rate": 1.0438413361169103,
+      "velocity_assessment": "normal_velocity",
+      "velocity_assessed_at_hours": 47.9,
+      "outcome_confirmed": true
     },
     "定番__定番": {
       "topic_group_id": "定番__定番",
@@ -83,7 +99,11 @@
       "updated_at": "2026-09-02T06:48:50Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
-      "latest_post_outcome": null
+      "latest_post_outcome": null,
+      "velocity_impression_rate": null,
+      "velocity_assessment": "unknown",
+      "velocity_assessed_at_hours": null,
+      "outcome_confirmed": false
     },
     "デニム-定番-服__定番": {
       "topic_group_id": "デニム-定番-服__定番",
@@ -97,10 +117,14 @@
       "route_to_research_only": true,
       "source_diversity_tag": "2088777767747735983",
       "created_at": "2026-09-02T06:27:09Z",
-      "updated_at": "2026-09-20T02:36:04Z",
+      "updated_at": "2026-09-23T08:31:19Z",
       "mainline_run_count": 1,
       "has_ever_won": false,
-      "latest_post_outcome": "insufficient_data"
+      "latest_post_outcome": "insufficient_data",
+      "velocity_impression_rate": 0.6273062730627306,
+      "velocity_assessment": "low_velocity",
+      "velocity_assessed_at_hours": 27.1,
+      "outcome_confirmed": true
     },
     "コーデ-デニム-服__テク": {
       "topic_group_id": "コーデ-デニム-服__テク",
@@ -114,10 +138,14 @@
       "route_to_research_only": true,
       "source_diversity_tag": "2082035837789716650",
       "created_at": "2026-09-02T06:27:09Z",
-      "updated_at": "2026-09-20T02:36:04Z",
+      "updated_at": "2026-09-23T08:31:19Z",
       "mainline_run_count": 1,
       "has_ever_won": false,
-      "latest_post_outcome": "loss"
+      "latest_post_outcome": "loss",
+      "velocity_impression_rate": 0.86230876216968,
+      "velocity_assessment": "normal_velocity",
+      "velocity_assessed_at_hours": 71.9,
+      "outcome_confirmed": true
     },
     "大人__似合う-合う": {
       "topic_group_id": "大人__似合う-合う",
@@ -134,7 +162,11 @@
       "updated_at": "2026-09-02T06:48:55Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
-      "latest_post_outcome": null
+      "latest_post_outcome": null,
+      "velocity_impression_rate": null,
+      "velocity_assessment": "unknown",
+      "velocity_assessed_at_hours": null,
+      "outcome_confirmed": false
     },
     "メンズ-大人-服__おすすめ": {
       "topic_group_id": "メンズ-大人-服__おすすめ",
@@ -148,10 +180,14 @@
       "route_to_research_only": true,
       "source_diversity_tag": "1920279945374245275",
       "created_at": "2026-09-02T06:27:10Z",
-      "updated_at": "2026-09-20T02:36:04Z",
+      "updated_at": "2026-09-23T08:31:19Z",
       "mainline_run_count": 1,
       "has_ever_won": true,
-      "latest_post_outcome": "win"
+      "latest_post_outcome": "win",
+      "velocity_impression_rate": 4.607046070460704,
+      "velocity_assessment": "high_velocity",
+      "velocity_assessed_at_hours": 36.9,
+      "outcome_confirmed": true
     },
     "大人-定番__定番": {
       "topic_group_id": "大人-定番__定番",
@@ -168,7 +204,11 @@
       "updated_at": "2026-09-04T00:42:44Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
-      "latest_post_outcome": null
+      "latest_post_outcome": null,
+      "velocity_impression_rate": null,
+      "velocity_assessment": "unknown",
+      "velocity_assessed_at_hours": null,
+      "outcome_confirmed": false
     },
     "コーデ-大人-定番__厳選-定番": {
       "topic_group_id": "コーデ-大人-定番__厳選-定番",
@@ -185,7 +225,11 @@
       "updated_at": "2026-09-04T00:51:00Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
-      "latest_post_outcome": null
+      "latest_post_outcome": null,
+      "velocity_impression_rate": null,
+      "velocity_assessment": "unknown",
+      "velocity_assessed_at_hours": null,
+      "outcome_confirmed": false
     },
     "コーデ-ジャケット-メンズ-大人__40代におすすめ-おすすめ": {
       "topic_group_id": "コーデ-ジャケット-メンズ-大人__40代におすすめ-おすすめ",
@@ -202,7 +246,11 @@
       "updated_at": "2026-09-11T04:31:37Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
-      "latest_post_outcome": null
+      "latest_post_outcome": null,
+      "velocity_impression_rate": null,
+      "velocity_assessment": "unknown",
+      "velocity_assessed_at_hours": null,
+      "outcome_confirmed": false
     },
     "コーデ-大人__似合う-合う": {
       "topic_group_id": "コーデ-大人__似合う-合う",
@@ -219,7 +267,11 @@
       "updated_at": "2026-09-11T04:31:38Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
-      "latest_post_outcome": null
+      "latest_post_outcome": null,
+      "velocity_impression_rate": null,
+      "velocity_assessment": "unknown",
+      "velocity_assessed_at_hours": null,
+      "outcome_confirmed": false
     },
     "コーデ-清潔感": {
       "topic_group_id": "コーデ-清潔感",
@@ -236,7 +288,11 @@
       "updated_at": "2026-09-11T04:31:38Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
-      "latest_post_outcome": null
+      "latest_post_outcome": null,
+      "velocity_impression_rate": null,
+      "velocity_assessment": "unknown",
+      "velocity_assessed_at_hours": null,
+      "outcome_confirmed": false
     },
     "コーデ-大人-着こなし": {
       "topic_group_id": "コーデ-大人-着こなし",
@@ -253,7 +309,11 @@
       "updated_at": "2026-09-11T04:31:38Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
-      "latest_post_outcome": null
+      "latest_post_outcome": null,
+      "velocity_impression_rate": null,
+      "velocity_assessment": "unknown",
+      "velocity_assessed_at_hours": null,
+      "outcome_confirmed": false
     },
     "清潔感__おすすめ": {
       "topic_group_id": "清潔感__おすすめ",
@@ -270,7 +330,11 @@
       "updated_at": "2026-09-11T04:31:38Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
-      "latest_post_outcome": null
+      "latest_post_outcome": null,
+      "velocity_impression_rate": null,
+      "velocity_assessment": "unknown",
+      "velocity_assessed_at_hours": null,
+      "outcome_confirmed": false
     },
     "デニム-垢抜け": {
       "topic_group_id": "デニム-垢抜け",
@@ -287,7 +351,11 @@
       "updated_at": "2026-09-11T04:51:28Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
-      "latest_post_outcome": null
+      "latest_post_outcome": null,
+      "velocity_impression_rate": null,
+      "velocity_assessment": "unknown",
+      "velocity_assessed_at_hours": null,
+      "outcome_confirmed": false
     },
     "メンズ-垢抜け-清潔感__似合う-合う": {
       "topic_group_id": "メンズ-垢抜け-清潔感__似合う-合う",
@@ -304,7 +372,11 @@
       "updated_at": "2026-09-11T05:39:25Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
-      "latest_post_outcome": null
+      "latest_post_outcome": null,
+      "velocity_impression_rate": null,
+      "velocity_assessment": "unknown",
+      "velocity_assessed_at_hours": null,
+      "outcome_confirmed": false
     },
     "垢抜け-服__正解": {
       "topic_group_id": "垢抜け-服__正解",
@@ -321,7 +393,11 @@
       "updated_at": "2026-09-11T05:39:26Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
-      "latest_post_outcome": null
+      "latest_post_outcome": null,
+      "velocity_impression_rate": null,
+      "velocity_assessment": "unknown",
+      "velocity_assessed_at_hours": null,
+      "outcome_confirmed": false
     },
     "バッグ-定番__定番": {
       "topic_group_id": "バッグ-定番__定番",
@@ -338,7 +414,11 @@
       "updated_at": "2026-09-11T05:50:10Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
-      "latest_post_outcome": null
+      "latest_post_outcome": null,
+      "velocity_impression_rate": null,
+      "velocity_assessment": "unknown",
+      "velocity_assessed_at_hours": null,
+      "outcome_confirmed": false
     },
     "デニム-定番__lightness-定番": {
       "topic_group_id": "デニム-定番__lightness-定番",
@@ -355,7 +435,11 @@
       "updated_at": "2026-09-11T05:39:25Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
-      "latest_post_outcome": null
+      "latest_post_outcome": null,
+      "velocity_impression_rate": null,
+      "velocity_assessment": "unknown",
+      "velocity_assessed_at_hours": null,
+      "outcome_confirmed": false
     },
     "メンズ-服__似合う-合う": {
       "topic_group_id": "メンズ-服__似合う-合う",
@@ -369,10 +453,14 @@
       "route_to_research_only": true,
       "source_diversity_tag": "2077324796355129730",
       "created_at": "2026-09-11T04:44:57Z",
-      "updated_at": "2026-09-20T02:36:04Z",
+      "updated_at": "2026-09-23T08:31:19Z",
       "mainline_run_count": 1,
       "has_ever_won": false,
-      "latest_post_outcome": "loss"
+      "latest_post_outcome": "loss",
+      "velocity_impression_rate": 2.6494345718901453,
+      "velocity_assessment": "high_velocity",
+      "velocity_assessed_at_hours": 61.9,
+      "outcome_confirmed": false
     },
     "コーデ-大人-清潔感-着こなし__正解": {
       "topic_group_id": "コーデ-大人-清潔感-着こなし__正解",
@@ -389,7 +477,11 @@
       "updated_at": "2026-09-11T05:39:25Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
-      "latest_post_outcome": null
+      "latest_post_outcome": null,
+      "velocity_impression_rate": null,
+      "velocity_assessment": "unknown",
+      "velocity_assessed_at_hours": null,
+      "outcome_confirmed": false
     },
     "コーデ-デニム-白T__正解": {
       "topic_group_id": "コーデ-デニム-白T__正解",
@@ -406,7 +498,11 @@
       "updated_at": "2026-09-11T05:39:25Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
-      "latest_post_outcome": null
+      "latest_post_outcome": null,
+      "velocity_impression_rate": null,
+      "velocity_assessment": "unknown",
+      "velocity_assessed_at_hours": null,
+      "outcome_confirmed": false
     },
     "大人-着こなし__おすすめ": {
       "topic_group_id": "大人-着こなし__おすすめ",
@@ -423,7 +519,11 @@
       "updated_at": "2026-09-11T05:39:26Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
-      "latest_post_outcome": null
+      "latest_post_outcome": null,
+      "velocity_impression_rate": null,
+      "velocity_assessment": "unknown",
+      "velocity_assessed_at_hours": null,
+      "outcome_confirmed": false
     },
     "コーデ-デニム-定番-着こなし__定番": {
       "topic_group_id": "コーデ-デニム-定番-着こなし__定番",
@@ -440,7 +540,11 @@
       "updated_at": "2026-09-11T04:51:28Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
-      "latest_post_outcome": null
+      "latest_post_outcome": null,
+      "velocity_impression_rate": null,
+      "velocity_assessment": "unknown",
+      "velocity_assessed_at_hours": null,
+      "outcome_confirmed": false
     },
     "服__似合う-合う": {
       "topic_group_id": "服__似合う-合う",
@@ -457,7 +561,11 @@
       "updated_at": "2026-09-18T23:07:39Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
-      "latest_post_outcome": null
+      "latest_post_outcome": null,
+      "velocity_impression_rate": null,
+      "velocity_assessment": "unknown",
+      "velocity_assessed_at_hours": null,
+      "outcome_confirmed": false
     },
     "コーデ__名品-正解": {
       "topic_group_id": "コーデ__名品-正解",
@@ -474,7 +582,11 @@
       "updated_at": "2026-09-19T22:46:08Z",
       "mainline_run_count": 0,
       "has_ever_won": false,
-      "latest_post_outcome": null
+      "latest_post_outcome": null,
+      "velocity_impression_rate": null,
+      "velocity_assessment": "unknown",
+      "velocity_assessed_at_hours": null,
+      "outcome_confirmed": false
     }
   }
 }
