@@ -67,6 +67,83 @@ NEVER_WON_RETRY_BUDGET_PENALTY_MULTIPLIER = 2
 # 仮定した暫定判断。実データによる検証はまだ行っていない。人間の確認が必要。
 WIN_COOLDOWN_DIVISOR = 3
 
+# ============================================================================
+# 2026-09-23追加（GOV-20260923-VELOCITY-ASSESSMENT-01）: post_outcome判定を
+# velocity判定（早期の有望性）とcumulative判定（最終到達点）に分離するための
+# 拡張。既存のlatest_post_outcome/has_ever_won/cooldown可変ロジック/
+# retry_budget消費ロジックの意味・算出方法は一切変更しない（純粋な追加）。
+# 設計根拠: ops/reports/post_outcome_velocity_design_2026-09-23.md
+# ============================================================================
+VELOCITY_ASSESSMENTS = ("high_velocity", "normal_velocity", "low_velocity", "unknown")
+
+# velocity判定の対象とする、投稿からの経過時間の窓（時間）。実データ
+# （run-009〜014）で経過時間ごとの伸び率を確認したところ、全投稿で経過時間
+# とともに伸び率が減衰する傾向が明確だったため、早期（24-72h）の計測のみを
+# velocity判定の入力とし、それ以外の時間帯の計測ではvelocity関連フィールドを
+# 変更しない（上書きしない）よう設計した。
+VELOCITY_ASSESSMENT_MIN_HOURS = 24
+VELOCITY_ASSESSMENT_MAX_HOURS = 72
+
+# 暫定閾値（imp/h）。根拠: 実データ6件（24-72h窓内の初回計測値
+# 0.56/0.63/0.86/1.04/2.65/4.60）に基づく暫定的な境界であり、n=6のため
+# サンプルが増え次第、人間が見直す必要がある。
+VELOCITY_HIGH_THRESHOLD = 2.0
+VELOCITY_NORMAL_THRESHOLD = 0.7
+
+# post_outcome（win/neutral/loss/insufficient_data）を「最終確定」とみなす
+# 経過時間（時間）。暫定値: 336時間（14日）。根拠: 実データでrun-009が
+# 411h時点でもまだ緩やかに増加していたため、7日（168h）では早すぎる可能性が
+# あると判断した暫定値。人間の見直しが必要。
+OUTCOME_CONFIRMATION_MIN_HOURS = 336
+
+
+def compute_velocity_assessment(impression_count: int, elapsed_hours: float) -> dict[str, Any] | None:
+    """経過時間がvelocity判定の対象窓（24-72h）内であれば、伸び率と
+    velocity_assessmentを計算して返す。窓外の場合はNoneを返す
+    （＝velocity関連フィールドを更新しない、という呼び出し側の判断材料）。
+    """
+    if elapsed_hours < VELOCITY_ASSESSMENT_MIN_HOURS or elapsed_hours > VELOCITY_ASSESSMENT_MAX_HOURS:
+        return None
+    rate = impression_count / elapsed_hours if elapsed_hours > 0 else 0.0
+    if rate >= VELOCITY_HIGH_THRESHOLD:
+        assessment = "high_velocity"
+    elif rate >= VELOCITY_NORMAL_THRESHOLD:
+        assessment = "normal_velocity"
+    else:
+        assessment = "low_velocity"
+    return {
+        "velocity_impression_rate": rate,
+        "velocity_assessment": assessment,
+        "velocity_assessed_at_hours": elapsed_hours,
+    }
+
+
+def update_velocity_and_confirmation(
+    state: TopicGroupState, impression_count: int, elapsed_hours: float | None
+) -> TopicGroupState:
+    """velocity関連フィールドとoutcome_confirmedを更新する。
+
+    elapsed_hoursがNone、またはvelocity判定の対象窓（24-72h）外の場合、
+    velocity関連フィールド（velocity_impression_rate/velocity_assessment/
+    velocity_assessed_at_hours）は変更しない（既存値を保持する）。
+
+    outcome_confirmedは、elapsed_hours >= OUTCOME_CONFIRMATION_MIN_HOURS
+    （336h=14日）の場合のみTrueへ設定する。一度Trueになった後、より短い
+    elapsed_hoursで本関数が再度呼ばれてもFalseへは戻さない（既存の
+    has_ever_wonと同じ「一度確定したら後退しない」設計方針を踏襲）。
+    """
+    if elapsed_hours is not None:
+        result = compute_velocity_assessment(impression_count, elapsed_hours)
+        if result is not None:
+            state.velocity_impression_rate = result["velocity_impression_rate"]
+            state.velocity_assessment = result["velocity_assessment"]
+            state.velocity_assessed_at_hours = result["velocity_assessed_at_hours"]
+        if elapsed_hours >= OUTCOME_CONFIRMATION_MIN_HOURS:
+            state.outcome_confirmed = True
+    state.updated_at = _now_iso()
+    return state
+
+
 # win実績が一度もないまま、mainline_run_countがこの値を超えたtopic_groupは
 # 候補プールから除外する（passes_mainline_candidate_filter()参照）。この判定は
 # topic_group単体のmainline_run_countのみを見る（同一テーマがtheme_signature分裂
@@ -117,6 +194,15 @@ class TopicGroupState:
     # 既存の保存済みJSONにこれらのキーが無くてもdataclassのdefaultでロード可能（追加のみ）。
     has_ever_won: bool = False
     latest_post_outcome: str | None = None
+    # 2026-09-23追加（GOV-20260923-VELOCITY-ASSESSMENT-01）: 早期の有望性判定
+    # （velocity）と、post_outcomeの最終確定フラグ。既存フィールドの意味・
+    # 算出方法は変更しない、純粋な追加。update_velocity_and_confirmation()での
+    # み更新する。既存の保存済みJSONにこれらのキーが無くてもdataclassの
+    # defaultでロード可能（追加のみで既存データを破壊しない）。
+    velocity_impression_rate: float | None = None
+    velocity_assessment: str = "unknown"
+    velocity_assessed_at_hours: float | None = None
+    outcome_confirmed: bool = False
 
 
 def _now_iso() -> str:

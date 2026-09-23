@@ -89,6 +89,7 @@ from topic_group_state import (
     record_topic_group_run_observed,
     record_post_outcome,
     update_performance_band,
+    update_velocity_and_confirmation,
     passes_mainline_candidate_filter,
     load_topic_group_state_store,
     save_topic_group_state_store,
@@ -1831,8 +1832,10 @@ def update_topic_performance_from_post_analytics(
     topic_group_state_path: str | Path | None = None,
     repo_root: str | Path | None = None,
     label: str | None = None,
+    elapsed_hours: float | None = None,
 ) -> dict[str, Any]:
-    """[2026-08-31 topic_groupライフサイクル管理、2026-09-01 post_outcome配線]
+    """[2026-08-31 topic_groupライフサイクル管理、2026-09-01 post_outcome配線、
+    2026-09-23 velocity判定/outcome_confirmed配線]
     post_analytics取得後に、対応するtopic_groupのtopic_performance_bandを更新し
     （既存のフィードバック接続、無変更）、あわせてpost_outcome.classify_post_outcome()
     による「勝ち/引き分け/負け/判定不能」の正本判定をtopic_groupへ反映する
@@ -1845,6 +1848,14 @@ def update_topic_performance_from_post_analytics(
     （+`fetch_status`/`affiliate_metrics`）へ変更した。この関数はこれまでコードベース内
     に呼び出し元がなかったため（GOV-20260901-INVESTIGATION-01調査で確認済み）、
     後方互換シムは設けていない。
+
+    2026-09-23追加（GOV-20260923-VELOCITY-ASSESSMENT-01）: `elapsed_hours`
+    （投稿からの経過時間、呼び出し側でpublished_atから計算して渡す）を新規の
+    任意引数として追加した。既存の呼び出し元は`elapsed_hours`を渡さなければ
+    従来と完全に同じ挙動のまま（省略時はNoneとなり、update_velocity_and_
+    confirmation()内部でvelocity関連フィールド・outcome_confirmedのいずれも
+    更新されない）。既存フィールド（topic_performance_band/latest_post_outcome/
+    has_ever_won）の算出方法・意味は一切変更していない。
     """
     path = Path(topic_group_state_path) if topic_group_state_path else _DEFAULT_TOPIC_GROUP_STATE_PATH
     store = load_topic_group_state_store(path)
@@ -1855,6 +1866,7 @@ def update_topic_performance_from_post_analytics(
     update_performance_band(state, impression_count=impression_count)
     outcome_result = classify_post_outcome(public_metrics, fetch_status=fetch_status, affiliate_metrics=affiliate_metrics)
     record_post_outcome(state, outcome_result.outcome)
+    update_velocity_and_confirmation(state, impression_count=impression_count or 0, elapsed_hours=elapsed_hours)
     saved_path = save_topic_group_state_store(store, repo_root or _REPO_ROOT, label=label)
     return {
         "updated": True,
@@ -1862,6 +1874,9 @@ def update_topic_performance_from_post_analytics(
         "post_outcome": outcome_result.outcome,
         "post_outcome_reason": outcome_result.reason,
         "has_ever_won": state.has_ever_won,
+        "velocity_assessment": state.velocity_assessment,
+        "velocity_impression_rate": state.velocity_impression_rate,
+        "outcome_confirmed": state.outcome_confirmed,
         "saved_path": str(saved_path),
     }
 
