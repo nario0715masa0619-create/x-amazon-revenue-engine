@@ -608,6 +608,27 @@
       "velocity_assessment": "unknown",
       "velocity_assessed_at_hours": null,
       "outcome_confirmed": false
+    },
+    "愛用品": {
+      "topic_group_id": "愛用品",
+      "theme_signature": "愛用品__priority-reversal",
+      "topic_status": "proposed",
+      "topic_last_published_at": null,
+      "topic_performance_band": "unknown",
+      "topic_retry_budget": 3,
+      "topic_cooldown_until": null,
+      "topic_retired_from_mainline": false,
+      "route_to_research_only": false,
+      "source_diversity_tag": "2103064065488920880",
+      "created_at": "2026-09-24T23:48:23Z",
+      "updated_at": "2026-09-24T23:48:23Z",
+      "mainline_run_count": 0,
+      "has_ever_won": false,
+      "latest_post_outcome": null,
+      "velocity_impression_rate": null,
+      "velocity_assessment": "unknown",
+      "velocity_assessed_at_hours": null,
+      "outcome_confirmed": false
     }
   }
 }
